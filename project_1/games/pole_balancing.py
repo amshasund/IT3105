@@ -22,7 +22,30 @@ class Pole():
         self.angular_acceleration = 0
 
 
-class PoleBalancing():
+class PoleBalancingPlayer():
+    def __init__(self):
+        self.B = 0
+
+        self.prev_state = 0
+        self.action = 0
+        self.current_state = 0
+        self.reward = 0
+
+        self.possible_actions = [0, 1]
+        self.possible_states = [(), ()]
+        self.possible_rewards = [0, 0]
+
+        self.world = PoleBalancingEnvironment
+
+    def do_action(self, action):
+        if action == 0:
+            self.B = -1
+        elif action == 1:
+            self.B = 1
+        self.world.add_force(self.B)
+
+
+class PoleBalancingEnvironment():
     def __init__(self):
         self.pole = Pole
         self.cart = Cart
@@ -47,6 +70,11 @@ class PoleBalancing():
         self.cart.velocity = self.cart.velocity + self.tau * self.cart.acceleration
         self.pole.angle = self.pole.angle + self.tau * self.pole.angular_velocity
         self.cart.location = self.cart.location + self.tau * self.cart.velocity
+        return self.is_successfull()
+
+    # def get_state(self):
+
+    # def get_reward(self):
 
     def update_angular_acceleration(self, B):
         g = self.g
@@ -85,3 +113,20 @@ class PoleBalancing():
             )
 
         )
+
+    def is_successfull(self):
+        if -self.cart.max_location <= self.cart.location <= self.cart.max_location:
+            if -self.pole.max_angle <= self.pole.angle <= self.pole.max_angle:
+                print("Keep on playing!")
+                return True
+            print("Pole out of range")
+        print("Cart out of range")
+
+        print("You were unsuccessfull.")
+        return False
+
+    def game_over(self):
+        if self.is_successfull == False:
+            print("GAME OVER.")
+            return True
+        return False

@@ -9,17 +9,17 @@ class Cart():
         self.location = 0
         self.velocity = 0
         self.acceleration = 0
-        self.max_location = 2.4
+        self.max_location = 2.4  # in both directions
 
 
 class Pole():
     def __init__(self):
         self.mass = pole_mass
         self.length = pole_length
-        self.max_angle = 0.21
+        self.max_angle = 0.21  # in both directions
         self.angle = random.randrange(-self.max_angle, self.max_angle, 0.01)
-        self.angle_d = 0
-        self.angle_dd = 0
+        self.angular_velocity = 0
+        self.angular_acceleration = 0
 
 
 class PoleBalancing():
@@ -32,16 +32,56 @@ class PoleBalancing():
         self.force = 10
 
     def add_force(self, B):
-        self.pole.angle_dd = self.calculate_angle_dd(B)
+        if B == -1:
+            B = -self.force
+        elif B == 1:
+            B = self.force
+        else:
+            return
 
-    def calculate_angle_dd(self, B):
+        self.pole.angular_acceleration = self.update_angular_acceleration(B)
+        self.cart.acceleration = self.update_acceleration(B)
+
+        self.pole.angular_velocity = self.pole.angular_velocity + \
+            self.tau * self.pole.angular_acceleration
+        self.cart.velocity = self.cart.velocity + self.tau * self.cart.acceleration
+        self.pole.angle = self.pole.angle + self.tau * self.pole.angular_velocity
+        self.cart.location = self.cart.location + self.tau * self.cart.velocity
+
+    def update_angular_acceleration(self, B):
         g = self.g
         theta = self.pole.angle
-        dd_theta = self.pole.angle_dd
+        dd_theta = self.pole.angular_acceleration
         m_p = self.pole.mass
         L = self.pole.length
         m_c = self.cart.mass
-        return (g*np.sin(theta)+(np.cos(theta)
-                                 * (-B-m_p*L*dd_theta*np.sin(theta))
-                                 )
-                )/()
+
+        return (
+            g * np.sin(theta) +
+            (np.cos(theta) * (-B - m_p * L * dd_theta * np.sin(theta))
+             )/(
+                m_p + m_c)
+        )/(
+            L * (
+                (4/3) -
+                (m_p * np.cos(theta)**2) / (m_p + m_c)
+            )
+        )
+
+    def update_acceleration(self, B):
+        theta = self.pole.angle
+        d_theta = self.pole.angular_velocity
+        dd_theta = self.pole.angular_acceleration
+        m_p = self.pole.mass
+        L = self.pole.length
+        m_c = self.cart.mass
+
+        return (
+            (
+                B + m_p * L * (d_theta**2 * np.sin(theta) -
+                               dd_theta * np.cos(theta))
+            )/(
+                m_p + m_c
+            )
+
+        )

@@ -1,9 +1,9 @@
-from parameters import pole_mass, pole_length, gravity, timestep
+from ..parameters import pole_mass, pole_length, gravity, timestep
 import random
 import numpy as np
 
 
-class Cart():
+class Cart:
     def __init__(self):
         self.mass = 1
         self.location = 0
@@ -12,7 +12,7 @@ class Cart():
         self.max_location = 2.4  # in both directions
 
 
-class Pole():
+class Pole:
     def __init__(self):
         self.mass = pole_mass
         self.length = pole_length
@@ -22,7 +22,7 @@ class Pole():
         self.angular_acceleration = 0
 
 
-class PoleBalancingPlayer():
+class PoleBalancingPlayer:
     def __init__(self):
         self.B = 0
 
@@ -45,7 +45,7 @@ class PoleBalancingPlayer():
         self.world.add_force(self.B)
 
 
-class PoleBalancingEnvironment():
+class PoleBalancingEnvironment:
     def __init__(self):
         self.pole = Pole
         self.cart = Cart
@@ -66,7 +66,7 @@ class PoleBalancingEnvironment():
         self.cart.acceleration = self.update_acceleration(B)
 
         self.pole.angular_velocity = self.pole.angular_velocity + \
-            self.tau * self.pole.angular_acceleration
+                                     self.tau * self.pole.angular_acceleration
         self.cart.velocity = self.cart.velocity + self.tau * self.cart.acceleration
         self.pole.angle = self.pole.angle + self.tau * self.pole.angular_velocity
         self.cart.location = self.cart.location + self.tau * self.cart.velocity
@@ -85,16 +85,16 @@ class PoleBalancingEnvironment():
         m_c = self.cart.mass
 
         return (
-            g * np.sin(theta) +
-            (np.cos(theta) * (-B - m_p * L * dd_theta * np.sin(theta))
-             )/(
-                m_p + m_c)
-        )/(
-            L * (
-                (4/3) -
-                (m_p * np.cos(theta)**2) / (m_p + m_c)
-            )
-        )
+                       g * np.sin(theta) +
+                       (np.cos(theta) * (-B - m_p * L * dd_theta * np.sin(theta))
+                        ) / (
+                               m_p + m_c)
+               ) / (
+                       L * (
+                       (4 / 3) -
+                       (m_p * np.cos(theta) ** 2) / (m_p + m_c)
+               )
+               )
 
     def update_acceleration(self, B):
         theta = self.pole.angle
@@ -105,12 +105,12 @@ class PoleBalancingEnvironment():
         m_c = self.cart.mass
 
         return (
-            (
-                B + m_p * L * (d_theta**2 * np.sin(theta) -
-                               dd_theta * np.cos(theta))
-            )/(
-                m_p + m_c
-            )
+                (
+                        B + m_p * L * (d_theta ** 2 * np.sin(theta) -
+                                       dd_theta * np.cos(theta))
+                ) / (
+                        m_p + m_c
+                )
 
         )
 

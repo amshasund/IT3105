@@ -1,3 +1,6 @@
+# Select game
+game = 'the_gambler'                   # 'towers_of_hanoi' or 'pole_balancing'
+
 # pivotal parameters
 
 episodes = 500

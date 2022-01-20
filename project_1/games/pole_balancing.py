@@ -3,6 +3,11 @@ import random
 import numpy as np
 
 
+class PoleWorld():
+    def __init__(self):
+        pass
+
+
 class Cart:
     def __init__(self):
         self.mass = 1
@@ -47,8 +52,8 @@ class PoleBalancingPlayer:
 
 class PoleBalancingEnvironment:
     def __init__(self):
-        self.pole = Pole
-        self.cart = Cart
+        self.pole = Pole()
+        self.cart = Cart()
         self.g = gravity
         self.tau = timestep
         self.T = 300
@@ -66,7 +71,7 @@ class PoleBalancingEnvironment:
         self.cart.acceleration = self.update_acceleration(B)
 
         self.pole.angular_velocity = self.pole.angular_velocity + \
-                                     self.tau * self.pole.angular_acceleration
+            self.tau * self.pole.angular_acceleration
         self.cart.velocity = self.cart.velocity + self.tau * self.cart.acceleration
         self.pole.angle = self.pole.angle + self.tau * self.pole.angular_velocity
         self.cart.location = self.cart.location + self.tau * self.cart.velocity
@@ -85,16 +90,16 @@ class PoleBalancingEnvironment:
         m_c = self.cart.mass
 
         return (
-                       g * np.sin(theta) +
-                       (np.cos(theta) * (-B - m_p * L * dd_theta * np.sin(theta))
-                        ) / (
-                               m_p + m_c)
-               ) / (
-                       L * (
-                       (4 / 3) -
-                       (m_p * np.cos(theta) ** 2) / (m_p + m_c)
-               )
-               )
+            g * np.sin(theta) +
+            (np.cos(theta) * (-B - m_p * L * dd_theta * np.sin(theta))
+             ) / (
+                m_p + m_c)
+        ) / (
+            L * (
+                (4 / 3) -
+                (m_p * np.cos(theta) ** 2) / (m_p + m_c)
+            )
+        )
 
     def update_acceleration(self, B):
         theta = self.pole.angle
@@ -105,12 +110,12 @@ class PoleBalancingEnvironment:
         m_c = self.cart.mass
 
         return (
-                (
-                        B + m_p * L * (d_theta ** 2 * np.sin(theta) -
-                                       dd_theta * np.cos(theta))
-                ) / (
-                        m_p + m_c
-                )
+            (
+                B + m_p * L * (d_theta ** 2 * np.sin(theta) -
+                               dd_theta * np.cos(theta))
+            ) / (
+                m_p + m_c
+            )
 
         )
 

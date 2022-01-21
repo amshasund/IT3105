@@ -33,6 +33,10 @@ class GamblerEnv:
     def __init__(self):
         self.coin = Coin()
 
+    @staticmethod
+    def get_range_of_units():
+        return list(range(0, 100 + 1))
+
     def perform_bet(self, bet):
         flip_result = self.coin.flip()
         if flip_result:
@@ -55,6 +59,9 @@ class GamblerWorld:
 
     def get_state(self):
         self.player.get_units()
+
+    def get_all_possible_states(self):
+        return self.environment.get_range_of_units()
 
     def do_action(self, action):
         self.player.place_bet(action)

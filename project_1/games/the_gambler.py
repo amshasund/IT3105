@@ -63,5 +63,9 @@ class GamblerWorld:
     def get_all_possible_states(self):
         return self.environment.get_range_of_units()
 
+    def get_possible_actions_from_state(self, state):
+        # in this game, state equals amount of units
+        return self.environment.get_legal_bets(state)
+
     def do_action(self, action):
         self.player.place_bet(action)

@@ -58,3 +58,17 @@ for key in blabla:
     blabla[key] = dict.fromkeys(blabla[key], 0)
 
 print(blabla)
+
+import random
+
+list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+print(random.choice(list))
+print(random.choice(list))
+print(random.choice(list))
+print(random.choice(list))
+print('seed')
+random.seed()
+print(random.choice(list))
+print(random.choice(list))
+print(random.choice(list))
+print(random.choice(list))

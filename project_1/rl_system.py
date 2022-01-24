@@ -1,4 +1,6 @@
-from parameters import critic_type, episodes
+from parameters import critic_type, episodes, lr_critic, lr_actor, \
+    discount_factor_critic, discount_factor_actor, eligibility_decay_critic, eligibility_decay_actor
+
 from simworld import SimWorld
 import random
 import copy
@@ -10,6 +12,15 @@ class Actor:
         self.sim_world = sim_world
         self.policy = dict()
         self.eligibility = dict()
+
+    def get_best_action(self, state):
+        actions = self.policy[state]
+        highest_value = max(actions.values())
+        best_actions = []
+        for key, value in actions.items():
+            if value == highest_value:
+                best_actions.append(key)
+        return random.choice(best_actions)
 
     def initialize_policy_function(self, all_states):
         for s in all_states:
@@ -25,6 +36,15 @@ class Actor:
         for state in self.eligibility:
             self.eligibility[state] = dict.fromkeys(self.eligibility[state], 0)
 
+    def set_eligibility(self, state, action, value):
+        if value is None:
+            self.eligibility[state][action] *= discount_factor_actor * eligibility_decay_actor
+        else:
+            self.eligibility[state][action] = value
+
+    def set_policy(self, state, action):
+        self.policy[state][action] += lr_actor * self.critic.get_TD_error() * self.eligibility[state][action]
+
 
 class Critic:
     def __init__(self, type, sim_world):
@@ -32,6 +52,13 @@ class Critic:
         self.sim_world = sim_world
         self.V = dict()
         self.eligibility = dict()
+        self.TD_error = 0
+
+    def get_state(self):
+        return self.sim_world.get_state()
+
+    def get_TD_error(self):
+        return self.TD_error
 
     def initialize_value_function(self, all_states):
         for s in all_states:
@@ -41,6 +68,18 @@ class Critic:
     def initialize_eligibility_function(self, all_states):
         for s in all_states:
             self.eligibility[s] = 0
+
+    def set_TD_error(self, r, state, new_state):
+        self.TD_error = r + discount_factor_critic * self.V[new_state] - self.V[state]
+
+    def set_eligibility(self, state, value):
+        if value is None:
+            self.eligibility[state] *= discount_factor_critic * eligibility_decay_critic
+        else:
+            self.eligibility[state] = value
+
+    def set_value_for_state(self, state):
+        self.V[state] += lr_critic * self.TD_error * self.eligibility[state]
 
 
 class RLSystem:
@@ -59,3 +98,38 @@ class RLSystem:
             # Reset eligibilities in actor and critic
             self.actor.initialize_eligibility_function()
             self.critic.initialize_eligibility_function(all_states)
+
+            # Get S_init and its policy
+            state = self.critic.get_state()
+            action = self.actor.get_best_action(state)
+
+            # Play the game
+            game_over = self.sim_world.is_game_over()
+            while not game_over:
+                # Do action
+                self.sim_world.do_action(action)
+                new_state = self.sim_world.get_state()
+                reward = self.sim_world.get_reward()
+
+                # Get new action
+                new_action = self.actor.get_best_action(new_state)
+
+                # Update actor's eligibility table
+                self.actor.set_eligibility(state, action, 1)
+
+                # Update TD error
+                self.critic.set_TD_error(reward, state, new_state)
+
+                # Update critic's eligibility table
+                self.critic.set_eligibility(state, 1)
+
+                for s in all_states:
+                    self.critic.set_value_for_state(s)
+                    self.critic.set_eligibility(s, None)
+                    for a in self.actor.policy[s]:
+                        self.actor.set_policy(s, a)
+                        self.actor.set_eligibility(s, a, None)
+
+                state = new_state
+                action = new_action
+                game_over = self.sim_world.is_game_over()

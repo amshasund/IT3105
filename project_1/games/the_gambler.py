@@ -4,8 +4,9 @@ from ..parameters import win_probability
 
 class GamblerPlayer:
     def __init__(self, env):
-        self.units = random.randint(1, 99)
         self.env = env
+        self.units = random.randint(1, 99)
+        self.reward = 0
 
     def get_units(self):
         return self.units
@@ -37,16 +38,17 @@ class GamblerEnv:
     def get_range_of_units():
         return list(range(0, 100 + 1))
 
+    @staticmethod
+    def get_legal_bets(units):
+        if units > 50:
+            return list(range(1, 100 - units + 1))
+        return list(range(1, units + 1))
+
     def perform_bet(self, bet):
         flip_result = self.coin.flip()
         if flip_result:
             return bet
         return -bet
-
-    def get_legal_bets(self, units):
-        if units > 50:
-            return list(range(1, 100 - units + 1))
-        return list(range(1, units + 1))
 
 
 class GamblerWorld:
@@ -55,10 +57,10 @@ class GamblerWorld:
         self.player = GamblerPlayer(self.environment)
 
     def get_actions(self):
-        self.player.get_possible_bets()
+        return self.player.get_possible_bets()
 
     def get_state(self):
-        self.player.get_units()
+        return self.player.get_units()
 
     def get_all_possible_states(self):
         return self.environment.get_range_of_units()
@@ -69,3 +71,17 @@ class GamblerWorld:
 
     def do_action(self, action):
         self.player.place_bet(action)
+
+    def get_reward(self):  # Must be optimized
+        return self.get_state()
+
+    def is_game_over(self):
+        state = self.get_state()
+        if state == 0 or state == 100:
+            return True
+        return False
+
+    def is_win(self):
+        if self.get_state() == 100:
+            return True
+        return False

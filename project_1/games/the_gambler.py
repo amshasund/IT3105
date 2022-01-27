@@ -1,5 +1,6 @@
 import random
-from ..parameters import win_probability
+from project_1.parameters import win_probability
+import matplotlib.pyplot as plt
 
 
 class GamblerPlayer:
@@ -10,6 +11,9 @@ class GamblerPlayer:
 
     def get_units(self):
         return self.units
+
+    def set_start_units(self):
+        self.units = random.randint(1, 99)
 
     def place_bet(self, bet):
         self.units += self.env.perform_bet(bet)
@@ -24,10 +28,10 @@ class Coin:
 
     def flip(self):
         return random.choices(
-            [False, True],
-            weights=(1 - win_probability, win_probability),
+            population=[False, True],
+            weights=[1 - win_probability, win_probability],
             k=1
-        )
+        )[0]
 
 
 class GamblerEnv:
@@ -45,9 +49,13 @@ class GamblerEnv:
         return list(range(1, units + 1))
 
     def perform_bet(self, bet):
+        print("Bet placed: " + str(bet))
+        print("Flips coin ..")
         flip_result = self.coin.flip()
         if flip_result:
+            print("Right side!")
             return bet
+        print("Wrong side..")
         return -bet
 
 
@@ -77,11 +85,29 @@ class GamblerWorld:
 
     def is_game_over(self):
         state = self.get_state()
-        if state == 0 or state == 100:
+        if state == 100:
+            print("You won!")
+            # Reset number of units for new game
+            self.player.set_start_units()
+            return True
+        elif state == 0:
+            print("You lost..")
+            # Reset number of units for new game
+            self.player.set_start_units()
             return True
         return False
 
-    def is_win(self):
-        if self.get_state() == 100:
-            return True
-        return False
+    @staticmethod
+    def print_results(policy):
+        print("Policy:")
+        print(policy)
+        """
+        # Plotting the points
+        plt.plot(states, bets)
+
+        # Name the axis and set title
+        plt.xlabel('State')
+        plt.ylabel('Bet')
+        plt.title('Results from last episode')
+        plt.show()
+        """

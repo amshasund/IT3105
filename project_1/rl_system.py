@@ -94,13 +94,16 @@ class RLSystem:
         self.critic.initialize_value_function(all_states)
         self.actor.initialize_policy_function(all_states)
 
-        for e in episodes:
+        for i in range(1, episodes + 1):
+            print("---------- Episode nr: " + str(i) + " ----------")
+
             # Reset eligibilities in actor and critic
             self.actor.initialize_eligibility_function()
             self.critic.initialize_eligibility_function(all_states)
 
             # Get S_init and its policy
             state = self.critic.get_state()
+            print("Your start state: " + str(state))
             action = self.actor.get_best_action(state)
 
             # Play the game
@@ -108,8 +111,14 @@ class RLSystem:
             while not game_over:
                 # Do action
                 self.sim_world.do_action(action)
-                new_state = self.sim_world.get_state()
                 reward = self.sim_world.get_reward()
+                new_state = self.sim_world.get_state()
+                print("New State: " + str(new_state))
+
+                # Check game status after new state
+                game_over = self.sim_world.is_game_over()
+                if game_over:
+                    break
 
                 # Get new action
                 new_action = self.actor.get_best_action(new_state)
@@ -132,4 +141,3 @@ class RLSystem:
 
                 state = new_state
                 action = new_action
-                game_over = self.sim_world.is_game_over()

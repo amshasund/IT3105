@@ -12,11 +12,19 @@ class GamblerPlayer:
     def get_units(self):
         return self.units
 
+    def get_reward(self):
+        if self.units == 0:
+            self.reward = - 100
+        elif self.units == 100:
+            self.reward = 100
+        return self.reward
+
     def set_start_units(self):
         self.units = random.randint(1, 99)
 
     def place_bet(self, bet):
-        self.units += self.env.perform_bet(bet)
+        self.reward = self.env.perform_bet(bet)
+        self.units += self.reward
 
     def get_possible_bets(self):
         return self.env.get_legal_bets(self.units)
@@ -81,7 +89,7 @@ class GamblerWorld:
         self.player.place_bet(action)
 
     def get_reward(self):  # Must be optimized
-        return self.get_state()
+        return self.player.get_reward()
 
     def is_game_over(self):
         state = self.get_state()
@@ -99,15 +107,20 @@ class GamblerWorld:
 
     @staticmethod
     def print_results(policy):
-        print("Policy:")
-        print(policy)
-        """
+        states = list(policy.keys())
+        bets = list(policy.values())
+        best_bets = [0]
+
+        for dict in bets[1:100]:
+            best_bets.append(max(dict.values()))
+
+        best_bets.append(0)
+
         # Plotting the points
-        plt.plot(states, bets)
+        plt.plot(states, best_bets)
 
         # Name the axis and set title
         plt.xlabel('State')
         plt.ylabel('Bet')
-        plt.title('Results from last episode')
+        plt.title('Policy after 500 episodes')
         plt.show()
-        """

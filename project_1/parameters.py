@@ -31,4 +31,4 @@ discs = 4  # [2,6]
 
 # the gambler
 
-win_probability = 0.5  # [0, 1.0]
+win_probability = 0.4  # [0, 1.0]

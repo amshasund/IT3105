@@ -136,8 +136,8 @@ class RLSystem:
                     self.critic.set_value_for_state(s)
                     self.critic.set_eligibility(s, None)
                     for a in self.actor.policy[s]:
+                        self.actor.set_eligibility(s, a, None)  # Denne først tror jeg
                         self.actor.set_policy(s, a)
-                        self.actor.set_eligibility(s, a, None)
 
                 state = new_state
                 action = new_action

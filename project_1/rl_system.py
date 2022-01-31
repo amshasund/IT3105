@@ -4,6 +4,7 @@ from parameters import critic_type, episodes, lr_critic, lr_actor, \
 from simworld import SimWorld
 import random
 import copy
+import matplotlib.pyplot as plt
 
 
 class Actor:
@@ -93,6 +94,7 @@ class RLSystem:
         all_states = self.sim_world.get_all_possible_states()
         self.critic.initialize_value_function(all_states)
         self.actor.initialize_policy_function(all_states)
+        acc_reward = [0] * episodes
 
         for i in range(1, episodes + 1):
             print("---------- Episode nr: " + str(i) + " ----------")
@@ -112,8 +114,9 @@ class RLSystem:
                 # Do action
                 self.sim_world.do_action(action)
                 reward = self.sim_world.get_reward()
+                acc_reward[i - 1] += reward
                 new_state = self.sim_world.get_state()
-                print("New State: " + str(new_state))
+                # print("New State: " + str(new_state))
 
                 # Check game status after new state
                 game_over = self.sim_world.is_game_over()
@@ -141,3 +144,15 @@ class RLSystem:
 
                 state = new_state
                 action = new_action
+        self.plot_train_progression(acc_reward)
+
+    def plot_train_progression(self, acc_reward):
+        list_episodes = list(range(episodes))
+        # Plotting the points
+        plt.plot(list_episodes, acc_reward)
+
+        # Name the axis and set title
+        plt.xlabel('Episode')
+        plt.ylabel('Accumulated reward')
+        plt.title('Accumulated reward for each episode')
+        plt.show()

@@ -13,11 +13,18 @@ class GamblerPlayer:
         return self.units
 
     def get_reward(self):
+        # For loosing
         if self.units == 0:
             self.reward = - 100
+        # For winning
         elif self.units == 100:
             self.reward = 100
+        # else:
+        # self.reward = -1
         return self.reward
+
+        # Test bare tap og seier - lærer seg å samle poeng med ikke vinne
+        # Plotte total reward - hivs agenten lærer noe bør den treffe bedre etter flere episoder
 
     def set_start_units(self):
         self.units = random.randint(1, 99)
@@ -57,13 +64,13 @@ class GamblerEnv:
         return list(range(1, units + 1))
 
     def perform_bet(self, bet):
-        print("Bet placed: " + str(bet))
-        print("Flips coin ..")
+        # print("Bet placed: " + str(bet))
+        # print("Flips coin ..")
         flip_result = self.coin.flip()
         if flip_result:
-            print("Right side!")
+            # print("Right side!")
             return bet
-        print("Wrong side..")
+        # print("Wrong side..")
         return -bet
 
 
@@ -112,9 +119,10 @@ class GamblerWorld:
         best_bets = [0]
 
         for dict in bets[1:100]:
-            best_bets.append(max(dict.values()))
+            best_bets.append(max(dict, key=dict.get))
 
         best_bets.append(0)
+        # print("Best_bets: " + str(best_bets))
 
         # Plotting the points
         plt.plot(states, best_bets)

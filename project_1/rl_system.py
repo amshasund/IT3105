@@ -49,7 +49,7 @@ class Actor:
 
 class Critic:
     def __init__(self, type, sim_world):
-        self.type = type
+        self.type = type  # How should we handle the type case
         self.sim_world = sim_world
         self.V = dict()
         self.eligibility = dict()
@@ -97,7 +97,7 @@ class RLSystem:
         acc_reward = [0] * episodes
 
         for i in range(1, episodes + 1):
-            print("---------- Episode nr: " + str(i) + " ----------")
+            # print("---------- Episode nr: " + str(i) + " ----------")
 
             # Reset eligibilities in actor and critic
             self.actor.initialize_eligibility_function()
@@ -105,7 +105,7 @@ class RLSystem:
 
             # Get S_init and its policy
             state = self.critic.get_state()
-            print("Your start state: " + str(state))
+            # print("Your start state: " + str(state))
             action = self.actor.get_best_action(state)
 
             # Play the game
@@ -139,7 +139,7 @@ class RLSystem:
                     self.critic.set_value_for_state(s)
                     self.critic.set_eligibility(s, None)
                     for a in self.actor.policy[s]:
-                        self.actor.set_eligibility(s, a, None)  # Denne først tror jeg
+                        self.actor.set_eligibility(s, a, None)
                         self.actor.set_policy(s, a)
 
                 state = new_state
@@ -150,6 +150,7 @@ class RLSystem:
         list_episodes = list(range(episodes))
         # Plotting the points
         plt.plot(list_episodes, acc_reward)
+        # Plot heller snittet for hvert 100ede episode
 
         # Name the axis and set title
         plt.xlabel('Episode')

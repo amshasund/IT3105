@@ -13,25 +13,26 @@ class GamblerPlayer:
         return self.units
 
     def get_reward(self):
-        # For loosing
-        if self.units == 0:
-            self.reward = - 100
         # For winning
-        elif self.units == 100:
+        if self.units == 100:
             self.reward = 100
-        # else:
-        # self.reward = -1
-        return self.reward
 
-        # Test bare tap og seier - lærer seg å samle poeng med ikke vinne
-        # Plotte total reward - hivs agenten lærer noe bør den treffe bedre etter flere episoder
+        # For loosing
+        elif self.units == 0:
+            self.reward = - 100
+
+        # For moving
+        else:
+            self.reward = -1  # økte antall minus per steg # sjekke antall steg økte antall episoder
+
+        return self.reward
 
     def set_start_units(self):
         self.units = random.randint(1, 99)
 
     def place_bet(self, bet):
-        self.reward = self.env.perform_bet(bet)
-        self.units += self.reward
+        # self.reward = self.env.perform_bet(bet)
+        self.units += self.env.perform_bet(bet)
 
     def get_possible_bets(self):
         return self.env.get_legal_bets(self.units)
@@ -95,18 +96,18 @@ class GamblerWorld:
     def do_action(self, action):
         self.player.place_bet(action)
 
-    def get_reward(self):  # Must be optimized
+    def get_reward(self):
         return self.player.get_reward()
 
     def is_game_over(self):
         state = self.get_state()
         if state == 100:
-            print("You won!")
+            # print("You won!")
             # Reset number of units for new game
             self.player.set_start_units()
             return True
         elif state == 0:
-            print("You lost..")
+            # print("You lost..")
             # Reset number of units for new game
             self.player.set_start_units()
             return True

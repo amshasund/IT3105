@@ -10,8 +10,6 @@ sys.path.insert(0, parentdir)
 from parameters import win_probability
 import matplotlib.pyplot as plt
 
-from project_1.parameters import win_probability
-
 
 class GamblerPlayer:
     def __init__(self, env):

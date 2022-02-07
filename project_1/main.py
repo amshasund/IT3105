@@ -10,6 +10,9 @@ def main():
     print(rl_system.critic.state_to_binary(93))
     print(rl_system.critic.state_to_binary([-3, -54, 103, 4]))
     print(rl_system.critic.state_to_binary([3, 54, 103, 4]))
+    print(rl_system.critic.binary_to_state("01011101"))
+    print(rl_system.critic.binary_to_state("11111101110010100110011100000100"))
+    print(rl_system.critic.binary_to_state("00000011001101100110011100000100"))
 
     # The Game Loop
     # rl_system.actor_critic_algorithm()

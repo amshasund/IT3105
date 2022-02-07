@@ -1,9 +1,8 @@
 import copy
 import random
-
-# import doodler as DDL
 import matplotlib.pyplot as plt
 import numpy as np
+import tensorflow as tf
 
 from parameters import (
     critic_type,
@@ -50,14 +49,14 @@ class Actor:
     def set_eligibility(self, state, action, value):
         if value is None:
             self.eligibility[state][action] *= (
-                    discount_factor_actor * eligibility_decay_actor
+                discount_factor_actor * eligibility_decay_actor
             )
         else:
             self.eligibility[state][action] = value
 
     def set_policy(self, state, action):
         self.policy[state][action] += (
-                lr_actor * self.critic.get_TD_error() * self.eligibility[state][action]
+            lr_actor * self.critic.get_TD_error() * self.eligibility[state][action]
         )
 
 
@@ -74,6 +73,9 @@ class CriticTable:
     def get_TD_error(self):
         return self.TD_error
 
+    def get_value(self, state):
+        return self.V[state]
+
     def initialize_value_function(self, all_states):
         for s in all_states:
             self.V[s] = random.randint(0, 10)
@@ -84,7 +86,11 @@ class CriticTable:
             self.eligibility[s] = 0
 
     def set_TD_error(self, r, state, new_state):
-        self.TD_error = r + discount_factor_critic * self.V[new_state] - self.V[state]
+        self.TD_error = (
+            r
+            + discount_factor_critic * self.get_value(new_state)
+            - self.get_value(state)
+        )
 
     def set_eligibility(self, state, value):
         if value is None:
@@ -93,27 +99,48 @@ class CriticTable:
             self.eligibility[state] = value
 
     def set_value_for_state(self, state):
-        self.V[state] += lr_critic * self.TD_error * self.eligibility[state]
+        self.V[state] += lr_critic * self.get_TD_error() * self.eligibility[state]
 
 
 class CriticANN:
     def __init__(self, sim_world):
         self.sim_world = sim_world
+        self.nn_model = self.build_model()
+        self.TD_error = 0
+
+    def build_model(self):
+        model = tf.keras.models.Sequential()
+        model.add(tf.keras.layers)
 
     def get_state(self):
         state = self.sim_world.get_state()
         return self.state_to_binary(state)
 
     def state_to_binary(self, state):
-        binary_string = ""
+        binary_state = ""
         if isinstance(state, list):
             for element in state:
-                binary_string += np.binary_repr(element, 8)
+                binary_state += np.binary_repr(element, 8)
         else:
-            binary_string += np.binary_repr(state)
-        return binary_string
+            binary_state += np.binary_repr(state, 8)
+        return binary_state
 
     def binary_to_state(self, binary_state):
+        state = []
+        if len(binary_state) > 8:
+            for i in range(0, len(binary_state), 8):
+                state.append(self.binary_to_decimal(binary_state[i : i + 8], 8))
+        else:
+            state = self.binary_to_decimal(binary_state, 8)
+        return state
+
+    def binary_to_decimal(self, num, bits):
+        # to handle negative numbers
+        if num[0] == "1":
+            return -(2**bits - int(num, 2))
+        return int(num, 2)
+
+    def get_value(self, state):
         pass
 
 

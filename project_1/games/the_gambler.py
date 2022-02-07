@@ -1,5 +1,9 @@
 import random
-from project_1.parameters import win_probability
+import numpy as np
+import sys
+
+sys.path.append("/path/to/dir")
+from parameters import win_probability
 import matplotlib.pyplot as plt
 
 
@@ -19,11 +23,13 @@ class GamblerPlayer:
 
         # For loosing
         elif self.units == 0:
-            self.reward = - 100
+            self.reward = -100
 
         # For moving
         else:
-            self.reward = -1  # økte antall minus per steg # sjekke antall steg økte antall episoder
+            self.reward = (
+                -1
+            )  # økte antall minus per steg # sjekke antall steg økte antall episoder
 
         return self.reward
 
@@ -46,7 +52,7 @@ class Coin:
         return random.choices(
             population=[False, True],
             weights=[1 - win_probability, win_probability],
-            k=1
+            k=1,
         )[0]
 
 
@@ -129,7 +135,7 @@ class GamblerWorld:
         plt.plot(states, best_bets)
 
         # Name the axis and set title
-        plt.xlabel('State')
-        plt.ylabel('Bet')
-        plt.title('Policy after 500 episodes')
+        plt.xlabel("State")
+        plt.ylabel("Bet")
+        plt.title("Policy after 500 episodes")
         plt.show()

@@ -1,8 +1,12 @@
 import random
 import numpy as np
+import os
 import sys
+import inspect
 
-sys.path.append("/path/to/dir")
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
 from parameters import win_probability
 import matplotlib.pyplot as plt
 

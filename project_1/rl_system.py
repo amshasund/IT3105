@@ -50,14 +50,14 @@ class Actor:
     def set_eligibility(self, state, action, value):
         if value is None:
             self.eligibility[state][action] *= (
-                discount_factor_actor * eligibility_decay_actor
+                    discount_factor_actor * eligibility_decay_actor
             )
         else:
             self.eligibility[state][action] = value
 
     def set_policy(self, state, action):
         self.policy[state][action] += (
-            lr_actor * self.critic.get_TD_error() * self.eligibility[state][action]
+                lr_actor * self.critic.get_TD_error() * self.eligibility[state][action]
         )
 
 
@@ -108,10 +108,13 @@ class CriticANN:
         binary_string = ""
         if isinstance(state, list):
             for element in state:
-                binary_string += np.binary_repr(element)
+                binary_string += np.binary_repr(element, 8)
         else:
             binary_string += np.binary_repr(state)
         return binary_string
+
+    def binary_to_state(self, binary_state):
+        pass
 
 
 class Critic(
@@ -125,7 +128,7 @@ class Critic(
 class RLSystem:
     def __init__(self):
         self.sim_world = SimWorld()
-        self.critic = Critic(critic_type, self.sim_world)
+        self.critic = Critic(self.sim_world)
         self.actor = Actor(self.critic, self.sim_world)
 
     def actor_critic_algorithm(self):

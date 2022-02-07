@@ -1,10 +1,8 @@
 import random
-import numpy as np
-import sys
 
-sys.path.append("/path/to/dir")
-from parameters import win_probability
 import matplotlib.pyplot as plt
+
+from project_1.parameters import win_probability
 
 
 class GamblerPlayer:

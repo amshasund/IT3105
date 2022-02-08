@@ -1,5 +1,6 @@
 import copy
 import random
+
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
@@ -13,6 +14,7 @@ from parameters import (
     discount_factor_actor,
     eligibility_decay_critic,
     eligibility_decay_actor,
+    game,
 )
 from simworld import SimWorld
 
@@ -49,14 +51,14 @@ class Actor:
     def set_eligibility(self, state, action, value):
         if value is None:
             self.eligibility[state][action] *= (
-                discount_factor_actor * eligibility_decay_actor
+                    discount_factor_actor * eligibility_decay_actor
             )
         else:
             self.eligibility[state][action] = value
 
     def set_policy(self, state, action):
         self.policy[state][action] += (
-            lr_actor * self.critic.get_TD_error() * self.eligibility[state][action]
+                lr_actor * self.critic.get_TD_error() * self.eligibility[state][action]
         )
 
 
@@ -87,9 +89,9 @@ class CriticTable:
 
     def set_TD_error(self, r, state, new_state):
         self.TD_error = (
-            r
-            + discount_factor_critic * self.get_value(new_state)
-            - self.get_value(state)
+                r
+                + discount_factor_critic * self.get_value(new_state)
+                - self.get_value(state)
         )
 
     def set_eligibility(self, state, value):
@@ -106,17 +108,49 @@ class CriticANN:
     def __init__(self, sim_world):
         self.sim_world = sim_world
         self.nn_model = self.build_model()
+        self.num_input_nodes = self.get_num_input_nodes()
         self.TD_error = 0
 
-    def build_model(self):
+    # We should probably do this another way
+    def get_num_input_nodes(self):
+        if game == "the_gambler":
+            return 1
+        elif game == "towers_of_hanoi":
+            return 2
+        elif game == "pole_balancing":
+            return 2
+        else:
+            return "game is not defined correctly"
+
+    def build_model(self, learning_rate, activation_func, dimensions):
+
+        # Create Neural Net
         model = tf.keras.models.Sequential()
-        model.add(tf.keras.layers)
+
+        # Add input layer
+        model.add(tf.keras.Dense(self.num_input_nodes, activation=activation_func))
+
+        for i in range(len(dimensions)):
+            # Add hidden layer
+            model.add(tf.keras.Dense(dimensions[i], aactivation=activation_func))
+
+        # Add output layer
+        model.add(tf.keras.Dense(1, activation=activation_func))
+
+        # Compile
+        # model.compile(optimizer=opt, )
+
+        return model
+
+    def train_model(self):
+        self.nn_model.fit()
 
     def get_state(self):
         state = self.sim_world.get_state()
         return self.state_to_binary(state)
 
-    def state_to_binary(self, state):
+    @staticmethod
+    def state_to_binary(state):
         binary_state = ""
         if isinstance(state, list):
             for element in state:
@@ -129,15 +163,16 @@ class CriticANN:
         state = []
         if len(binary_state) > 8:
             for i in range(0, len(binary_state), 8):
-                state.append(self.binary_to_decimal(binary_state[i : i + 8], 8))
+                state.append(self.binary_to_decimal(binary_state[i: i + 8], 8))
         else:
             state = self.binary_to_decimal(binary_state, 8)
         return state
 
-    def binary_to_decimal(self, num, bits):
+    @staticmethod
+    def binary_to_decimal(num, bits):
         # to handle negative numbers
         if num[0] == "1":
-            return -(2**bits - int(num, 2))
+            return -(2 ** bits - int(num, 2))
         return int(num, 2)
 
     def get_value(self, state):

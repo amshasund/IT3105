@@ -14,6 +14,7 @@ from parameters import (
     discount_factor_actor,
     eligibility_decay_critic,
     eligibility_decay_actor,
+    neural_dim,
     game,
 )
 from simworld import SimWorld
@@ -107,65 +108,77 @@ class CriticTable:
 class CriticANN:
     def __init__(self, sim_world):
         self.sim_world = sim_world
-        self.nn_model = self.build_model()
         self.num_input_nodes = self.get_num_input_nodes()
+        self.nn_model = self.build_model()
         self.TD_error = 0
 
     # We should probably do this another way
-    def get_num_input_nodes(self):
+    @staticmethod
+    def get_num_input_nodes():
         if game == "the_gambler":
             return 1
         elif game == "towers_of_hanoi":
-            return 2
+            return 4
         elif game == "pole_balancing":
-            return 2
+            return 6
         else:
             return "game is not defined correctly"
 
-    def build_model(self, learning_rate, activation_func, dimensions):
-
+    def build_model(self, act='relu', opt=tf.keras.optimizers.SGD(), loss=tf.keras.losses.MeanAbsoluteError()):
         # Create Neural Net
         model = tf.keras.models.Sequential()
 
         # Add input layer
-        model.add(tf.keras.Dense(self.num_input_nodes, activation=activation_func))
+        model.add(tf.keras.Dense(self.num_input_nodes, activation=act))
 
-        for i in range(len(dimensions)):
-            # Add hidden layer
-            model.add(tf.keras.Dense(dimensions[i], aactivation=activation_func))
+        # Add hidden layers
+        for i in range(len(neural_dim)):
+            model.add(tf.keras.Dense(neural_dim[i], aactivation=act))
 
         # Add output layer
-        model.add(tf.keras.Dense(1, activation=activation_func))
+        model.add(tf.keras.Dense(1, activation=act))
 
-        # Compile
-        # model.compile(optimizer=opt, )
+        # Using stochastic gradient descent when compiling
+        model.compile(optimizer=opt(lr=lr_critic), loss=loss,
+                      metrics=[
+                          tf.keras.metrics.categorical_accuracy])  # TODO trenger vi metrics greia her -- ikke sykt
+        # viktig i guess
 
         return model
 
-    def train_model(self):
-        self.nn_model.fit()
+    def train_model(self, reward, state, new_state):
+        target = reward + discount_factor_critic * self.nn_model(new_state)
+        loss = self.TD_error ** 2
+        self.nn_model.fit(state, target)
+        self.nn_model.loss(loss)
+
+    def set_value_for_state(self):
+        pass
 
     def get_state(self):
         state = self.sim_world.get_state()
         return self.state_to_binary(state)
 
+    def get_value(self, state):  # TODO We dont have values :(
+        pass
+
+    def set_TD_error(self, reward, state, new_state):
+        self.TD_error = reward + discount_factor_critic * self.nn_model(new_state) - self.nn_model(state)
+
     @staticmethod
     def state_to_binary(state):
-        binary_state = ""
+        binary_state = []
         if isinstance(state, list):
             for element in state:
-                binary_state += np.binary_repr(element, 8)
+                binary_state.append(np.binary_repr(element, 8))
         else:
-            binary_state += np.binary_repr(state, 8)
+            binary_state.append(np.binary_repr(state, 8))
         return binary_state
 
     def binary_to_state(self, binary_state):
         state = []
-        if len(binary_state) > 8:
-            for i in range(0, len(binary_state), 8):
-                state.append(self.binary_to_decimal(binary_state[i: i + 8], 8))
-        else:
-            state = self.binary_to_decimal(binary_state, 8)
+        for s in binary_state:
+            state.append(self.binary_to_decimal(s, 8))
         return state
 
     @staticmethod
@@ -174,9 +187,6 @@ class CriticANN:
         if num[0] == "1":
             return -(2 ** bits - int(num, 2))
         return int(num, 2)
-
-    def get_value(self, state):
-        pass
 
 
 class Critic(
@@ -245,6 +255,8 @@ class RLSystem:
                     for a in self.actor.policy[s]:
                         self.actor.set_eligibility(s, a, None)
                         self.actor.set_policy(s, a)
+                
+                self.critic.train_model()
 
                 state = new_state
                 action = new_action

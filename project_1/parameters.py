@@ -3,7 +3,7 @@ game = 'the_gambler'  # 'towers_of_hanoi' or 'pole_balancing'
 
 # pivotal parameters
 
-episodes = 500
+episodes = 1000
 max_steps = 300
 critic_type = "NN"  # "NN" or "table"
 neural_dim = (15, 20, 30, 5, 1)

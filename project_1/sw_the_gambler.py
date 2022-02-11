@@ -135,5 +135,5 @@ class GamblerWorld:
         # Name the axis and set title
         plt.xlabel("State")
         plt.ylabel("Bet")
-        plt.title("Policy after ", episodes, " episodes")
+        plt.title("Policy after episodes")
         plt.show()

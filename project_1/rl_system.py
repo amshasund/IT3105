@@ -33,8 +33,6 @@ class RLSystem:
         acc_reward = [0] * episodes
 
         for i in range(1, episodes + 1):
-            # print("---------- Episode nr: " + str(i) + " ----------")
-
             # Reset eligibilities in actor and critic
             self.actor.initialize_eligibility_function()
             if critic_type == "table":
@@ -43,7 +41,7 @@ class RLSystem:
             # Get S_init and its policy
             # TODO: critic or sim_world?
             state = self.critic.get_state()
-            # print("Your start state: " + str(state))
+            #print("Your start state: " + str(state))
             action = self.actor.get_best_action(state)
 
             # Play the game
@@ -56,7 +54,7 @@ class RLSystem:
 
                 # TODO: change to critic.get_state?
                 new_state = self.sim_world.get_state()
-                # print("New State: " + str(new_state))
+                #print("New State: " + str(new_state))
 
                 # Check game status after new state
                 game_over = self.sim_world.is_game_over()

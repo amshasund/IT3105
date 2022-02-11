@@ -28,12 +28,12 @@ class CriticNN:
         else:
             return "game is not defined correctly"
 
-    def build_model(self, act='relu', opt=tf.keras.optimizers.SGD, loss=tf.keras.losses.MeanSquaredError):
+    def build_model(self, act='relu', opt=tf.keras.optimizers.SGD, loss=tf.keras.losses.MeanSquaredError()):
         # Create Neural Net
         model = tf.keras.models.Sequential()
 
         # Add input layer
-        model.add(tf.keras.layers.Dense(self.num_input_nodes, activation=act))
+        model.add(tf.keras.layers.Input((self.num_input_nodes,)))
 
         # Add hidden layers
         for i in range(len(neural_dim)):
@@ -43,7 +43,7 @@ class CriticNN:
         model.add(tf.keras.layers.Dense(1, activation=act))
 
         # Using stochastic gradient descent when compiling
-        model.compile(optimizer=opt(lr=lr_critic), loss=loss,
+        model.compile(optimizer=opt(learning_rate=lr_critic), loss=loss,
                       metrics=[
                           tf.keras.metrics.categorical_accuracy])  # Keith had this
 
@@ -52,32 +52,33 @@ class CriticNN:
     def train_model(self, reward, state, new_state):
         state_bin = self.state_to_binary(state)
         target = reward + discount_factor_critic * self.get_value(new_state)
-        # input loss as TD_error squared
-        loss = self.TD_error ** 2
-        self.nn_model.fit(state_bin, target)
-        self.nn_model.loss(loss)
-        # TODO: prøv å ha loss både før og etter fit
+        #print("Target: ", target)
+        self.nn_model.fit(state_bin, target, verbose=0)
 
     def get_value(self, state):
         state_bin = self.state_to_binary(state)
-        return self.nn_model.predict(state_bin)
+        return self.nn_model(state_bin)
 
     def get_state(self):
         return self.sim_world.get_state()
 
+    def get_TD_error(self):
+        return self.TD_error
+
     def set_TD_error(self, reward, state, new_state):
         self.TD_error = reward + discount_factor_critic * \
             self.get_value(new_state) - self.get_value(state)
+        #print("Value: ", self.get_value(state),"TD: ", self.get_TD_error())
 
     @staticmethod
     def state_to_binary(state):
         binary_state = []
         if isinstance(state, list):
             for element in state:
-                binary_state.append(np.binary_repr(element, 8))
+                binary_state.append(int(np.binary_repr(element, 8)))
         else:
-            binary_state.append(np.binary_repr(state, 8))
-        return binary_state
+            binary_state.append(int(np.binary_repr(state, 8)))
+        return np.array(binary_state)
 
     def binary_to_state(self, binary_state):
         state = []

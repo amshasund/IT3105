@@ -1,6 +1,6 @@
-from games.the_gambler import GamblerWorld
-from games.pole_balancing import PoleWorld
-from games.towers_of_hanoi import TowersWorld
+from sw_the_gambler import GamblerWorld
+from sw_pole_balancing import PoleWorld
+from sw_towers_of_hanoi import TowersWorld
 from parameters import game
 
 

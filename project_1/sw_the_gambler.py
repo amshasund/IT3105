@@ -1,13 +1,7 @@
 import random
 import numpy as np
-import os
-import sys
-import inspect
 
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir)
-from parameters import win_probability
+from parameters import win_probability, episodes
 import matplotlib.pyplot as plt
 
 
@@ -141,5 +135,5 @@ class GamblerWorld:
         # Name the axis and set title
         plt.xlabel("State")
         plt.ylabel("Bet")
-        plt.title("Policy after 500 episodes")
+        plt.title("Policy after ", episodes, " episodes")
         plt.show()

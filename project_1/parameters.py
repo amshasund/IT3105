@@ -5,7 +5,7 @@ game = 'the_gambler'  # 'towers_of_hanoi' or 'pole_balancing'
 
 episodes = 500
 max_steps = 300
-critic_type = "ANN"  # "ANN" or "table"
+critic_type = "NN"  # "NN" or "table"
 neural_dim = (15, 20, 30, 5, 1)
 lr_actor = 0.9  # alpha_a
 lr_critic = 0.9  # alpha_c

@@ -1,199 +1,20 @@
-import copy
-import random
-
 import matplotlib.pyplot as plt
-import numpy as np
-import tensorflow as tf
 
 from parameters import (
     critic_type,
-    episodes,
-    lr_critic,
-    lr_actor,
-    discount_factor_critic,
-    discount_factor_actor,
-    eligibility_decay_critic,
-    eligibility_decay_actor,
-    neural_dim,
-    game,
+    episodes
 )
 from simworld import SimWorld
 
-
-class Actor:
-    def __init__(self, critic, sim_world):
-        self.critic = critic
-        self.sim_world = sim_world
-        self.policy = dict()
-        self.eligibility = dict()
-
-    def get_best_action(self, state):
-        actions = self.policy[state]
-        highest_value = max(actions.values())
-        best_actions = []
-        for key, value in actions.items():
-            if value == highest_value:
-                best_actions.append(key)
-        return random.choice(best_actions)
-
-    def initialize_policy_function(self, all_states):
-        for s in all_states:
-            self.policy[s] = dict()
-            all_actions_for_state = self.sim_world.get_possible_actions_from_state(s)
-            for a in all_actions_for_state:
-                self.policy[s][a] = 0
-
-    def initialize_eligibility_function(self):
-        self.eligibility = copy.deepcopy(self.policy)
-        # set all action values in each state to 0
-        for state in self.eligibility:
-            self.eligibility[state] = dict.fromkeys(self.eligibility[state], 0)
-
-    def set_eligibility(self, state, action, value):
-        if value is None:
-            self.eligibility[state][action] *= (
-                    discount_factor_actor * eligibility_decay_actor
-            )
-        else:
-            self.eligibility[state][action] = value
-
-    def set_policy(self, state, action):
-        self.policy[state][action] += (
-                lr_actor * self.critic.get_TD_error() * self.eligibility[state][action]
-        )
-
-
-class CriticTable:
-    def __init__(self, sim_world):
-        self.sim_world = sim_world
-        self.V = dict()
-        self.eligibility = dict()
-        self.TD_error = 0
-
-    def get_state(self):
-        return self.sim_world.get_state()
-
-    def get_TD_error(self):
-        return self.TD_error
-
-    def get_value(self, state):
-        return self.V[state]
-
-    def initialize_value_function(self, all_states):
-        for s in all_states:
-            self.V[s] = random.randint(0, 10)
-
-    # should this be done differently?
-    def initialize_eligibility_function(self, all_states):
-        for s in all_states:
-            self.eligibility[s] = 0
-
-    def set_TD_error(self, r, state, new_state):
-        self.TD_error = (
-                r
-                + discount_factor_critic * self.get_value(new_state)
-                - self.get_value(state)
-        )
-
-    def set_eligibility(self, state, value):
-        if value is None:
-            self.eligibility[state] *= discount_factor_critic * eligibility_decay_critic
-        else:
-            self.eligibility[state] = value
-
-    def set_value_for_state(self, state):
-        self.V[state] += lr_critic * self.get_TD_error() * self.eligibility[state]
-
-
-class CriticANN:
-    def __init__(self, sim_world):
-        self.sim_world = sim_world
-        self.num_input_nodes = self.get_num_input_nodes()
-        self.nn_model = self.build_model()
-        self.TD_error = 0
-
-    # We should probably do this another way
-    @staticmethod
-    def get_num_input_nodes():
-        if game == "the_gambler":
-            return 1
-        elif game == "towers_of_hanoi":
-            return 4
-        elif game == "pole_balancing":
-            return 6
-        else:
-            return "game is not defined correctly"
-
-    def build_model(self, act='relu', opt=tf.keras.optimizers.SGD(), loss=tf.keras.losses.MeanAbsoluteError()):
-        # Create Neural Net
-        model = tf.keras.models.Sequential()
-
-        # Add input layer
-        model.add(tf.keras.Dense(self.num_input_nodes, activation=act))
-
-        # Add hidden layers
-        for i in range(len(neural_dim)):
-            model.add(tf.keras.Dense(neural_dim[i], aactivation=act))
-
-        # Add output layer
-        model.add(tf.keras.Dense(1, activation=act))
-
-        # Using stochastic gradient descent when compiling
-        model.compile(optimizer=opt(lr=lr_critic), loss=loss,
-                      metrics=[
-                          tf.keras.metrics.categorical_accuracy])  # TODO trenger vi metrics greia her -- ikke sykt
-        # viktig i guess
-
-        return model
-
-    def train_model(self, reward, state, new_state):
-        target = reward + discount_factor_critic * self.nn_model(new_state)
-        loss = self.TD_error ** 2
-        self.nn_model.fit(state, target)
-        self.nn_model.loss(loss)
-
-    def set_value_for_state(self):
-        pass
-
-    def get_state(self):
-        state = self.sim_world.get_state()
-        return self.state_to_binary(state)
-
-    def get_value(self, state):  # TODO We dont have values :(
-        pass
-
-    def set_TD_error(self, reward, state, new_state):
-        self.TD_error = reward + discount_factor_critic * self.nn_model(new_state) - self.nn_model(state)
-
-    @staticmethod
-    def state_to_binary(state):
-        binary_state = []
-        if isinstance(state, list):
-            for element in state:
-                binary_state.append(np.binary_repr(element, 8))
-        else:
-            binary_state.append(np.binary_repr(state, 8))
-        return binary_state
-
-    def binary_to_state(self, binary_state):
-        state = []
-        for s in binary_state:
-            state.append(self.binary_to_decimal(s, 8))
-        return state
-
-    @staticmethod
-    def binary_to_decimal(num, bits):
-        # to handle negative numbers
-        if num[0] == "1":
-            return -(2 ** bits - int(num, 2))
-        return int(num, 2)
+from rl_critic_nn import CriticNN
+from rl_critic_table import CriticTable
+from rl_actor import Actor
 
 
 class Critic(
-    CriticTable
-    if critic_type == "table"
-    else (CriticANN if critic_type == "ANN" else False)
-):
+        CriticTable if critic_type == "table"
+        else (CriticNN if critic_type == "NN"
+              else False)):
     pass
 
 
@@ -206,7 +27,8 @@ class RLSystem:
     def actor_critic_algorithm(self):
         # Initialize
         all_states = self.sim_world.get_all_possible_states()
-        self.critic.initialize_value_function(all_states)
+        if critic_type == "table":
+            self.critic.initialize_value_function(all_states)
         self.actor.initialize_policy_function(all_states)
         acc_reward = [0] * episodes
 
@@ -215,9 +37,11 @@ class RLSystem:
 
             # Reset eligibilities in actor and critic
             self.actor.initialize_eligibility_function()
-            self.critic.initialize_eligibility_function(all_states)
+            if critic_type == "table":
+                self.critic.initialize_eligibility_function(all_states)
 
             # Get S_init and its policy
+            # TODO: critic or sim_world?
             state = self.critic.get_state()
             # print("Your start state: " + str(state))
             action = self.actor.get_best_action(state)
@@ -229,6 +53,8 @@ class RLSystem:
                 self.sim_world.do_action(action)
                 reward = self.sim_world.get_reward()
                 acc_reward[i - 1] += reward
+
+                # TODO: change to critic.get_state?
                 new_state = self.sim_world.get_state()
                 # print("New State: " + str(new_state))
 
@@ -247,16 +73,20 @@ class RLSystem:
                 self.critic.set_TD_error(reward, state, new_state)
 
                 # Update critic's eligibility table
-                self.critic.set_eligibility(state, 1)
+                if critic_type == "table":
+                    self.critic.set_eligibility(state, 1)
 
+                # TODO: training before forloop?
+                # Should we still loop for actor?
+                if critic_type == "NN":
+                    self.critic.train_model(reward, state, new_state)
                 for s in all_states:
-                    self.critic.set_value_for_state(s)
-                    self.critic.set_eligibility(s, None)
+                    if critic_type == "table":
+                        self.critic.set_value_for_state(s)
+                        self.critic.set_eligibility(s, None)
                     for a in self.actor.policy[s]:
                         self.actor.set_eligibility(s, a, None)
                         self.actor.set_policy(s, a)
-                
-                self.critic.train_model()
 
                 state = new_state
                 action = new_action

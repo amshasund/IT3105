@@ -21,7 +21,7 @@ frame_delay = 3
 
 pole_length = 0.5  # [0.1, 1.0] m
 pole_mass = 0.1  # [0.05, 0.5] kg
-gravity = 9.81  # [5, 15] m/s^2
+gravity = -9.81  # [-15, -5] m/s^2
 timestep = 0.02  # [0.01, 0.1] s
 
 # towers of hanoi

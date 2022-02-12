@@ -14,13 +14,26 @@ class Cart:
         self.acceleration = 0
         self.max_location = 2.4  # in both directions
 
+    def reset_cart(self):
+        self.location = 0
+        self.velocity = 0
+        self.acceleration = 0
+
 
 class Pole:
     def __init__(self):
         self.mass = pole_mass
         self.length = pole_length
         self.max_angle = 0.21  # in both directions
-        self.angle = random.randrange(-self.max_angle, self.max_angle, 0.01)
+        self.angle = self.set_start_angle()
+        self.angular_velocity = 0
+        self.angular_acceleration = 0
+
+    def set_start_angle(self):
+        return random.randrange(-self.max_angle, self.max_angle, 0.01)
+
+    def reset_pole(self):
+        self.angle = self.set_start_angle()
         self.angular_velocity = 0
         self.angular_acceleration = 0
 
@@ -28,45 +41,36 @@ class Pole:
 class PolePlayer:
     def __init__(self, env):
         self.env = env
+        self.situation = self.update_situation()
         self.reward = 0
-        self.B = 0
 
-    def add_force(self, action):
-        if action == 0:
-            self.B = -1
-        elif action == 1:
-            self.B = 1
-        self.env.add_force(self.B)
-
-    def get_angle(self):
-        return self.units
+    def get_situation(self):
+        return self.situation
 
     def get_reward(self):
-        # For winning
-        if self.units == 100:
-            self.reward = 100
+        pass
 
-        # For loosing
-        elif self.units == 0:
-            self.reward = -100
+    def add_force(self, action):
+        self.env.update_state(action)
+        self.update_situation()
 
-        # For moving
-        else:
-            self.reward = (
-                -1
-            )  # økte antall minus per steg # sjekke antall steg økte antall episoder
+    def update_situation(self):
+        sit = [
+            self.env.cart.location,
+            self.env.cart.velocity,
+            self.env.cart.acceleration,
+            self.env.pole.angle,
+            self.env.pole.angular_velocity,
+            self.env.pole.angular_acceleration
+        ]
+        return sit
 
-        return self.reward
+    def set_start_situation(self):
+        self.env.reset_environment()
+        self.situation = self.update_situation()
 
-    def set_start_units(self):
-        self.units = random.randint(1, 99)
-
-    def place_bet(self, bet):
-        # self.reward = self.env.perform_bet(bet)
-        self.units += self.env.perform_bet(bet)
-
-    def get_possible_forces(self):
-        return self.env.get_legal_bets(self.units)
+    def get_legal_push(self):
+        return self.env.get_force_options()
 
 
 class PoleEnv:
@@ -78,24 +82,24 @@ class PoleEnv:
         self.T = 300
         self.force = 10
 
-    def add_force(self, B):
-        if B == -1:
-            B = -self.force
-        elif B == 1:
-            B = self.force
-        else:
-            return
+    def reset_environment(self):
+        self.pole.reset_pole()
+        self.cart.reset_cart()
 
-        self.pole.angular_acceleration = self.update_angular_acceleration(B)
-        self.cart.acceleration = self.update_acceleration(B)
+    def update_state(self, bang_bang):
+        self.pole.angular_acceleration = self.update_angular_acceleration(
+            bang_bang)
+        self.cart.acceleration = self.update_acceleration(bang_bang)
 
         self.pole.angular_velocity = (
-                self.pole.angular_velocity + self.tau * self.pole.angular_acceleration
+            self.pole.angular_velocity + self.tau * self.pole.angular_acceleration
         )
         self.cart.velocity = self.cart.velocity + self.tau * self.cart.acceleration
         self.pole.angle = self.pole.angle + self.tau * self.pole.angular_velocity
         self.cart.location = self.cart.location + self.tau * self.cart.velocity
-        return self.is_successfull()
+
+    def get_force_options(self):
+        return [-self.force, self.force]
 
     # def get_state(self):
 
@@ -110,9 +114,9 @@ class PoleEnv:
         m_c = self.cart.mass
 
         return (
-                       g * np.sin(theta)
-                       + (np.cos(theta) * (-B - m_p * L * dd_theta * np.sin(theta))) / (m_p + m_c)
-               ) / (L * ((4 / 3) - (m_p * np.cos(theta) ** 2) / (m_p + m_c)))
+            g * np.sin(theta)
+            + (np.cos(theta) * (-B - m_p * L * dd_theta * np.sin(theta))) / (m_p + m_c)
+        ) / (L * ((4 / 3) - (m_p * np.cos(theta) ** 2) / (m_p + m_c)))
 
     def update_acceleration(self, B):
         theta = self.pole.angle
@@ -123,24 +127,17 @@ class PoleEnv:
         m_c = self.cart.mass
 
         return (
-                       B + m_p * L * (d_theta ** 2 * np.sin(theta) - dd_theta * np.cos(theta))
-               ) / (m_p + m_c)
+            B + m_p * L * (d_theta ** 2 * np.sin(theta) -
+                           dd_theta * np.cos(theta))
+        ) / (m_p + m_c)
 
-    def is_successfull(self):
+    def is_state_legal(self):
         if -self.cart.max_location <= self.cart.location <= self.cart.max_location:
             if -self.pole.max_angle <= self.pole.angle <= self.pole.max_angle:
                 print("Keep on playing!")
                 return True
             print("Pole out of range")
         print("Cart out of range")
-
-        print("You were unsuccessfull.")
-        return False
-
-    def game_over(self):
-        if self.is_successfull == False:
-            print("GAME OVER.")
-            return True
         return False
 
 
@@ -150,7 +147,7 @@ class PoleWorld:
         self.player = PolePlayer(self.environment)
 
     def get_actions(self):
-        return self.player.get_possible_forces()
+        return self.player.get_legal_push()
 
     def get_state(self):
         return self.player.get_units()
@@ -173,12 +170,12 @@ class PoleWorld:
         if state == 100:
             # print("You won!")
             # Reset number of units for new game
-            self.player.set_start_units()
+            self.player.set_start_situation()
             return True
         elif state == 0:
             # print("You lost..")
             # Reset number of units for new game
-            self.player.set_start_units()
+            self.player.set_start_situation()
             return True
         return False
 

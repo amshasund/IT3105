@@ -6,12 +6,13 @@ def main():
     print("Let's play!")
     # Create A RL system
     rl_system = RLSystem()
+    rl_system.sim_world.environment.print_game_board()
 
     # The Game Loop
-    rl_system.actor_critic_algorithm()
+    # rl_system.actor_critic_algorithm()
 
     # Print the result
-    rl_system.sim_world.print_results(rl_system.actor.policy)
+    # rl_system.sim_world.print_results(rl_system.actor.policy)
 
 
 main()

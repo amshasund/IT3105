@@ -1,20 +1,17 @@
-import matplotlib.pyplot as plt
-
 from parameters import (
     critic_type,
     episodes
 )
-from simworld import SimWorld
-
+from rl_actor import Actor
 from rl_critic_nn import CriticNN
 from rl_critic_table import CriticTable
-from rl_actor import Actor
+from simworld import SimWorld
 
 
 class Critic(
-        CriticTable if critic_type == "table"
-        else (CriticNN if critic_type == "NN"
-              else False)):
+    CriticTable if critic_type == "table"
+    else (CriticNN if critic_type == "NN"
+    else False)):
     pass
 
 
@@ -25,13 +22,12 @@ class RLSystem:
         self.actor = Actor(self.critic, self.sim_world)
 
     def actor_critic_algorithm(self):
-        acc_reward = [0] * episodes
 
         for i in range(1, episodes + 1):
             # Get S_init and its policy
             # TODO: critic or sim_world?
-            state = self.critic.get_state()
-            #print("Your start state: " + str(state))
+            state = str(self.critic.get_state())
+            # print("Your start state: " + str(state))
             action = self.actor.get_best_action(state)
 
             # Initialize eligibility, policy and value func
@@ -46,17 +42,19 @@ class RLSystem:
                 # Do action
                 self.sim_world.do_action(action)
                 reward = self.sim_world.get_reward()
-                acc_reward[i - 1] += reward
 
                 # TODO: change to critic.get_state?
-                new_state = self.sim_world.get_state()
-                #print("New State: " + str(new_state))
+                new_state = str(self.sim_world.get_state())
+                # print("New State: " + str(new_state))
 
                 # Add state to eligibility, policy and value funcs
                 # in actor and critic_table
                 if critic_type == "table":
                     self.critic.add_state(new_state)
                 self.actor.add_state(new_state)
+
+                # TODO: Check this - does it save right
+                self.sim_world.save_history(self, i)
 
                 # Check game status after new state
                 game_over = self.sim_world.is_game_over()
@@ -90,16 +88,3 @@ class RLSystem:
 
                 state = new_state
                 action = new_action
-        self.plot_train_progression(acc_reward)
-
-    def plot_train_progression(self, acc_reward):
-        list_episodes = list(range(episodes))
-        # Plotting the points
-        plt.plot(list_episodes, acc_reward)
-        # Plot heller snittet for hvert 100ede episode
-
-        # Name the axis and set title
-        plt.xlabel("Episode")
-        plt.ylabel("Accumulated reward")
-        plt.title("Accumulated reward for each episode")
-        plt.show()

@@ -1,5 +1,5 @@
 import random
-import copy
+
 from parameters import (
     lr_actor,
     discount_factor_actor,
@@ -15,7 +15,9 @@ class Actor:
         self.eligibility = dict()
 
     def get_best_action(self, state):
-        if state not in self.policy.keys():
+        print(str(state))
+        print(self.policy.keys())
+        if str(state) not in self.policy.keys():
             return random.choice(
                 self.sim_world.get_possible_actions_from_state(
                     state)
@@ -58,13 +60,13 @@ class Actor:
     def set_eligibility(self, state, action, value=None):
         if value is None:
             self.eligibility[state][action] *= (
-                discount_factor_actor * eligibility_decay_actor
+                    discount_factor_actor * eligibility_decay_actor
             )
         else:
             self.eligibility[state][action] = value
 
     def set_policy(self, state, action):
         self.policy[state][action] += (
-            lr_actor * self.critic.get_TD_error() *
-            self.eligibility[state][action]
+                lr_actor * self.critic.get_TD_error() *
+                self.eligibility[state][action]
         )

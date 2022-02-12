@@ -1,8 +1,8 @@
 import random
-import numpy as np
 
-from parameters import win_probability, episodes
 import matplotlib.pyplot as plt
+
+from parameters import win_probability
 
 
 class Coin:
@@ -95,7 +95,7 @@ class GamblerWorld:
 
     def get_possible_actions_from_state(self, state):
         # in this game, state equals amount of units
-        return self.environment.get_legal_bets(state)
+        return self.environment.get_legal_bets(int(state))
 
     def do_action(self, action):
         self.player.place_bet(action)
@@ -117,9 +117,12 @@ class GamblerWorld:
             return True
         return False
 
+    def save_history(self, episode):
+        pass
+
     @staticmethod
     def print_results(policy):
-        states = list(range(0, 100+1))
+        states = list(range(0, 100 + 1))
         best_bets = [0]
 
         for i in range(1, 100):

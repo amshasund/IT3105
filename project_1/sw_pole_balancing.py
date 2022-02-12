@@ -1,9 +1,8 @@
 import random
 
-import matplotlib.pyplot as plt
 import numpy as np
 
-from parameters import pole_mass, pole_length, gravity, timestep
+from parameters import pole_mass, pole_length, gravity, timestep, episodes
 
 
 class Cart:
@@ -30,7 +29,7 @@ class Pole:
         self.angular_acceleration = 0
 
     def set_start_angle(self):
-        return random.randrange(-self.max_angle, self.max_angle, 0.01)
+        return random.uniform(-self.max_angle, self.max_angle)
 
     def reset_pole(self):
         self.angle = self.set_start_angle()
@@ -43,32 +42,43 @@ class PolePlayer:
         self.env = env
         self.situation = self.update_situation()
         self.reward = 0
+        self.num_moves = 0
 
     def get_situation(self):
         return self.situation
 
     def get_reward(self):
-        pass
+        # For loosing
+        if not self.env.is_state_legal():
+            self.reward = - 100
+
+        # TODO: Improve this
+        # For legal moving
+        else:
+            self.reward = 1
+
+        return self.reward
 
     def update_situation(self):
         sit = [
-            self.env.cart.location,
-            self.env.cart.velocity,
-            self.env.cart.acceleration,
-            self.env.pole.angle,
-            self.env.pole.angular_velocity,
-            self.env.pole.angular_acceleration
+            round(self.env.cart.location, 2),
+            round(self.env.cart.velocity, 2),
+            round(self.env.cart.acceleration, 2),
+            round(self.env.pole.angle, 2),
+            round(self.env.pole.angular_velocity, 2),
+            round(self.env.pole.angular_acceleration, 2),
         ]
         return sit
 
     def set_start_situation(self):
         self.env.reset_environment()
         self.situation = self.update_situation()
+        self.num_moves = 0
 
     def add_force(self, action):
         self.env.update_state(action)
         self.update_situation()
-        self.reward += 1
+        self.num_moves += 1
 
     def get_legal_push(self):
         return self.env.get_force_options()
@@ -93,7 +103,7 @@ class PoleEnv:
         self.cart.acceleration = self.update_acceleration(bang_bang)
 
         self.pole.angular_velocity = (
-            self.pole.angular_velocity + self.tau * self.pole.angular_acceleration
+                self.pole.angular_velocity + self.tau * self.pole.angular_acceleration
         )
         self.cart.velocity = self.cart.velocity + self.tau * self.cart.acceleration
         self.pole.angle = self.pole.angle + self.tau * self.pole.angular_velocity
@@ -111,9 +121,9 @@ class PoleEnv:
         m_c = self.cart.mass
 
         return (
-            g * np.sin(theta)
-            + (np.cos(theta) * (-B - m_p * L * dd_theta * np.sin(theta))) / (m_p + m_c)
-        ) / (L * ((4 / 3) - (m_p * np.cos(theta) ** 2) / (m_p + m_c)))
+                       g * np.sin(theta)
+                       + (np.cos(theta) * (-B - m_p * L * dd_theta * np.sin(theta))) / (m_p + m_c)
+               ) / (L * ((4 / 3) - (m_p * np.cos(theta) ** 2) / (m_p + m_c)))
 
     def update_acceleration(self, B):
         theta = self.pole.angle
@@ -124,9 +134,9 @@ class PoleEnv:
         m_c = self.cart.mass
 
         return (
-            B + m_p * L * (d_theta ** 2 * np.sin(theta) -
-                           dd_theta * np.cos(theta))
-        ) / (m_p + m_c)
+                       B + m_p * L * (d_theta ** 2 * np.sin(theta) -
+                                      dd_theta * np.cos(theta))
+               ) / (m_p + m_c)
 
     def is_state_legal(self):
         if -self.cart.max_location <= self.cart.location <= self.cart.max_location:
@@ -142,6 +152,7 @@ class PoleWorld:
     def __init__(self):
         self.environment = PoleEnv()
         self.player = PolePlayer(self.environment)
+        self.moves_per_episode = [0] * episodes
 
     def get_actions(self):
         return self.player.get_legal_push()
@@ -165,23 +176,9 @@ class PoleWorld:
     def is_game_over(self):
         return not self.environment.is_state_legal()
 
+    def save_history(self, episode):
+        self.moves_per_episode[episode] = self.player.num_moves
+
     @staticmethod
-    def print_results(policy):
-        states = list(policy.keys())
-        bets = list(policy.values())
-        best_bets = [0]
-
-        for dict in bets[1:100]:
-            best_bets.append(max(dict, key=dict.get))
-
-        best_bets.append(0)
-        # print("Best_bets: " + str(best_bets))
-
-        # Plotting the points
-        plt.plot(states, best_bets)
-
-        # Name the axis and set title
-        plt.xlabel("State")
-        plt.ylabel("Bet")
-        plt.title("Policy after episodes")
-        plt.show()
+    def print_results(time_steps):
+        pass

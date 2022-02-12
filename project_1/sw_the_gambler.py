@@ -5,6 +5,18 @@ from parameters import win_probability, episodes
 import matplotlib.pyplot as plt
 
 
+class Coin:
+    def __init__(self):
+        self.win_probability = win_probability
+
+    def flip(self):
+        return random.choices(
+            population=[False, True],
+            weights=[1 - win_probability, win_probability],
+            k=1,
+        )[0]
+
+
 class GamblerPlayer:
     def __init__(self, env):
         self.env = env
@@ -40,18 +52,6 @@ class GamblerPlayer:
 
     def get_possible_bets(self):
         return self.env.get_legal_bets(self.units)
-
-
-class Coin:
-    def __init__(self):
-        self.win_probability = win_probability
-
-    def flip(self):
-        return random.choices(
-            population=[False, True],
-            weights=[1 - win_probability, win_probability],
-            k=1,
-        )[0]
 
 
 class GamblerEnv:
@@ -119,12 +119,14 @@ class GamblerWorld:
 
     @staticmethod
     def print_results(policy):
-        states = list(policy.keys())
-        bets = list(policy.values())
+        states = list(range(0, 100+1))
         best_bets = [0]
 
-        for dict in bets[1:100]:
-            best_bets.append(max(dict, key=dict.get))
+        for i in range(1, 100):
+            if i in policy.keys():
+                best_bets.append(max(policy[i], key=policy[i].get))
+            else:
+                best_bets.append(0)
 
         best_bets.append(0)
         # print("Best_bets: " + str(best_bets))

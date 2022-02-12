@@ -50,10 +50,6 @@ class PolePlayer:
     def get_reward(self):
         pass
 
-    def add_force(self, action):
-        self.env.update_state(action)
-        self.update_situation()
-
     def update_situation(self):
         sit = [
             self.env.cart.location,
@@ -68,6 +64,11 @@ class PolePlayer:
     def set_start_situation(self):
         self.env.reset_environment()
         self.situation = self.update_situation()
+
+    def add_force(self, action):
+        self.env.update_state(action)
+        self.update_situation()
+        self.reward += 1
 
     def get_legal_push(self):
         return self.env.get_force_options()
@@ -100,10 +101,6 @@ class PoleEnv:
 
     def get_force_options(self):
         return [-self.force, self.force]
-
-    # def get_state(self):
-
-    # def get_reward(self):
 
     def update_angular_acceleration(self, B):
         g = self.g
@@ -150,34 +147,23 @@ class PoleWorld:
         return self.player.get_legal_push()
 
     def get_state(self):
-        return self.player.get_units()
+        return self.player.get_situation()
 
     def get_all_possible_states(self):
-        return self.environment.get_range_of_units()
+        pass
 
     def get_possible_actions_from_state(self, state):
         # in this game, state equals amount of units
-        return self.environment.get_legal_bets(state)
+        return self.get_actions()
 
     def do_action(self, action):
-        self.player.place_bet(action)
+        self.player.add_force(action)
 
     def get_reward(self):
         return self.player.get_reward()
 
     def is_game_over(self):
-        state = self.get_state()
-        if state == 100:
-            # print("You won!")
-            # Reset number of units for new game
-            self.player.set_start_situation()
-            return True
-        elif state == 0:
-            # print("You lost..")
-            # Reset number of units for new game
-            self.player.set_start_situation()
-            return True
-        return False
+        return not self.environment.is_state_legal()
 
     @staticmethod
     def print_results(policy):

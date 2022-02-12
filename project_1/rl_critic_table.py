@@ -22,14 +22,11 @@ class CriticTable:
     def get_value(self, state):
         return self.V[state]
 
-    def initialize_value_function(self, all_states):
-        for s in all_states:
-            self.V[s] = random.randint(0, 10)
-
-    # should this be done differently?
-    def initialize_eligibility_function(self, all_states):
-        for s in all_states:
-            self.eligibility[s] = 0
+    def add_state(self, state):
+        if state not in self.eligibility.keys():
+            self.eligibility[state] = 0
+        if state not in self.V.keys():
+            self.V[state] = round(random.uniform(0, 2), 3)
 
     def set_TD_error(self, r, state, new_state):
         self.TD_error = (
@@ -38,7 +35,7 @@ class CriticTable:
             - self.get_value(state)
         )
 
-    def set_eligibility(self, state, value):
+    def set_eligibility(self, state, value=None):
         if value is None:
             self.eligibility[state] *= discount_factor_critic * \
                 eligibility_decay_critic

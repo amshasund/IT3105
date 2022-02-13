@@ -24,16 +24,17 @@ class RLSystem:
     def actor_critic_algorithm(self):
 
         for i in range(1, episodes + 1):
+            print("--- Episode: " + str(i) + " ---")
             # Get S_init and its policy
             # TODO: critic or sim_world?
-            state = str(self.critic.get_state())
-            # print("Your start state: " + str(state))
+            state = self.critic.get_state()
             action = self.actor.get_best_action(state)
 
             # Initialize eligibility, policy and value func
             # for start state in actor and critic_table
             if critic_type == "table":
                 self.critic.add_state(state)
+
             self.actor.add_state(state)
 
             # Play the game
@@ -44,7 +45,7 @@ class RLSystem:
                 reward = self.sim_world.get_reward()
 
                 # TODO: change to critic.get_state?
-                new_state = str(self.sim_world.get_state())
+                new_state = self.sim_world.get_state()
                 # print("New State: " + str(new_state))
 
                 # Add state to eligibility, policy and value funcs
@@ -54,7 +55,7 @@ class RLSystem:
                 self.actor.add_state(new_state)
 
                 # TODO: Check this - does it save right
-                self.sim_world.save_history(self, i)
+                self.sim_world.save_history(i)
 
                 # Check game status after new state
                 game_over = self.sim_world.is_game_over()
@@ -78,13 +79,15 @@ class RLSystem:
                 # Should we still loop for actor?
                 if critic_type == "NN":
                     self.critic.train_model(reward, state, new_state)
+
                 for s in self.actor.eligibility.keys():
                     if critic_type == "table":
                         self.critic.set_value_for_state(s)
                         self.critic.set_eligibility(s)
                     for a in self.actor.policy[s]:
-                        self.actor.set_eligibility(s, a)
                         self.actor.set_policy(s, a)
+                        self.actor.set_eligibility(s, a)
 
                 state = new_state
                 action = new_action
+            self.sim_world.reset_sim_world()

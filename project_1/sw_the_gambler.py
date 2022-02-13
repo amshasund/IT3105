@@ -94,7 +94,7 @@ class GamblerWorld:
         return self.environment.get_range_of_units()
 
     def get_possible_actions_from_state(self, state):
-        # in this game, state equals amount of units
+        # State equals amount of units
         return self.environment.get_legal_bets(int(state))
 
     def do_action(self, action):
@@ -107,21 +107,21 @@ class GamblerWorld:
         state = self.get_state()
         if state == 100:
             # print("You won!")
-            # Reset number of units for new game
-            self.player.set_start_units()
             return True
         elif state == 0:
             # print("You lost..")
-            # Reset number of units for new game
-            self.player.set_start_units()
             return True
         return False
+
+    def reset_sim_world(self):
+        self.player.set_start_units()
 
     def save_history(self, episode):
         pass
 
     @staticmethod
     def print_results(policy):
+        # Plot: State vs Bet
         states = list(range(0, 100 + 1))
         best_bets = [0]
 
@@ -132,7 +132,7 @@ class GamblerWorld:
                 best_bets.append(0)
 
         best_bets.append(0)
-        # print("Best_bets: " + str(best_bets))
+        print("Best_bets: " + str(best_bets))
 
         # Plotting the points
         plt.plot(states, best_bets)

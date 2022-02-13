@@ -1,5 +1,5 @@
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
 from parameters import (
     lr_critic,
@@ -52,7 +52,7 @@ class CriticNN:
     def train_model(self, reward, state, new_state):
         state_bin = self.state_to_binary(state)
         target = reward + discount_factor_critic * self.get_value(new_state)
-        #print("Target: ", target)
+        # print("Target: ", target)
         self.nn_model.fit(state_bin, target, verbose=0)
 
     def get_value(self, state):
@@ -67,17 +67,17 @@ class CriticNN:
 
     def set_TD_error(self, reward, state, new_state):
         self.TD_error = reward + discount_factor_critic * \
-            self.get_value(new_state) - self.get_value(state)
-        #print("Value: ", self.get_value(state),"TD: ", self.get_TD_error())
+                        self.get_value(new_state) - self.get_value(state)
+        # print("Value: ", self.get_value(state),"TD: ", self.get_TD_error())
 
     @staticmethod
     def state_to_binary(state):
         binary_state = []
         if isinstance(state, list):
             for element in state:
-                binary_state.append(int(np.binary_repr(element, 8)))
+                binary_state.append(int(np.binary_repr(int(element), 8)))
         else:
-            binary_state.append(int(np.binary_repr(state, 8)))
+            binary_state.append(int(np.binary_repr(int(state), 8)))
         return np.array(binary_state)
 
     def binary_to_state(self, binary_state):

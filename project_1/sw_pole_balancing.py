@@ -1,8 +1,9 @@
 import random
 
+import matplotlib.pyplot as plt
 import numpy as np
 
-from parameters import pole_mass, pole_length, gravity, timestep, episodes
+from parameters import pole_mass, pole_length, gravity, timestep, episodes, max_steps
 
 
 class Cart:
@@ -42,9 +43,10 @@ class PolePlayer:
         self.env = env
         self.situation = self.update_situation()
         self.reward = 0
-        self.num_moves = 0
+        self.num_pushes = 0
 
     def get_situation(self):
+        self.situation = self.update_situation()
         return self.situation
 
     def get_reward(self):
@@ -53,9 +55,13 @@ class PolePlayer:
             self.reward = - 100
 
         # TODO: Improve this
+        # For winning
+        if self.num_pushes == max_steps:
+            self.reward = 1000
+
         # For legal moving
         else:
-            self.reward = 1
+            self.reward = 1 * self.num_pushes
 
         return self.reward
 
@@ -70,18 +76,18 @@ class PolePlayer:
         ]
         return sit
 
-    def set_start_situation(self):
-        self.env.reset_environment()
-        self.situation = self.update_situation()
-        self.num_moves = 0
-
     def add_force(self, action):
         self.env.update_state(action)
         self.update_situation()
-        self.num_moves += 1
+        self.num_pushes += 1
 
     def get_legal_push(self):
         return self.env.get_force_options()
+
+    def reset_player(self):
+        self.situation = self.update_situation()
+        self.reward = 0
+        self.num_pushes = 0
 
 
 class PoleEnv:
@@ -92,10 +98,6 @@ class PoleEnv:
         self.tau = timestep
         self.T = 300
         self.force = 10
-
-    def reset_environment(self):
-        self.pole.reset_pole()
-        self.cart.reset_cart()
 
     def update_state(self, bang_bang):
         self.pole.angular_acceleration = self.update_angular_acceleration(
@@ -108,6 +110,7 @@ class PoleEnv:
         self.cart.velocity = self.cart.velocity + self.tau * self.cart.acceleration
         self.pole.angle = self.pole.angle + self.tau * self.pole.angular_velocity
         self.cart.location = self.cart.location + self.tau * self.cart.velocity
+        self.tau += timestep
 
     def get_force_options(self):
         return [-self.force, self.force]
@@ -115,15 +118,15 @@ class PoleEnv:
     def update_angular_acceleration(self, B):
         g = self.g
         theta = self.pole.angle
-        dd_theta = self.pole.angular_acceleration
+        d_theta = self.pole.angular_velocity
         m_p = self.pole.mass
         L = self.pole.length
         m_c = self.cart.mass
 
         return (
                        g * np.sin(theta)
-                       + (np.cos(theta) * (-B - m_p * L * dd_theta * np.sin(theta))) / (m_p + m_c)
-               ) / (L * ((4 / 3) - (m_p * np.cos(theta) ** 2) / (m_p + m_c)))
+                       + (np.cos(theta) * (-B - m_p * L * (d_theta ** 2) * np.sin(theta))) / (m_p + m_c)
+               ) / (L * ((4 / 3) - (m_p * (np.cos(theta)) ** 2) / (m_p + m_c)))
 
     def update_acceleration(self, B):
         theta = self.pole.angle
@@ -141,18 +144,20 @@ class PoleEnv:
     def is_state_legal(self):
         if -self.cart.max_location <= self.cart.location <= self.cart.max_location:
             if -self.pole.max_angle <= self.pole.angle <= self.pole.max_angle:
-                print("Keep on playing!")
                 return True
-            print("Pole out of range")
-        print("Cart out of range")
         return False
+
+    def reset_environment(self):
+        self.tau = timestep
+        self.pole.reset_pole()
+        self.cart.reset_cart()
 
 
 class PoleWorld:
     def __init__(self):
         self.environment = PoleEnv()
         self.player = PolePlayer(self.environment)
-        self.moves_per_episode = [0] * episodes
+        self.moves_per_episode = [0] * (episodes + 1)
 
     def get_actions(self):
         return self.player.get_legal_push()
@@ -174,11 +179,39 @@ class PoleWorld:
         return self.player.get_reward()
 
     def is_game_over(self):
-        return not self.environment.is_state_legal()
+        # Pole out of balance
+        if not self.environment.is_state_legal():
+            print("Pole out of balance")
+            print("Num timesteps: " + str(self.player.num_pushes))
+            print("Tau" + str(self.environment.tau))
+            return True
+
+        # Maximum timesteps reached
+        elif self.environment.tau == max_steps * timestep:
+            print("Max timesteps reached!")
+            return True
+
+        else:
+            return False
+
+    def reset_sim_world(self):
+        self.environment.reset_environment()
+        self.player.reset_player()
 
     def save_history(self, episode):
-        self.moves_per_episode[episode] = self.player.num_moves
+        self.moves_per_episode[episode] = self.player.num_pushes
 
-    @staticmethod
-    def print_results(time_steps):
-        pass
+    def print_results(self, policy):
+        # Plot: The Progression of Learning
+        x = list(range(1, episodes + 1))
+        y = self.moves_per_episode[1:]
+
+        plt.plot(x, y)
+
+        plt.xlabel("Episode")
+        plt.ylabel("Timestep")
+        plt.title("The Progression of Learning")
+
+        plt.show()
+
+        # Plot: The most successful episode

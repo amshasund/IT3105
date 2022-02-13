@@ -4,7 +4,7 @@ from rl_system import RLSystem
 def main():
     """Runs the game"""
     print("Let's play!")
-    # Create A RL system
+    # Create a RL system
     rl_system = RLSystem()
 
     # The Game Loop

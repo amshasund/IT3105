@@ -1,4 +1,5 @@
 import random
+
 from parameters import (
     lr_critic,
     discount_factor_critic,
@@ -20,28 +21,53 @@ class CriticTable:
         return self.TD_error
 
     def get_value(self, state):
+        # Change state type to string when state is a list
+        if isinstance(state, list):
+            state = str(state)
         return self.V[state]
 
     def add_state(self, state):
-        if state not in self.eligibility.keys():
+        # Change state type to string when state is a list
+        if isinstance(state, list):
+            state = str(state)
+
+        # For empty eligibility
+        if not self.eligibility:
             self.eligibility[state] = 0
-        if state not in self.V.keys():
+
+        # For state not in eligibility
+        elif state not in list(self.eligibility.keys()):
+            self.eligibility[state] = 0
+
+        # For empty V
+        if not self.V:
+            self.V[state] = round(random.uniform(0, 2), 3)
+
+        # For state not in V
+        elif state not in list(self.V.keys()):
             self.V[state] = round(random.uniform(0, 2), 3)
 
     def set_TD_error(self, r, state, new_state):
         self.TD_error = (
-            r
-            + discount_factor_critic * self.get_value(new_state)
-            - self.get_value(state)
+                r
+                + discount_factor_critic * self.get_value(new_state)
+                - self.get_value(state)
         )
 
     def set_eligibility(self, state, value=None):
+        # Change state type to string when state is a list
+        if isinstance(state, list):
+            state = str(state)
         if value is None:
             self.eligibility[state] *= discount_factor_critic * \
-                eligibility_decay_critic
+                                       eligibility_decay_critic
         else:
             self.eligibility[state] = value
 
     def set_value_for_state(self, state):
+        # Change state type to string when state is a list
+        if isinstance(state, list):
+            state = str(state)
+
         self.V[state] += lr_critic * self.get_TD_error() * \
-            self.eligibility[state]
+                         self.eligibility[state]

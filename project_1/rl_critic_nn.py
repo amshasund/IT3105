@@ -40,7 +40,7 @@ class CriticNN:
             model.add(tf.keras.layers.Dense(neural_dim[i], activation=act))
 
         # Add output layer
-        model.add(tf.keras.layers.Dense(1, activation=act))
+        model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
 
         # Using stochastic gradient descent when compiling
         model.compile(optimizer=opt(learning_rate=lr_critic), loss=loss,
@@ -50,6 +50,7 @@ class CriticNN:
         return model
 
     def train_model(self, reward, state, new_state):
+        # TODO: train with list of states and targets
         state_bin = self.state_to_binary(state)
         target = reward + discount_factor_critic * self.get_value(new_state)
         # print("Target: ", target)
@@ -67,7 +68,7 @@ class CriticNN:
 
     def set_TD_error(self, reward, state, new_state):
         self.TD_error = reward + discount_factor_critic * \
-                        self.get_value(new_state) - self.get_value(state)
+            self.get_value(new_state) - self.get_value(state)
         # print("Value: ", self.get_value(state),"TD: ", self.get_TD_error())
 
     @staticmethod
@@ -78,7 +79,7 @@ class CriticNN:
                 binary_state.append(int(np.binary_repr(int(element), 8)))
         else:
             binary_state.append(int(np.binary_repr(int(state), 8)))
-        return np.array(binary_state)
+        return np.array(binary_state).reshape(1, -1)
 
     def binary_to_state(self, binary_state):
         state = []

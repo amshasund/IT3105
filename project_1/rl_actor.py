@@ -14,36 +14,45 @@ class Actor:
         self.policy = dict()
         self.eligibility = dict()
 
-    def get_best_action(self, state):
+    def get_best_action(self, state, epsilon):
         # Change state type to string when state is a list
         if isinstance(state, list):
             state = str(state)
 
-        # For policy being empty
-        if not self.policy:
+        # TODO: Random with epsilon probability
+        random_action = random.choices(
+            population=[False, True],
+            weights=[1 - epsilon, epsilon],
+            k=1,
+        )[0]
+        if random_action:
             return random.choice(
                 self.sim_world.get_possible_actions_from_state(
                     state)
             )
-
-        # For state NOT in policy
-        elif state not in list(self.policy.keys()):
-            return random.choice(
-                self.sim_world.get_possible_actions_from_state(
-                    state)
-            )
-
-        # For state in policy
         else:
-            # print("state in policy")
-            state_actions = self.policy[state]
-            # TODO: shorten this?
-            highest_value = max(state_actions.values())
-            best_actions = []
-            for key, value in state_actions.items():
-                if value == highest_value:
-                    best_actions.append(key)
-            return random.choice(best_actions)
+            # For policy being empty
+            if not self.policy:
+                return random.choice(
+                    self.sim_world.get_possible_actions_from_state(
+                        state)
+                )
+
+            # For state NOT in policy
+            elif state not in list(self.policy.keys()):
+                return random.choice(
+                    self.sim_world.get_possible_actions_from_state(
+                        state)
+                )
+            else:
+                state_actions = self.policy[state]
+                # TODO: shorten this?
+                highest_value = max(state_actions.values())
+                best_actions = []
+                for key, value in state_actions.items():
+                    if value == highest_value:
+                        best_actions.append(key)
+                return random.choice(best_actions)
 
     def add_state(self, state):
         # Change state type to string when state is a list
@@ -84,10 +93,13 @@ class Actor:
 
         if value is None:
             self.eligibility[state][action] *= (
-                    discount_factor_actor * eligibility_decay_actor
+                discount_factor_actor * eligibility_decay_actor
             )
         else:
             self.eligibility[state][action] = value
+
+    def reset_eligibilities(self):
+        self.eligibility.clear()
 
     def set_policy(self, state, action):
         # Change state type to string when state is a list
@@ -95,6 +107,6 @@ class Actor:
             state = str(state)
 
         self.policy[state][action] += (
-                lr_actor * self.critic.get_TD_error() *
-                self.eligibility[state][action]
+            lr_actor * self.critic.get_TD_error() *
+            self.eligibility[state][action]
         )

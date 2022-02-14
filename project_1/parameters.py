@@ -3,17 +3,17 @@ game = 'the_gambler'  # 'the_gambler', 'towers_of_hanoi' or 'pole_balancing'
 
 # pivotal parameters
 
-episodes = 200
+episodes = 500
 max_steps = 300
-critic_type = "NN"  # "NN" or "table"
-neural_dim = (15, 20, 30, 5, 1)
+critic_type = "table"  # "NN" or "table"
+neural_dim = [9]
 lr_actor = 0.9  # alpha_a
 lr_critic = 0.9  # alpha_c
 eligibility_decay_actor = 0.9  # lambda_a
 eligibility_decay_critic = 0.9  # lambda_c
-discount_factor_actor = 0.5  # gamma_a
-discount_factor_critic = 0.5  # gamma_c
-epsilon = 0
+discount_factor_actor = 0.9  # gamma_a
+discount_factor_critic = 0.9  # gamma_c
+epsilon = 0.9
 display_variable = episodes - 1
 frame_delay = 3
 
@@ -31,4 +31,4 @@ discs = 4  # [2,6]
 
 # the gambler
 
-win_probability = 0.4  # [0, 1.0]
+win_probability = 0.6  # [0, 1.0]

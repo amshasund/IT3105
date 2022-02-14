@@ -27,6 +27,7 @@ class CriticTable:
         return self.V[state]
 
     def add_state(self, state):
+        #print("Add state", state)
         # Change state type to string when state is a list
         if isinstance(state, list):
             state = str(state)
@@ -41,18 +42,19 @@ class CriticTable:
 
         # For empty V
         if not self.V:
-            self.V[state] = round(random.uniform(0, 2), 3)
+            self.V[state] = round(random.uniform(0, 1), 3)
 
         # For state not in V
         elif state not in list(self.V.keys()):
-            self.V[state] = round(random.uniform(0, 2), 3)
+            self.V[state] = round(random.uniform(0, 1), 3)
 
     def set_TD_error(self, r, state, new_state):
         self.TD_error = (
-                r
-                + discount_factor_critic * self.get_value(new_state)
-                - self.get_value(state)
+            r
+            + discount_factor_critic * self.get_value(new_state)
+            - self.get_value(state)
         )
+        # print(self.TD_error)
 
     def set_eligibility(self, state, value=None):
         # Change state type to string when state is a list
@@ -60,14 +62,18 @@ class CriticTable:
             state = str(state)
         if value is None:
             self.eligibility[state] *= discount_factor_critic * \
-                                       eligibility_decay_critic
+                eligibility_decay_critic
         else:
             self.eligibility[state] = value
+
+    def reset_eligibilities(self):
+        self.eligibility.clear()
 
     def set_value_for_state(self, state):
         # Change state type to string when state is a list
         if isinstance(state, list):
             state = str(state)
 
+        # TODO: Round
         self.V[state] += lr_critic * self.get_TD_error() * \
-                         self.eligibility[state]
+            self.eligibility[state]

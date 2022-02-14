@@ -52,27 +52,31 @@ class PolePlayer:
     def get_reward(self):
         # For loosing
         if not self.env.is_state_legal():
-            self.reward = - 1000
+            self.reward = -100
 
         # TODO: Improve this
         # For winning
-        if self.num_pushes == max_steps:
-            self.reward = 1000
+        if self.num_pushes == 100:
+            self.reward = 1
+        elif self.num_pushes == 200:
+            self.reward = 2
+        elif self.num_pushes == max_steps:
+            self.reward = 100
 
         # For legal moving
         else:
-            self.reward = 1 * self.num_pushes // 10
+            self.reward = 0  # 1 * self.num_pushes // 10
 
         return self.reward
 
     def update_situation(self):
         sit = [
-            round(self.env.cart.location, 2),
-            round(self.env.cart.velocity, 2),
-            round(self.env.cart.acceleration, 2),
+            round(self.env.cart.location, 1),
+            round(self.env.cart.velocity, 1),
+            round(self.env.cart.acceleration, 1),
             round(self.env.pole.angle, 2),
-            round(self.env.pole.angular_velocity, 2),
-            round(self.env.pole.angular_acceleration, 2),
+            round(self.env.pole.angular_velocity, 1),
+            round(self.env.pole.angular_acceleration, 1),
         ]
         return sit
 
@@ -105,7 +109,7 @@ class PoleEnv:
         self.cart.acceleration = self.update_acceleration(bang_bang)
 
         self.pole.angular_velocity = (
-                self.pole.angular_velocity + self.tau * self.pole.angular_acceleration
+            self.pole.angular_velocity + self.tau * self.pole.angular_acceleration
         )
         self.cart.velocity = self.cart.velocity + self.tau * self.cart.acceleration
         self.pole.angle = self.pole.angle + self.tau * self.pole.angular_velocity
@@ -124,9 +128,10 @@ class PoleEnv:
         m_c = self.cart.mass
 
         return (
-                       g * np.sin(theta)
-                       + (np.cos(theta) * (-B - m_p * L * (d_theta ** 2) * np.sin(theta))) / (m_p + m_c)
-               ) / (L * ((4 / 3) - (m_p * (np.cos(theta)) ** 2) / (m_p + m_c)))
+            g * np.sin(theta)
+            + (np.cos(theta) * (-B - m_p * L *
+               (d_theta ** 2) * np.sin(theta))) / (m_p + m_c)
+        ) / (L * ((4 / 3) - (m_p * (np.cos(theta)) ** 2) / (m_p + m_c)))
 
     def update_acceleration(self, B):
         theta = self.pole.angle
@@ -137,9 +142,9 @@ class PoleEnv:
         m_c = self.cart.mass
 
         return (
-                       B + m_p * L * (d_theta ** 2 * np.sin(theta) -
-                                      dd_theta * np.cos(theta))
-               ) / (m_p + m_c)
+            B + m_p * L * (d_theta ** 2 * np.sin(theta) -
+                           dd_theta * np.cos(theta))
+        ) / (m_p + m_c)
 
     def is_state_legal(self):
         if -self.cart.max_location <= self.cart.location <= self.cart.max_location:

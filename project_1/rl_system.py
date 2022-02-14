@@ -1,6 +1,7 @@
 from parameters import (
     critic_type,
-    episodes
+    episodes,
+    epsilon
 )
 from rl_actor import Actor
 from rl_critic_nn import CriticNN
@@ -11,7 +12,7 @@ from simworld import SimWorld
 class Critic(
     CriticTable if critic_type == "table"
     else (CriticNN if critic_type == "NN"
-    else False)):
+          else False)):
     pass
 
 
@@ -22,13 +23,18 @@ class RLSystem:
         self.actor = Actor(self.critic, self.sim_world)
 
     def actor_critic_algorithm(self):
+        eps = epsilon
 
         for i in range(1, episodes + 1):
             print("--- Episode: " + str(i) + " ---")
+            # Reset eligibilities in actor and critic
+            if critic_type == "table":
+                self.critic.reset_eligibilities()
+            self.actor.reset_eligibilities()
             # Get S_init and its policy
             # TODO: critic or sim_world?
             state = self.critic.get_state()
-            action = self.actor.get_best_action(state)
+            action = self.actor.get_best_action(state, eps)
 
             # Initialize eligibility, policy and value func
             # for start state in actor and critic_table
@@ -61,7 +67,7 @@ class RLSystem:
                 game_over = self.sim_world.is_game_over()
                 if not game_over:
                     # Get new action
-                    new_action = self.actor.get_best_action(new_state)
+                    new_action = self.actor.get_best_action(new_state, eps)
                 else:
                     new_action = None
                 # Update actor's eligibility table
@@ -75,6 +81,7 @@ class RLSystem:
                     self.critic.set_eligibility(state, 1)
 
                 # TODO: training before forloop?
+                # TODO: do this after the episode with a list of all the states
                 # Should we still loop for actor?
                 if critic_type == "NN":
                     # fix state input format
@@ -92,3 +99,6 @@ class RLSystem:
                 action = new_action
 
             self.sim_world.reset_sim_world()
+
+            if eps > 0.1:
+                eps -= 1/episodes

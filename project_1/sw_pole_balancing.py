@@ -162,6 +162,8 @@ class PoleWorld:
         self.environment = PoleEnv()
         self.player = PolePlayer(self.environment)
         self.moves_per_episode = [0] * (episodes + 1)
+        self.best_episode = 0
+        self.best_angles = []
 
     def get_actions(self):
         return self.player.get_legal_push()
@@ -199,10 +201,18 @@ class PoleWorld:
         self.environment.reset_environment()
         self.player.reset_player()
 
-    def save_history(self, episode):
+    def save_history(self, episode, str_states):
         self.moves_per_episode[episode] = self.player.num_pushes
+        if self.moves_per_episode[episode] > self.moves_per_episode[self.best_episode]:
+            self.best_angles = []
+            print("New best episode")
+            self.best_episode = episode
+            for state in str_states:
+                s = list(state.split(","))
+                self.best_angles.append(float(s[3]))
 
-    def print_results(self, policy):
+    def print_end_results(self, policy):
+        # self.print_episode()
         # Plot: The Progression of Learning
         x = list(range(1, episodes + 1))
         y = self.moves_per_episode[1:]
@@ -215,4 +225,16 @@ class PoleWorld:
 
         plt.show()
 
-        # Plot: The most successful episode
+    # Plot: The most successful episode
+
+    def print_episode(self):
+        x = list(range(len(self.best_angles)))
+        y = self.best_angles
+
+        plt.plot(x, y)
+
+        plt.xlabel("Timesteps")
+        plt.ylabel("Angle (Radians)")
+        plt.title("Most successfull episode nr {}".format(self.best_episode))
+
+        plt.show()

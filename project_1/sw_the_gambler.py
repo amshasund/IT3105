@@ -120,7 +120,7 @@ class GamblerWorld:
         pass
 
     @staticmethod
-    def print_results(policy):
+    def print_end_results(policy):
         # Plot: State vs Bet
         states = list(range(0, 100 + 1))
         best_bets = [0]
@@ -142,3 +142,9 @@ class GamblerWorld:
         plt.ylabel("Bet")
         plt.title("Policy after episodes")
         plt.show()
+
+    def print_episode(self):
+        pass
+
+    def save_episode_for_print(self):
+        pass

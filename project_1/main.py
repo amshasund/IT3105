@@ -11,7 +11,7 @@ def main():
     rl_system.actor_critic_algorithm()
 
     # Print the result
-    rl_system.sim_world.print_results(rl_system.actor.policy)
+    rl_system.sim_world.print_end_results(rl_system.actor.policy)
 
 
 main()

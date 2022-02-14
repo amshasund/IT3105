@@ -1,7 +1,8 @@
 from parameters import (
     critic_type,
     episodes,
-    epsilon
+    epsilon,
+    display_variable
 )
 from rl_actor import Actor
 from rl_critic_nn import CriticNN
@@ -60,9 +61,6 @@ class RLSystem:
                     self.critic.add_state(new_state)
                 self.actor.add_state(new_state)
 
-                # TODO: Check this - does it save right
-                self.sim_world.save_history(i)
-
                 # Check game status after new state
                 game_over = self.sim_world.is_game_over()
                 if not game_over:
@@ -98,7 +96,12 @@ class RLSystem:
                 state = new_state
                 action = new_action
 
+            # TODO: Check this - does it save right
+            self.sim_world.save_history(i, self.actor.eligibility.keys())
             self.sim_world.reset_sim_world()
 
             if eps > 0.1:
                 eps -= 1/episodes
+
+            if i == display_variable:
+                self.sim_world.print_episode()

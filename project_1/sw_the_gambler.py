@@ -29,17 +29,15 @@ class GamblerPlayer:
     def get_reward(self):
         # For winning
         if self.units == 100:
-            self.reward = 100
+            self.reward = 1
 
         # For loosing
         elif self.units == 0:
-            self.reward = -100
+            self.reward = -1
 
         # For moving
         else:
-            self.reward = (
-                -1
-            )  # økte antall minus per steg # sjekke antall steg økte antall episoder
+            self.reward = 0
 
         return self.reward
 

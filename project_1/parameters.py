@@ -1,5 +1,5 @@
 # Select game
-game = 'the_gambler'  # 'the_gambler', 'towers_of_hanoi' or 'pole_balancing'
+game = 'pole_balancing'  # 'the_gambler', 'towers_of_hanoi' or 'pole_balancing'
 
 # pivotal parameters
 
@@ -7,8 +7,8 @@ episodes = 500
 max_steps = 300
 critic_type = "table"  # "NN" or "table"
 neural_dim = [9]
-lr_actor = 0.9  # alpha_a
-lr_critic = 0.9  # alpha_c
+lr_actor = 0.4  # alpha_a
+lr_critic = 0.4  # alpha_c
 eligibility_decay_actor = 0.9  # lambda_a
 eligibility_decay_critic = 0.9  # lambda_c
 discount_factor_actor = 0.9  # gamma_a

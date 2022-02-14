@@ -52,7 +52,7 @@ class PolePlayer:
     def get_reward(self):
         # For loosing
         if not self.env.is_state_legal():
-            self.reward = - 100
+            self.reward = - 1000
 
         # TODO: Improve this
         # For winning
@@ -61,7 +61,7 @@ class PolePlayer:
 
         # For legal moving
         else:
-            self.reward = 1 * self.num_pushes
+            self.reward = 1 * self.num_pushes // 10
 
         return self.reward
 
@@ -110,7 +110,7 @@ class PoleEnv:
         self.cart.velocity = self.cart.velocity + self.tau * self.cart.acceleration
         self.pole.angle = self.pole.angle + self.tau * self.pole.angular_velocity
         self.cart.location = self.cart.location + self.tau * self.cart.velocity
-        self.tau += timestep
+        # self.tau += timestep
 
     def get_force_options(self):
         return [-self.force, self.force]
@@ -148,7 +148,6 @@ class PoleEnv:
         return False
 
     def reset_environment(self):
-        self.tau = timestep
         self.pole.reset_pole()
         self.cart.reset_cart()
 
@@ -181,13 +180,10 @@ class PoleWorld:
     def is_game_over(self):
         # Pole out of balance
         if not self.environment.is_state_legal():
-            print("Pole out of balance")
-            print("Num timesteps: " + str(self.player.num_pushes))
-            print("Tau" + str(self.environment.tau))
             return True
 
         # Maximum timesteps reached
-        elif self.environment.tau == max_steps * timestep:
+        elif self.player.num_pushes == max_steps:
             print("Max timesteps reached!")
             return True
 

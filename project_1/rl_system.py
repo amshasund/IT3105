@@ -59,12 +59,11 @@ class RLSystem:
 
                 # Check game status after new state
                 game_over = self.sim_world.is_game_over()
-                if game_over:
-                    break
-
-                # Get new action
-                new_action = self.actor.get_best_action(new_state)
-
+                if not game_over:
+                    # Get new action
+                    new_action = self.actor.get_best_action(new_state)
+                else:
+                    new_action = None
                 # Update actor's eligibility table
                 self.actor.set_eligibility(state, action, 1)
 
@@ -78,6 +77,7 @@ class RLSystem:
                 # TODO: training before forloop?
                 # Should we still loop for actor?
                 if critic_type == "NN":
+                    # fix state input format
                     self.critic.train_model(reward, state, new_state)
 
                 for s in self.actor.eligibility.keys():
@@ -90,4 +90,5 @@ class RLSystem:
 
                 state = new_state
                 action = new_action
+
             self.sim_world.reset_sim_world()

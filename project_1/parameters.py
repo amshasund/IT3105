@@ -1,11 +1,11 @@
 # Select game
-game = 'pole_balancing'  # 'the_gambler', 'towers_of_hanoi' or 'pole_balancing'
+game = 'the_gambler'  # 'the_gambler', 'towers_of_hanoi' or 'pole_balancing'
 
 # pivotal parameters
 
 episodes = 200
 max_steps = 300
-critic_type = "table"  # "NN" or "table"
+critic_type = "NN"  # "NN" or "table"
 neural_dim = (15, 20, 30, 5, 1)
 lr_actor = 0.9  # alpha_a
 lr_critic = 0.9  # alpha_c

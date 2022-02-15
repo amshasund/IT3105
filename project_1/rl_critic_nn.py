@@ -53,30 +53,37 @@ class CriticNN:
 
     def set_TD_error(self, reward, state, new_state, game_over):
         self.TD_error = reward + discount_factor_critic * \
-            self.get_value(new_state) * (not game_over) - self.get_value(state)
+                        self.get_value(new_state) * (not game_over) - self.get_value(state)
         # print("Value: ", self.get_value(state),"TD: ", self.get_TD_error())
 
     @staticmethod
     def state_to_binary(state):
+        """ Returns a binary representation of the state
+            ex: (4,2,1) -> '421' -> 421 -> 110100101 """
         binary_state = []
+
+        # For state being tuple -> Towers of Hanoi or Pole Balancing
         if isinstance(state, tuple):
             for element in state:
+
+                # For touple of touples -> Towers of Hanoi
                 if isinstance(element, tuple):
                     if len(element) == 0:
                         binary_state.append(0)
                     else:
-                        # ex: [4,2,1] -> '421' -> 421 -> 110100101
-                        string = ""
-                        string.join(str(element))
+                        values_string = ''.join(map(str, element))
                         binary_state.append(
-                            int(np.binary_repr(int(string), 8)))
+                            int(np.binary_repr(int(values_string), 8)))
+
+                # For tuples of lists -> Pole Balancing
                 else:
                     binary_state.append(int(np.binary_repr(int(element), 8)))
 
+        # For state being an int -> The Gambler
         else:
             binary_state.append(int(np.binary_repr(int(state), 8)))
-
-        return np.array(binary_state).reshape(1, -1)
+        # .reshape(1, -1) does not work for towers of hanoi
+        return np.array(binary_state)
 
     def binary_to_state(self, binary_state):
         state = []

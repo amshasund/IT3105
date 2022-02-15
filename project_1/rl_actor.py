@@ -1,5 +1,7 @@
 import random
 
+import tensorflow as tf
+
 from parameters import (
     lr_actor,
     discount_factor_actor,
@@ -42,11 +44,16 @@ class Actor:
                 )
             else:
                 state_actions = self.policy[state]
-                # TODO: shorten this?
-                highest_value = max(state_actions.values())
+
+                for values in state_actions:
+                    print("b", values)
+                    print("a", int(tf.reduce_max(values)))
+
+                highest_value = tf.reduce_max(state_actions.values())
                 best_actions = []
                 for key, value in state_actions.items():
-                    if value == highest_value:
+                    if int(value) == highest_value:
+                        print("Int(value):" + str(int(value)))
                         best_actions.append(key)
                 return random.choice(best_actions)
 
@@ -71,7 +78,7 @@ class Actor:
 
         if value is None:
             self.eligibility[state][action] *= (
-                discount_factor_actor * eligibility_decay_actor
+                    discount_factor_actor * eligibility_decay_actor
             )
         else:
             self.eligibility[state][action] = value
@@ -83,6 +90,6 @@ class Actor:
     def set_policy(self, state, action):
 
         self.policy[state][action] += (
-            lr_actor * self.critic.get_TD_error() *
-            self.eligibility[state][action]
+                lr_actor * self.critic.get_TD_error() *
+                self.eligibility[state][action]
         )

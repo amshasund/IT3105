@@ -114,7 +114,7 @@ class GamblerWorld:
     def reset_sim_world(self):
         self.player.set_start_units()
 
-    def save_history(self, episode):
+    def save_history(self, episode, str_states):
         pass
 
     @staticmethod

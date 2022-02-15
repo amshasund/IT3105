@@ -40,18 +40,21 @@ class CriticTable:
         elif state not in list(self.eligibility.keys()):
             self.eligibility[state] = 0
 
-        # For empty V
+        # For empty V# if not state in self.V
         if not self.V:
-            self.V[state] = round(random.uniform(0, 1), 3)
+            # TODO: litt høye verdier -> 0 og 0.01 (har litt med reward å gjøre)
+            self.V[state] = random.uniform(0, 0.01)
 
         # For state not in V
         elif state not in list(self.V.keys()):
-            self.V[state] = round(random.uniform(0, 1), 3)
+            # TODO: Not round
+            self.V[state] = random.uniform(0, 0.01)
 
-    def set_TD_error(self, r, state, new_state):
+    # Ta med is game_over inn i TD error og if true sett value : 0
+    def set_TD_error(self, r, state, new_state, game_over):
         self.TD_error = (
                 r
-                + discount_factor_critic * self.get_value(new_state)
+                + discount_factor_critic * self.get_value(new_state) * (not game_over)
                 - self.get_value(state)
         )
         # print(self.TD_error)
@@ -61,8 +64,9 @@ class CriticTable:
         if isinstance(state, list):
             state = str(state)
         if value is None:
-            self.eligibility[state] *= round(discount_factor_critic * \
-                                             eligibility_decay_critic, 3)
+            # TODO: Not round
+            self.eligibility[state] *= discount_factor_critic * \
+                                       eligibility_decay_critic
         else:
             self.eligibility[state] = value
 
@@ -74,6 +78,6 @@ class CriticTable:
         if isinstance(state, list):
             state = str(state)
 
-        # TODO: Round
-        self.V[state] += round(lr_critic * self.get_TD_error() * \
-                               self.eligibility[state], 3)
+        # TODO: Not round
+        self.V[state] += lr_critic * self.get_TD_error() * \
+                         self.eligibility[state]

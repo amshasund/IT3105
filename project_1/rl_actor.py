@@ -19,7 +19,6 @@ class Actor:
         if isinstance(state, list):
             state = str(state)
 
-        # TODO: Random with epsilon probability
         random_action = random.choices(
             population=[False, True],
             weights=[1 - epsilon, epsilon],
@@ -92,9 +91,9 @@ class Actor:
             state = str(state)
 
         if value is None:
-            self.eligibility[state][action] *= round((
-                discount_factor_actor * eligibility_decay_actor
-            ), 3)
+            self.eligibility[state][action] *= (
+                    discount_factor_actor * eligibility_decay_actor
+            )
         else:
             self.eligibility[state][action] = value
 
@@ -106,7 +105,7 @@ class Actor:
         if isinstance(state, list):
             state = str(state)
 
-        self.policy[state][action] += round((
-            lr_actor * self.critic.get_TD_error() *
-            self.eligibility[state][action]
-        ), 3)
+        self.policy[state][action] += (
+                lr_actor * self.critic.get_TD_error() *
+                self.eligibility[state][action]
+        )

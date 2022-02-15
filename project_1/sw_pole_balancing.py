@@ -57,26 +57,28 @@ class PolePlayer:
         # TODO: Improve this
         # For winning
         if self.num_pushes == 100:
-            self.reward = 1
-        elif self.num_pushes == 200:
             self.reward = 2
+        elif self.num_pushes == 200:
+            self.reward = 3
         elif self.num_pushes == max_steps:
             self.reward = 5
 
         # For legal moving
         else:
-            self.reward = 0  # 1 * self.num_pushes // 10
+            self.reward = 1  # 1 * self.num_pushes // 10
 
         return self.reward
 
     def update_situation(self):
+        # Tuple can be used as a key
+        # Try with booleans
         sit = [
-            round(self.env.cart.location, 1),
-            round(self.env.cart.velocity, 1),
-            round(self.env.cart.acceleration, 1),
+            round(self.env.cart.location, 2),
+            round(self.env.cart.velocity, 2),
+            # round(self.env.cart.acceleration, 2),
             round(self.env.pole.angle, 2),
-            round(self.env.pole.angular_velocity, 1),
-            round(self.env.pole.angular_acceleration, 1),
+            round(self.env.pole.angular_velocity, 2),
+            # round(self.env.pole.angular_acceleration, 2),
         ]
         return sit
 
@@ -109,12 +111,11 @@ class PoleEnv:
         self.cart.acceleration = self.update_acceleration(bang_bang)
 
         self.pole.angular_velocity = (
-            self.pole.angular_velocity + self.tau * self.pole.angular_acceleration
+                self.pole.angular_velocity + self.tau * self.pole.angular_acceleration
         )
         self.cart.velocity = self.cart.velocity + self.tau * self.cart.acceleration
         self.pole.angle = self.pole.angle + self.tau * self.pole.angular_velocity
         self.cart.location = self.cart.location + self.tau * self.cart.velocity
-        # self.tau += timestep
 
     def get_force_options(self):
         return [-self.force, self.force]
@@ -128,10 +129,10 @@ class PoleEnv:
         m_c = self.cart.mass
 
         return (
-            g * np.sin(theta)
-            + (np.cos(theta) * (-B - m_p * L *
-                                (d_theta ** 2) * np.sin(theta))) / (m_p + m_c)
-        ) / (L * ((4 / 3) - (m_p * (np.cos(theta)) ** 2) / (m_p + m_c)))
+                       g * np.sin(theta)
+                       + (np.cos(theta) * (-B - m_p * L *
+                                           (d_theta ** 2) * np.sin(theta))) / (m_p + m_c)
+               ) / (L * ((4 / 3) - (m_p * (np.cos(theta)) ** 2) / (m_p + m_c)))
 
     def update_acceleration(self, B):
         theta = self.pole.angle
@@ -142,9 +143,9 @@ class PoleEnv:
         m_c = self.cart.mass
 
         return (
-            B + m_p * L * (d_theta ** 2 * np.sin(theta) -
-                           dd_theta * np.cos(theta))
-        ) / (m_p + m_c)
+                       B + m_p * L * (d_theta ** 2 * np.sin(theta) -
+                                      dd_theta * np.cos(theta))
+               ) / (m_p + m_c)
 
     def is_state_legal(self):
         if -self.cart.max_location <= self.cart.location <= self.cart.max_location:
@@ -209,7 +210,7 @@ class PoleWorld:
             self.best_episode = episode
             for state in str_states:
                 s = list(state.split(","))
-                self.best_angles.append(float(s[3]))
+                self.best_angles.append(float(s[2]))
 
     def print_end_results(self, policy):
         # self.print_episode()

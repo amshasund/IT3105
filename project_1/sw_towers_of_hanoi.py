@@ -1,9 +1,10 @@
-from numpy import str_
-from parameters import discs, pegs, max_steps, episodes, frame_delay
-import copy
-import matplotlib.pyplot as plt
-import time
 import ast
+import copy
+import time
+
+import matplotlib.pyplot as plt
+
+from parameters import discs, pegs, max_steps, episodes, frame_delay
 
 
 class TowersPlayer:
@@ -16,13 +17,14 @@ class TowersPlayer:
         return self.env.game_board
 
     def get_reward(self):
-        if self.num_moves >= max_steps:
-            self.reward = -20
+        # TODO: Try to give more minus when higher num_moves
+        # if self.num_moves >= max_steps:
+        # self.reward = -20
+        # Må håndtere tid
 
-        elif self.is_game_over():
+        if self.is_game_over() and not self.num_moves >= max_steps:
             self.reward = 20
 
-        # TODO: Try to give more minus when higher num_moves
         else:
             self.reward = -1
 
@@ -60,6 +62,7 @@ class TowersEnv:
         self.game_board = self.create_game_board()
 
     def update_game_board(self, disc_nr, peg_nr):
+        self.game_board = copy.deepcopy(self.game_board)
         # Remove the disc from a peg
         for peg in self.game_board:
             if peg:
@@ -92,9 +95,9 @@ class TowersEnv:
                         if next_top_disc == 0:
                             # save actions as integer "top_disc" + "next_peg_nr"
                             # ex: move disc 5 to peg 3: options.append(53)
-                            options.append(int(str(top_disc)+str(next_peg_nr)))
+                            options.append(int(str(top_disc) + str(next_peg_nr)))
                         elif top_disc < next_top_disc:
-                            options.append(int(str(top_disc)+str(next_peg_nr)))
+                            options.append(int(str(top_disc) + str(next_peg_nr)))
         return options
 
     @staticmethod
@@ -132,7 +135,7 @@ class TowersEnv:
                     string += '{:^10s}'.format(peg[i]
                                                * "*")
             string += "\n"
-        string += '{:^10s}'.format("'")*len(game_board)
+        string += '{:^10s}'.format("'") * len(game_board)
         print(string)
 
 

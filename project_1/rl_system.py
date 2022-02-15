@@ -1,3 +1,5 @@
+import random
+
 from parameters import (
     critic_type,
     episodes,
@@ -9,11 +11,13 @@ from rl_critic_nn import CriticNN
 from rl_critic_table import CriticTable
 from simworld import SimWorld
 
+random.seed(1)
+
 
 class Critic(
     CriticTable if critic_type == "table"
     else (CriticNN if critic_type == "NN"
-          else False)):
+    else False)):
     pass
 
 
@@ -27,14 +31,14 @@ class RLSystem:
         eps = epsilon
 
         for i in range(1, episodes + 1):
-            #print("--- Episode: " + str(i) + " ---")
+            # print("--- Episode: " + str(i) + " ---")
             # Reset eligibilities in actor and critic
             if critic_type == "table":
                 self.critic.reset_eligibilities()
+
             self.actor.reset_eligibilities()
             # Get S_init and its policy
-            # TODO: critic or sim_world?
-            state = self.critic.get_state()
+            state = self.sim_world.get_state()
             action = self.actor.get_best_action(state, eps)
 
             # Initialize eligibility, policy and value func
@@ -72,7 +76,7 @@ class RLSystem:
                 self.actor.set_eligibility(state, action, 1)
 
                 # Update TD error
-                self.critic.set_TD_error(reward, state, new_state)
+                self.critic.set_TD_error(reward, state, new_state, game_over)
 
                 # Update critic's eligibility table
                 if critic_type == "table":
@@ -100,8 +104,12 @@ class RLSystem:
             self.sim_world.save_history(i, self.actor.eligibility.keys())
             self.sim_world.reset_sim_world()
 
+            # TODO: exp instead of linear
             if eps > 0.1:
-                eps -= 1/episodes
+                eps -= 1 / episodes
 
+            # if i > 0.9 * episodes:
+            # eps = 0
+            # print("Epsilon: " + str(eps))
             if i == display_variable:
                 self.sim_world.print_episode()

@@ -4,8 +4,8 @@ game = 'towers_of_hanoi'  # 'the_gambler', 'towers_of_hanoi' or 'pole_balancing'
 # pivotal parameters
 
 episodes = 200
-max_steps = 300
-critic_type = "table"  # "NN" or "table"
+max_steps = 100
+critic_type = "NN"  # "NN" or "table"
 neural_dim = [9]
 lr_actor = 0.9  # alpha_a
 lr_critic = 0.3  # alpha_c
@@ -15,7 +15,7 @@ discount_factor_actor = 0.9  # gamma_a
 discount_factor_critic = 0.9  # gamma_c
 epsilon = 0.9
 display_variable = episodes - 1
-frame_delay = 3
+frame_delay = 1
 
 # pole balancing
 

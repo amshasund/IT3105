@@ -14,10 +14,10 @@ def main():
     rl_system.sim_world.environment.get_options()
 
     # The Game Loop
-    # rl_system.actor_critic_algorithm()
+    rl_system.actor_critic_algorithm()
 
     # Print the result
-    # rl_system.sim_world.print_end_results(rl_system.actor.policy)
+    rl_system.sim_world.print_end_results(rl_system.actor.policy)
 
 
 main()

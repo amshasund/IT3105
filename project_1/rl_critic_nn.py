@@ -5,7 +5,8 @@ from parameters import (
     lr_critic,
     discount_factor_critic,
     neural_dim,
-    game
+    game,
+    pegs
 )
 
 
@@ -22,7 +23,7 @@ class CriticNN:
         if game == "the_gambler":
             return 1
         elif game == "towers_of_hanoi":
-            return 4
+            return pegs
         elif game == "pole_balancing":
             return 6
         else:
@@ -76,7 +77,17 @@ class CriticNN:
         binary_state = []
         if isinstance(state, list):
             for element in state:
-                binary_state.append(int(np.binary_repr(int(element), 8)))
+                if isinstance(element, list):
+                    if len(element) == 0:
+                        binary_state.append(0)
+                    else:
+                        # ex: [4,2,1] -> '421' -> 421 -> 110100101
+                        string = ""
+                        string.join(element)
+                        binary_state.append(
+                            int(np.binary_repr(int(string), 8)))
+                else:
+                    binary_state.append(int(np.binary_repr(int(element), 8)))
         else:
             binary_state.append(int(np.binary_repr(int(state), 8)))
         return np.array(binary_state).reshape(1, -1)

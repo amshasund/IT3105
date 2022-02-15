@@ -27,7 +27,7 @@ class RLSystem:
         eps = epsilon
 
         for i in range(1, episodes + 1):
-            print("--- Episode: " + str(i) + " ---")
+            #print("--- Episode: " + str(i) + " ---")
             # Reset eligibilities in actor and critic
             if critic_type == "table":
                 self.critic.reset_eligibilities()

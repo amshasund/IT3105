@@ -63,16 +63,16 @@ class Actor:
         # For empty eligibility
         if not self.eligibility:
             self.eligibility[state] = dict()
-            all_actions_for_state = \
-                self.sim_world.get_possible_actions_from_state(state)
+            all_actions_for_state = self.sim_world.get_possible_actions_from_state(
+                state)
             for a in all_actions_for_state:
                 self.eligibility[state][a] = 0
 
         # For state not in eligibility
         elif state not in list(self.eligibility.keys()):
             self.eligibility[state] = dict()
-            all_actions_for_state = \
-                self.sim_world.get_possible_actions_from_state(state)
+            all_actions_for_state = self.sim_world.get_possible_actions_from_state(
+                state)
 
             for a in all_actions_for_state:
                 self.eligibility[state][a] = 0
@@ -93,7 +93,7 @@ class Actor:
 
         if value is None:
             self.eligibility[state][action] *= round((
-                    discount_factor_actor * eligibility_decay_actor
+                discount_factor_actor * eligibility_decay_actor
             ), 3)
         else:
             self.eligibility[state][action] = value
@@ -107,6 +107,6 @@ class Actor:
             state = str(state)
 
         self.policy[state][action] += round((
-                lr_actor * self.critic.get_TD_error() *
-                self.eligibility[state][action]
+            lr_actor * self.critic.get_TD_error() *
+            self.eligibility[state][action]
         ), 3)

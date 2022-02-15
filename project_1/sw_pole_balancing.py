@@ -109,7 +109,7 @@ class PoleEnv:
         self.cart.acceleration = self.update_acceleration(bang_bang)
 
         self.pole.angular_velocity = (
-                self.pole.angular_velocity + self.tau * self.pole.angular_acceleration
+            self.pole.angular_velocity + self.tau * self.pole.angular_acceleration
         )
         self.cart.velocity = self.cart.velocity + self.tau * self.cart.acceleration
         self.pole.angle = self.pole.angle + self.tau * self.pole.angular_velocity
@@ -128,10 +128,10 @@ class PoleEnv:
         m_c = self.cart.mass
 
         return (
-                       g * np.sin(theta)
-                       + (np.cos(theta) * (-B - m_p * L *
-                                           (d_theta ** 2) * np.sin(theta))) / (m_p + m_c)
-               ) / (L * ((4 / 3) - (m_p * (np.cos(theta)) ** 2) / (m_p + m_c)))
+            g * np.sin(theta)
+            + (np.cos(theta) * (-B - m_p * L *
+                                (d_theta ** 2) * np.sin(theta))) / (m_p + m_c)
+        ) / (L * ((4 / 3) - (m_p * (np.cos(theta)) ** 2) / (m_p + m_c)))
 
     def update_acceleration(self, B):
         theta = self.pole.angle
@@ -142,9 +142,9 @@ class PoleEnv:
         m_c = self.cart.mass
 
         return (
-                       B + m_p * L * (d_theta ** 2 * np.sin(theta) -
-                                      dd_theta * np.cos(theta))
-               ) / (m_p + m_c)
+            B + m_p * L * (d_theta ** 2 * np.sin(theta) -
+                           dd_theta * np.cos(theta))
+        ) / (m_p + m_c)
 
     def is_state_legal(self):
         if -self.cart.max_location <= self.cart.location <= self.cart.max_location:
@@ -175,7 +175,7 @@ class PoleWorld:
         pass
 
     def get_possible_actions_from_state(self, state):
-        # in this game, state equals amount of units
+        # all actions are legal for all states
         return self.get_actions()
 
     def do_action(self, action):

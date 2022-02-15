@@ -92,9 +92,11 @@ class TowersEnv:
                         if next_top_disc == 0:
                             # save actions as integer "top_disc" + "next_peg_nr"
                             # ex: move disc 5 to peg 3: options.append(53)
-                            options.append(int(str(top_disc) + str(next_peg_nr)))
+                            options.append(
+                                int(str(top_disc) + str(next_peg_nr)))
                         elif top_disc < next_top_disc:
-                            options.append(int(str(top_disc) + str(next_peg_nr)))
+                            options.append(
+                                int(str(top_disc) + str(next_peg_nr)))
         return options
 
     @staticmethod
@@ -113,13 +115,11 @@ class TowersEnv:
 
     def print_game_board(self, state=None):
         if state:
-            game_board = state
+            game_board = list(list(s) for s in state)
         else:
             game_board = copy.deepcopy(self.game_board)
         print(game_board)
         for peg in game_board:
-            if isinstance(peg, str):
-                peg = list(peg.split(","))
             while len(peg) < discs:
                 peg.append(0)
             peg.reverse()
@@ -146,7 +146,9 @@ class TowersWorld:
         return self.player.get_legal_options()
 
     def get_state(self):
-        return self.player.get_game_board()
+        state = copy.deepcopy(self.player.get_game_board())
+        state = tuple(tuple(s) for s in state)
+        return state
 
     def get_all_possible_states(self):
         pass
@@ -185,8 +187,8 @@ class TowersWorld:
     def print_episode(self):
         max = 20
         counter = 0
-        for state_str in self.states_for_current_episode:
-            state = ast.literal_eval(state_str)
+        for state_tuple in self.states_for_current_episode:
+            state = list(state_tuple)
             if counter < max:
                 self.environment.print_game_board(state)
                 counter += 1

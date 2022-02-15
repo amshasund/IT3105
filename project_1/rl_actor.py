@@ -14,11 +14,8 @@ class Actor:
         self.policy = dict()
         self.eligibility = dict()
 
+    # TODO: Send in possible_actions instead of using sim_world
     def get_best_action(self, state, epsilon):
-        # Change state type to string when state is a list
-        if isinstance(state, list):
-            state = str(state)
-
         random_action = random.choices(
             population=[False, True],
             weights=[1 - epsilon, epsilon],
@@ -53,10 +50,8 @@ class Actor:
                         best_actions.append(key)
                 return random.choice(best_actions)
 
+    # TODO: Send in possible_actions instead of using sim_world
     def add_state(self, state):
-        # Change state type to string when state is a list
-        if isinstance(state, list):
-            state = str(state)
 
         # Add state to eligibility
         # For empty eligibility or  for state not in eligibility
@@ -73,13 +68,10 @@ class Actor:
             self.policy[state] = dict.fromkeys(self.eligibility[state], 0)
 
     def set_eligibility(self, state, action, value=None):
-        # Change state type to string when state is a list
-        if isinstance(state, list):
-            state = str(state)
 
         if value is None:
             self.eligibility[state][action] *= (
-                    discount_factor_actor * eligibility_decay_actor
+                discount_factor_actor * eligibility_decay_actor
             )
         else:
             self.eligibility[state][action] = value
@@ -87,12 +79,10 @@ class Actor:
     def reset_eligibilities(self):
         self.eligibility.clear()
 
+    # TODO: send in TD_error instead of importing critic
     def set_policy(self, state, action):
-        # Change state type to string when state is a list
-        if isinstance(state, list):
-            state = str(state)
 
         self.policy[state][action] += (
-                lr_actor * self.critic.get_TD_error() *
-                self.eligibility[state][action]
+            lr_actor * self.critic.get_TD_error() *
+            self.eligibility[state][action]
         )

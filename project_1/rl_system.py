@@ -24,7 +24,7 @@ class Critic(
 class RLSystem:
     def __init__(self):
         self.sim_world = SimWorld()
-        self.critic = Critic(self.sim_world)
+        self.critic = Critic()
         self.actor = Actor(self.critic, self.sim_world)
 
     def get_num_input_nodes(self):

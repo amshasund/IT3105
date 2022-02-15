@@ -9,8 +9,7 @@ from parameters import (
 
 
 class CriticNN:
-    def __init__(self, sim_world):
-        self.sim_world = sim_world
+    def __init__(self):
         self.num_input_nodes = 0
         self.nn_model = None
         self.TD_error = 0
@@ -49,29 +48,26 @@ class CriticNN:
         state_bin = self.state_to_binary(state)
         return self.nn_model(state_bin)
 
-    def get_state(self):
-        return self.sim_world.get_state()
-
     def get_TD_error(self):
         return self.TD_error
 
     def set_TD_error(self, reward, state, new_state, game_over):
         self.TD_error = reward + discount_factor_critic * \
-                        self.get_value(new_state) * (not game_over) - self.get_value(state)
+            self.get_value(new_state) * (not game_over) - self.get_value(state)
         # print("Value: ", self.get_value(state),"TD: ", self.get_TD_error())
 
     @staticmethod
     def state_to_binary(state):
         binary_state = []
-        if isinstance(state, list):
+        if isinstance(state, tuple):
             for element in state:
-                if isinstance(element, list):
+                if isinstance(element, tuple):
                     if len(element) == 0:
                         binary_state.append(0)
                     else:
                         # ex: [4,2,1] -> '421' -> 421 -> 110100101
                         string = ""
-                        string.join(element)
+                        string.join(str(element))
                         binary_state.append(
                             int(np.binary_repr(int(string), 8)))
                 else:

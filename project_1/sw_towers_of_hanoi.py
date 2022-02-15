@@ -1,5 +1,3 @@
-import numpy as np
-
 from parameters import discs, pegs
 
 
@@ -14,13 +12,13 @@ class TowersPlayer:
 
     def get_reward(self):
         # TODO: -1 per and 100 for win?
-        return 15 - self.num_moves
+        return 0
 
     def move_disc(self, disc_nr, peg_nr):
         self.env.update_game_board(disc_nr, peg_nr)
 
     def set_start_game_board(self):
-        self.env.create_game_board()
+        self.env.reset_environment()
 
     def get_legal_options(self):
         return self.env.get_options()
@@ -29,31 +27,60 @@ class TowersPlayer:
 class TowersEnv:
     def __init__(self):
         self.game_board = self.create_game_board()
-        self.print_game_board()
 
     def reset_environment(self):
-        self.create_game_board()
+        self.game_board = self.create_game_board()
 
     def update_game_board(self, disc_nr, peg_nr):
-        result = np.where(self.game_board == disc_nr)
-        self.game_board
+        # Remove the disc from a peg
+        for peg in self.game_board:
+            if peg:
+                if peg[-1] == disc_nr:
+                    peg.pop()
+
+        # Add the disc to a new peg
+        self.game_board[peg_nr].append(disc_nr)
 
     def get_options(self):
-        pass
+        options = []
+        top_discs = []
+
+        # Find last disc or element in every peg
+        for peg in self.game_board:
+            if not len(peg) == 0:
+                top_discs.append(peg[-1])
+            else:
+                top_discs.append(0)
+
+        # Find possible pegs for all top discs
+        for peg_nr, top_disc in enumerate(top_discs):
+            if top_disc != 0:
+                for next_peg_nr, next_top_disc in enumerate(top_discs):
+                    if not peg_nr == next_peg_nr:
+                        if next_top_disc == 0:
+                            options.append((top_disc, next_peg_nr))
+                        elif top_disc < next_top_disc:
+                            options.append((top_disc, next_peg_nr))
+        return options
 
     @staticmethod
     def create_game_board():
-        # Create gameboard with the shape from numbers of pegs and discs
-        game_board = np.zeros((discs, pegs), dtype=int)
-        # Sett all discs in first peg on game board
-        for i in range(discs):
-            game_board[i][0] = i + 1
+        # Create gameboard as a list of lists
+        game_board = []
+
+        # Add all disc to the first peg
+        peg_1 = list(range(discs, 0, -1))
+        game_board.append(peg_1)
+
+        # Add the rest of the pegs as empty lists
+        for i in range(pegs - 1):
+            game_board.append([])
         return game_board
 
     def print_game_board(self):
         game_board = self.game_board
-        print('\n'.join(['\t'.join([(cell*"*" if cell != 0 else '|')
-              for cell in row]) for row in game_board]))
+        print('\n'.join(['\t'.join([(cell * "*" if cell != 0 else '|')
+                                    for cell in row]) for row in game_board]))
 
 
 class TowersWorld:

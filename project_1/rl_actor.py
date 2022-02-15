@@ -59,30 +59,17 @@ class Actor:
             state = str(state)
 
         # Add state to eligibility
-        # For empty eligibility
-        if not self.eligibility:
+        # For empty eligibility or  for state not in eligibility
+        if state not in self.eligibility:
             self.eligibility[state] = dict()
             all_actions_for_state = self.sim_world.get_possible_actions_from_state(
                 state)
-            for a in all_actions_for_state:
-                self.eligibility[state][a] = 0
-
-        # For state not in eligibility
-        elif state not in list(self.eligibility.keys()):
-            self.eligibility[state] = dict()
-            all_actions_for_state = self.sim_world.get_possible_actions_from_state(
-                state)
-
             for a in all_actions_for_state:
                 self.eligibility[state][a] = 0
 
         # Add state to policy
-        # For empty policy
-        if not self.policy:
-            self.policy[state] = dict.fromkeys(self.eligibility[state], 0)
-
-        # For state not in policy
-        elif state not in list(self.policy.keys()):
+        # For empty policy or state not in policy
+        if state not in self.policy:
             self.policy[state] = dict.fromkeys(self.eligibility[state], 0)
 
     def set_eligibility(self, state, action, value=None):

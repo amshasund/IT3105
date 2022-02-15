@@ -17,10 +17,7 @@ class TowersPlayer:
         return self.env.game_board
 
     def get_reward(self):
-        # TODO: Try to give more minus when higher num_moves
-        # if self.num_moves >= max_steps:
-        # self.reward = -20
-        # Må håndtere tid
+        # TODO: Må håndtere tid
 
         if self.is_game_over() and not self.num_moves >= max_steps:
             self.reward = 20
@@ -81,7 +78,7 @@ class TowersEnv:
             game_board = self.game_board
 
         # Find last disc or element in every peg
-        for peg in self.game_board:
+        for peg in game_board:
             if not len(peg) == 0:
                 top_discs.append(peg[-1])
             else:
@@ -136,7 +133,6 @@ class TowersEnv:
                                                * "*")
             string += "\n"
         string += '{:^10s}'.format("'") * len(game_board)
-        print(string)
 
 
 class TowersWorld:
@@ -181,11 +177,9 @@ class TowersWorld:
         y = self.moves_per_episode[1:]
 
         plt.plot(x, y)
-
         plt.xlabel("Episode")
         plt.ylabel("Number of Moves")
         plt.title("The Progression of Learning")
-
         plt.show()
 
     def print_episode(self):

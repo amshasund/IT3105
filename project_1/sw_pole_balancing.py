@@ -30,7 +30,7 @@ class Pole:
         self.angular_acceleration = 0
 
     def set_start_angle(self):
-        return random.uniform(-self.max_angle, self.max_angle)
+        return round(random.uniform(-self.max_angle, self.max_angle), 2)
 
     def reset_pole(self):
         self.angle = self.set_start_angle()
@@ -70,21 +70,34 @@ class PolePlayer:
         return self.reward
 
     def update_situation(self):
-        # Tuple can be used as a key
-        # Try with booleans
-        sit = [
-            round(self.env.cart.location, 2),
-            round(self.env.cart.velocity, 2),
-            # round(self.env.cart.acceleration, 2),
-            round(self.env.pole.angle, 2),
-            round(self.env.pole.angular_velocity, 2),
-            # round(self.env.pole.angular_acceleration, 2),
-        ]
-        return sit
+        # TODO: Try with booleans
+        location = True if self.env.cart.location > 0 else False
+        angle = True if self.env.pole.angle > 0 else False
+        angle_vel = True if self.env.pole.angular_velocity > 0 else False
+        location_vel = True if self.env.cart.velocity > 0 else False
+
+        situation = [location,
+                     location_vel,
+                     angle,
+                     angle_vel
+                     ]
+        
+        # situation = [
+        #   round(self.env.cart.location, 2),
+        #  round(self.env.cart.velocity, 2),
+        # round(self.env.pole.angle, 2),
+        # round(self.env.pole.angular_velocity, 2),
+        # ]
+        return situation
 
     def add_force(self, action):
+        # Add force to the environment
         self.env.update_state(action)
+
+        # Update the players state
         self.update_situation()
+
+        # Increase number of pushes
         self.num_pushes += 1
 
     def get_legal_push(self):
@@ -206,36 +219,29 @@ class PoleWorld:
         self.moves_per_episode[episode] = self.player.num_pushes
         if self.moves_per_episode[episode] > self.moves_per_episode[self.best_episode]:
             self.best_angles = []
-            print("New best episode")
             self.best_episode = episode
             for state in str_states:
                 s = list(state.split(","))
-                self.best_angles.append(float(s[2]))
+                self.best_angles.append(bool(s[1].replace("]", "").strip()))
 
     def print_end_results(self, policy):
-        # self.print_episode()
         # Plot: The Progression of Learning
         x = list(range(1, episodes + 1))
         y = self.moves_per_episode[1:]
 
         plt.plot(x, y)
-
         plt.xlabel("Episode")
         plt.ylabel("Timestep")
         plt.title("The Progression of Learning")
-
         plt.show()
 
-    # Plot: The most successful episode
-
     def print_episode(self):
+        # Plot the most successful episode
         x = list(range(len(self.best_angles)))
         y = self.best_angles
 
         plt.plot(x, y)
-
         plt.xlabel("Timesteps")
         plt.ylabel("Angle (Radians)")
         plt.title("Most successfull episode nr {}".format(self.best_episode))
-
         plt.show()

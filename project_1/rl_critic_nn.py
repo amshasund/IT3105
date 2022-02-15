@@ -4,30 +4,19 @@ import tensorflow as tf
 from parameters import (
     lr_critic,
     discount_factor_critic,
-    neural_dim,
-    game,
-    pegs
+    neural_dim
 )
 
 
 class CriticNN:
     def __init__(self, sim_world):
         self.sim_world = sim_world
-        self.num_input_nodes = self.get_num_input_nodes()
-        self.nn_model = self.build_model()
+        self.num_input_nodes = 0
+        self.nn_model = None
         self.TD_error = 0
 
-    # We should probably do this another way
-    @staticmethod
-    def get_num_input_nodes():
-        if game == "the_gambler":
-            return 1
-        elif game == "towers_of_hanoi":
-            return pegs
-        elif game == "pole_balancing":
-            return 6
-        else:
-            return "game is not defined correctly"
+    def set_num_input_nodes(self, num_input_nodes):
+        self.num_input_nodes = num_input_nodes
 
     def build_model(self, act='relu', opt=tf.keras.optimizers.SGD, loss=tf.keras.losses.MeanSquaredError()):
         # Create Neural Net
@@ -48,13 +37,12 @@ class CriticNN:
                       metrics=[
                           tf.keras.metrics.categorical_accuracy])  # Keith had this
 
-        return model
+        self.nn_model = model
 
     def train_model(self, reward, state, new_state):
         # TODO: train with list of states and targets
         state_bin = self.state_to_binary(state)
         target = reward + discount_factor_critic * self.get_value(new_state)
-        # print("Target: ", target)
         self.nn_model.fit(state_bin, target, verbose=0)
 
     def get_value(self, state):
@@ -67,9 +55,9 @@ class CriticNN:
     def get_TD_error(self):
         return self.TD_error
 
-    def set_TD_error(self, reward, state, new_state):
+    def set_TD_error(self, reward, state, new_state, game_over):
         self.TD_error = reward + discount_factor_critic * \
-            self.get_value(new_state) - self.get_value(state)
+                        self.get_value(new_state) * (not game_over) - self.get_value(state)
         # print("Value: ", self.get_value(state),"TD: ", self.get_TD_error())
 
     @staticmethod
@@ -88,8 +76,10 @@ class CriticNN:
                             int(np.binary_repr(int(string), 8)))
                 else:
                     binary_state.append(int(np.binary_repr(int(element), 8)))
+
         else:
             binary_state.append(int(np.binary_repr(int(state), 8)))
+
         return np.array(binary_state).reshape(1, -1)
 
     def binary_to_state(self, binary_state):

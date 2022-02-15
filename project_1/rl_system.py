@@ -27,16 +27,29 @@ class RLSystem:
         self.critic = Critic(self.sim_world)
         self.actor = Actor(self.critic, self.sim_world)
 
-    def actor_critic_algorithm(self):
-        eps = epsilon
+    def get_num_input_nodes(self):
+        state = self.sim_world.get_state()
+        if isinstance(state, list):
+            return len(state)
+        return 1
 
+    def actor_critic_algorithm(self):
+        # COMMENT
+        if critic_type == "NN":
+            input_nodes = self.get_num_input_nodes()
+            self.critic.set_num_input_nodes(input_nodes)
+            self.critic.build_model()
+
+        # Enable linear decay
+        eps = epsilon
         for i in range(1, episodes + 1):
-            # print("--- Episode: " + str(i) + " ---")
+            print("--- Episode: " + str(i) + " ---")
+
             # Reset eligibilities in actor and critic
             if critic_type == "table":
                 self.critic.reset_eligibilities()
-
             self.actor.reset_eligibilities()
+
             # Get S_init and its policy
             state = self.sim_world.get_state()
             action = self.actor.get_best_action(state, eps)

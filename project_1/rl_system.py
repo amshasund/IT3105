@@ -17,7 +17,7 @@ random.seed(1)
 class Critic(
     CriticTable if critic_type == "table"
     else (CriticNN if critic_type == "NN"
-          else False)):
+    else False)):
     pass
 
 
@@ -121,8 +121,5 @@ class RLSystem:
             if eps > 0.1:
                 eps -= 1 / episodes
 
-            # if i > 0.9 * episodes:
-            # eps = 0
-            # print("Epsilon: " + str(eps))
             if i == display_variable:
-                self.sim_world.print_episode()
+                self.sim_world.print_episode(i)

@@ -1,11 +1,15 @@
 # TODO
 
-- [X] The Gambler: Set reward til 0 for hvert steg
+- [DONE] Fikse training progression plot
+- [DONE] Fikse angle plot
+- Fikse to stater i Pole Balancing, en true/false for table og en med tallverdier for nettverket
+- [DONE] Fikse print i Towers of Hanoi
+- Fikse Critic og actor separert
+- Fikse terminal logging for alle games
+- Kommentere koden (docstring, kommentarer)
 
-- Alle: Fix save history
-- Critic - round TD error med 3 desimaler ( skal den være negativ) - trenger kanskje ikke runde av denne hvis vi runder
-  av punkt under
--
-- [X] Critic - table : Round set value for state
-- [X] Høye tall for reward, burde ha +-1
-- [] Plot 2 til pole balancing
+| The Gambler    | Towers of Hanoi | Pole Balancing |
+| -------- | -------- | ------ |
+| NN [DONE]  | NN [DONE]    | NN  |
+| Table [DONE] | Table [DONE]   | Table [DONE]  |
+| Visualization [DONE] | Visualization    | Visualization [DONE]  |

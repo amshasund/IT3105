@@ -1,8 +1,8 @@
+import copy
 import random
 
 import matplotlib.pyplot as plt
 import numpy as np
-import copy
 
 from parameters import pole_mass, pole_length, gravity, timestep, episodes, max_steps
 
@@ -55,7 +55,6 @@ class PolePlayer:
         if not self.env.is_state_legal():
             self.reward = -5
 
-        # TODO: Improve this
         # For winning
         if self.num_pushes == 100:
             self.reward = 2
@@ -125,7 +124,7 @@ class PoleEnv:
         self.cart.acceleration = self.update_acceleration(bang_bang)
 
         self.pole.angular_velocity = (
-            self.pole.angular_velocity + self.tau * self.pole.angular_acceleration
+                self.pole.angular_velocity + self.tau * self.pole.angular_acceleration
         )
         self.cart.velocity = self.cart.velocity + self.tau * self.cart.acceleration
         self.pole.angle = self.pole.angle + self.tau * self.pole.angular_velocity
@@ -143,10 +142,10 @@ class PoleEnv:
         m_c = self.cart.mass
 
         return (
-            g * np.sin(theta)
-            + (np.cos(theta) * (-B - m_p * L *
-                                (d_theta ** 2) * np.sin(theta))) / (m_p + m_c)
-        ) / (L * ((4 / 3) - (m_p * (np.cos(theta)) ** 2) / (m_p + m_c)))
+                       g * np.sin(theta)
+                       + (np.cos(theta) * (-B - m_p * L *
+                                           (d_theta ** 2) * np.sin(theta))) / (m_p + m_c)
+               ) / (L * ((4 / 3) - (m_p * (np.cos(theta)) ** 2) / (m_p + m_c)))
 
     def update_acceleration(self, B):
         theta = self.pole.angle
@@ -157,9 +156,9 @@ class PoleEnv:
         m_c = self.cart.mass
 
         return (
-            B + m_p * L * (d_theta ** 2 * np.sin(theta) -
-                           dd_theta * np.cos(theta))
-        ) / (m_p + m_c)
+                       B + m_p * L * (d_theta ** 2 * np.sin(theta) -
+                                      dd_theta * np.cos(theta))
+               ) / (m_p + m_c)
 
     def is_state_legal(self):
         if -self.cart.max_location <= self.cart.location <= self.cart.max_location:
@@ -176,7 +175,7 @@ class PoleWorld:
     def __init__(self):
         self.environment = PoleEnv()
         self.player = PolePlayer(self.environment)
-        self.moves_per_episode = [0] * episodes
+        self.moves_per_episode = [0] * (episodes + 1)
         self.current_angles = []
         self.best_angles = []
         self.best_episode = 0
@@ -219,14 +218,15 @@ class PoleWorld:
     def reset_sim_world(self):
         self.environment.reset_environment()
         self.player.reset_player()
-        self.current_state = []
+        self.current_angles = []
 
     def save_state(self):
         self.current_angles.append(self.environment.pole.angle)
 
     def save_history(self, episode, state=None):
         self.moves_per_episode[episode] = self.player.num_pushes
-        print(self.moves_per_episode[episode])
+        print("Number of moves: ", self.moves_per_episode[episode])
+
         if self.moves_per_episode[episode] > self.moves_per_episode[self.best_episode]:
             self.best_angles = []
             self.best_episode = episode
@@ -235,7 +235,7 @@ class PoleWorld:
     def print_end_results(self, policy):
         # Plot: The Progression of Learning
         x = list(range(1, episodes + 1))
-        y = self.moves_per_episode[1:]
+        y = self.moves_per_episode[1:]  # From episode 1 to 'episode'
 
         plt.plot(x, y)
         plt.xlabel("Episode")
@@ -243,9 +243,10 @@ class PoleWorld:
         plt.title("The Progression of Learning")
         plt.show()
 
-    def print_episode(self):
+    def print_episode(self, episode):
         # Plot the most successful episode
-        x = list(range(len(self.best_angles)))
+        num_moves = self.moves_per_episode[episode]
+        x = list(range(num_moves))
         y = self.best_angles
 
         plt.plot(x, y)

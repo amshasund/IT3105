@@ -7,9 +7,12 @@ from parameters import win_probability
 
 class Coin:
     def __init__(self):
+        """ Initializes a weighted coin with a winning probability"""
         self.win_probability = win_probability
 
-    def flip(self):
+    @staticmethod
+    def flip():
+        """ Method that flips the weighted coin and returns the side flipped to"""
         return random.choices(
             population=[False, True],
             weights=[1 - win_probability, win_probability],
@@ -19,14 +22,21 @@ class Coin:
 
 class GamblerPlayer:
     def __init__(self, env):
+        """ Initializes a game player for the gambler. The player
+         has an Gambler environment to play in and knows the current
+         state of the game (number of units). The player also saves
+         the current """
         self.env = env
         self.units = random.randint(1, 99)
         self.reward = 0
 
     def get_units(self):
+        """ Returns the number of units (state) the player has """
         return self.units
 
     def get_reward(self):
+        """ Returns a reword based on the state the player
+        got itself into """
         # For winning
         if self.units == 100:
             self.reward = 1
@@ -35,25 +45,34 @@ class GamblerPlayer:
         elif self.units == 0:
             self.reward = -1
 
-        # For moving
+        # For staying alive
         else:
             self.reward = 0
 
         return self.reward
 
     def set_start_units(self):
+        """ Sets a random start state of units
+        between 1 and 99for the player."""
         self.units = random.randint(1, 99)
 
     def place_bet(self, bet):
-        # self.reward = self.env.perform_bet(bet)
+        """ Method that places a bet by calling
+        the environment with a bet request. The
+        results from the betting is added to
+        the players state """
         self.units += self.env.perform_bet(bet)
 
     def get_possible_bets(self):
+        """ Method that returns legal and possible
+        bets for a given state"""
         return self.env.get_legal_bets(self.units)
 
 
 class GamblerEnv:
     def __init__(self):
+        """ Initializes a environment for the game The Gambler.
+        The environment has a object in it, which is a coin """
         self.coin = Coin()
 
     @staticmethod
@@ -141,7 +160,7 @@ class GamblerWorld:
         plt.title("Policy after episodes")
         plt.show()
 
-    def print_episode(self):
+    def print_episode(self, episode):
         pass
 
     def save_episode_for_print(self):

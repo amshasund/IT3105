@@ -1,4 +1,3 @@
-import ast
 import copy
 import time
 
@@ -185,7 +184,7 @@ class TowersWorld:
         plt.title("The Progression of Learning")
         plt.show()
 
-    def print_episode(self):
+    def print_episode(self, episode):
         max = 20
         counter = 0
         for state_tuple in self.states_for_current_episode:

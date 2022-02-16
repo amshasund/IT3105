@@ -176,9 +176,10 @@ class PoleWorld:
     def __init__(self):
         self.environment = PoleEnv()
         self.player = PolePlayer(self.environment)
-        self.moves_per_episode = [0] * (episodes + 1)
-        self.best_episode = 0
+        self.moves_per_episode = [0] * episodes
+        self.current_angles = []
         self.best_angles = []
+        self.best_episode = 0
 
     def get_actions(self):
         return self.player.get_legal_push()
@@ -197,6 +198,7 @@ class PoleWorld:
 
     def do_action(self, action):
         self.player.add_force(action)
+        self.save_state()
 
     def get_reward(self):
         return self.player.get_reward()
@@ -217,15 +219,18 @@ class PoleWorld:
     def reset_sim_world(self):
         self.environment.reset_environment()
         self.player.reset_player()
+        self.current_state = []
 
-    def save_history(self, episode, str_states):
+    def save_state(self):
+        self.current_angles.append(self.environment.pole.angle)
+
+    def save_history(self, episode, state=None):
         self.moves_per_episode[episode] = self.player.num_pushes
+        print(self.moves_per_episode[episode])
         if self.moves_per_episode[episode] > self.moves_per_episode[self.best_episode]:
             self.best_angles = []
             self.best_episode = episode
-            for state in str_states:
-                s = list(state.split(","))
-                self.best_angles.append(bool(s[1].replace("]", "").strip()))
+            self.best_angles = copy.deepcopy(self.current_angles)
 
     def print_end_results(self, policy):
         # Plot: The Progression of Learning

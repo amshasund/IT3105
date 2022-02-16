@@ -17,7 +17,7 @@ random.seed(1)
 class Critic(
     CriticTable if critic_type == "table"
     else (CriticNN if critic_type == "NN"
-    else False)):
+          else False)):
     pass
 
 

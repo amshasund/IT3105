@@ -22,7 +22,7 @@ class CriticNN:
         model = tf.keras.models.Sequential()
 
         # Add input layer
-        model.add(tf.keras.layers.Input((self.num_input_nodes,)))
+        model.add(tf.keras.layers.Input((self.num_input_nodes),))
 
         # Add hidden layers
         for i in range(len(neural_dim)):
@@ -46,6 +46,9 @@ class CriticNN:
 
     def get_value(self, state):
         state_bin = self.state_to_binary(state)
+        value = float(sum(self.nn_model(state_bin)).numpy())
+        # print(value)
+        # print(tf.keras.backend.eval(value))
         return self.nn_model(state_bin)
 
     def get_TD_error(self):
@@ -53,7 +56,8 @@ class CriticNN:
 
     def set_TD_error(self, reward, state, new_state, game_over):
         self.TD_error = reward + discount_factor_critic * \
-                        self.get_value(new_state) * (not game_over) - self.get_value(state)
+            float(sum(self.get_value(new_state)).numpy()) * \
+            (not game_over) - float(sum(self.get_value(state)).numpy())
         # print("Value: ", self.get_value(state),"TD: ", self.get_TD_error())
 
     @staticmethod
@@ -66,7 +70,7 @@ class CriticNN:
         if isinstance(state, tuple):
             for element in state:
 
-                # For touple of touples -> Towers of Hanoi
+                # For tuple of tuples -> Towers of Hanoi
                 if isinstance(element, tuple):
                     if len(element) == 0:
                         binary_state.append(0)
@@ -83,17 +87,5 @@ class CriticNN:
         else:
             binary_state.append(int(np.binary_repr(int(state), 8)))
         # .reshape(1, -1) does not work for towers of hanoi
-        return np.array(binary_state)
-
-    def binary_to_state(self, binary_state):
-        state = []
-        for s in binary_state:
-            state.append(self.binary_to_decimal(s, 8))
-        return state
-
-    @staticmethod
-    def binary_to_decimal(num, bits):
-        # to handle negative numbers
-        if num[0] == "1":
-            return -(2 ** bits - int(num, 2))
-        return int(num, 2)
+        # print(np.array(binary_state))
+        return np.array(binary_state)  # .reshape(1,-1)

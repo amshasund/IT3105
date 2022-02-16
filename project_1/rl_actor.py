@@ -44,17 +44,16 @@ class Actor:
                 )
             else:
                 state_actions = self.policy[state]
+                # print(self.policy)
+                # print(state_actions)
+                # print(state_actions.values())
 
-                for values in state_actions:
-                    print("b", values)
-                    print("a", int(tf.reduce_max(values)))
-
-                highest_value = tf.reduce_max(state_actions.values())
+                highest_value = max(state_actions.values())
                 best_actions = []
                 for key, value in state_actions.items():
-                    if int(value) == highest_value:
-                        print("Int(value):" + str(int(value)))
+                    if value == highest_value:
                         best_actions.append(key)
+                # print(best_actions)
                 return random.choice(best_actions)
 
     # TODO: Send in possible_actions instead of using sim_world
@@ -78,7 +77,7 @@ class Actor:
 
         if value is None:
             self.eligibility[state][action] *= (
-                    discount_factor_actor * eligibility_decay_actor
+                discount_factor_actor * eligibility_decay_actor
             )
         else:
             self.eligibility[state][action] = value
@@ -88,8 +87,7 @@ class Actor:
 
     # TODO: send in TD_error instead of importing critic
     def set_policy(self, state, action):
-
         self.policy[state][action] += (
-                lr_actor * self.critic.get_TD_error() *
-                self.eligibility[state][action]
+            lr_actor * self.critic.get_TD_error() *
+            self.eligibility[state][action]
         )

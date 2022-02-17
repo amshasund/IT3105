@@ -248,7 +248,7 @@ class PoleWorld:
 
     def print_episode(self, episode):
         # Plot the most successful episode
-        num_moves = self.moves_per_episode[episode]
+        num_moves = self.moves_per_episode[self.best_episode]
         x = list(range(num_moves))
         y = self.best_angles[:num_moves]
 

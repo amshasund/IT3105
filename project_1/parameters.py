@@ -1,8 +1,8 @@
 # Select game
-game = 'towers_of_hanoi'  # 'the_gambler', 'towers_of_hanoi' or 'pole_balancing'
+game = 'the_gambler'  # 'the_gambler', 'towers_of_hanoi' or 'pole_balancing'
 
 # Pivotal parameters
-episodes = 200  # The gambler: 10.000
+episodes = 10000  # The gambler: 10.000
 max_steps = 300
 critic_type = "NN"  # "NN" or "table"
 neural_dim = [9, 5, 1]

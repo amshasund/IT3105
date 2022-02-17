@@ -51,10 +51,10 @@ class CriticNN:
     def get_TD_error(self):
         return self.TD_error
 
-    def set_TD_error(self, reward, state, new_state, game_over):
+    def set_TD_error(self, reward, state, new_state, game_over, time_out):
         self.TD_error = reward + discount_factor_critic * \
                         self.get_value(new_state) * \
-                        (not game_over) - self.get_value(state)
+                        (game_over == time_out) - self.get_value(state)
 
     @staticmethod
     def reshape_state(state):

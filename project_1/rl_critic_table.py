@@ -29,11 +29,11 @@ class CriticTable:
         if state not in self.V:
             self.V[state] = random.uniform(0, 0.01)
 
-    def set_TD_error(self, r, state, new_state, game_over):
+    def set_TD_error(self, r, state, new_state, game_over, time_out):
         self.TD_error = (
                 r
                 + discount_factor_critic *
-                self.get_value(new_state) * (not game_over)
+                self.get_value(new_state) * (game_over == time_out)
                 - self.get_value(state)
         )
 

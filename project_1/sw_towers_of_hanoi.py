@@ -39,6 +39,7 @@ class TowersPlayer:
 
     def is_game_over(self):
         if self.num_moves >= max_steps:
+
             return True
         else:
             state = self.get_game_board()
@@ -143,7 +144,7 @@ class TowersWorld:
     def get_actions(self):
         return self.player.get_legal_options()
 
-    def get_state(self, state_type):
+    def get_state(self, state_type=None):
         state = copy.deepcopy(self.player.get_game_board())
         return self.state_to_send(state)
 
@@ -185,10 +186,13 @@ class TowersWorld:
         self.environment.reset_environment()
         self.player.reset_player()
 
+    def is_time_out(self):
+        return self.player.num_moves >= max_steps
+
     def is_game_over(self):
         is_over = self.player.is_game_over()
-        # if is_over:
-        # print("You used ", self.player.num_moves, " moves")
+        if is_over:
+            print("You used ", self.player.num_moves, " moves")
         return is_over
 
     def save_history(self, episode, str_states):
@@ -215,5 +219,9 @@ class TowersWorld:
                 self.environment.print_game_board(state)
                 counter += 1
             else:
+                state = self.received_to_state(self.states_for_current_episode[-1])
+                print("Final state:")
+                self.environment.print_game_board(state)
+                print("Num moves ", len(self.states_for_current_episode))
                 return
             time.sleep(frame_delay)

@@ -7,8 +7,6 @@ def main():
     # Create a RL system
     rl_system = RLSystem()
 
-    # rl_system.sim_world.environment.create_game_board()
-
     # The Game Loop
     rl_system.actor_critic_algorithm()
 

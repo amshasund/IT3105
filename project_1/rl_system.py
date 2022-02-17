@@ -28,7 +28,7 @@ class RLSystem:
         self.actor = Actor()
 
     def get_num_input_nodes(self):
-        state = self.sim_world.get_state()
+        state = self.sim_world.get_state(critic_type)
         if isinstance(state, tuple):
             return len(state)
         return 1
@@ -88,7 +88,8 @@ class RLSystem:
                 self.actor.set_eligibility(state, action, 1)
 
                 # Update TD error
-                self.critic.set_TD_error(reward, state, new_state, game_over)
+                time_out = self.sim_world.is_time_out()
+                self.critic.set_TD_error(reward, state, new_state, game_over, time_out)
                 TD_error = self.critic.get_TD_error()
 
                 # Update critic's eligibility table

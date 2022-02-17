@@ -102,7 +102,7 @@ class GamblerWorld:
     def get_actions(self):
         return self.player.get_possible_bets()
 
-    def get_state(self, state_type):
+    def get_state(self, state_type=None):
         return self.player.get_units()
 
     def get_possible_actions_from_state(self, state):
@@ -114,6 +114,10 @@ class GamblerWorld:
 
     def get_reward(self):
         return self.player.get_reward()
+
+    @staticmethod
+    def is_time_out():
+        return False
 
     def is_game_over(self):
         state = self.get_state()

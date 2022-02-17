@@ -175,7 +175,7 @@ class PoleWorld:
     def get_actions(self):
         return self.player.get_legal_push()
 
-    def get_state(self, state_type):
+    def get_state(self, state_type=None):
         state = copy.deepcopy(self.player.get_situation())
         return tuple(self.state_to_send(state, state_type))
 
@@ -199,6 +199,10 @@ class PoleWorld:
 
     def get_reward(self):
         return self.player.get_reward()
+
+    @staticmethod
+    def is_time_out():
+        return False
 
     def is_game_over(self):
         # Pole out of balance

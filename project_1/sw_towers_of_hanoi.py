@@ -116,7 +116,7 @@ class TowersEnv:
             game_board = list(list(s) for s in state)
         else:
             game_board = copy.deepcopy(self.game_board)
-        # print(game_board)
+
         for peg in game_board:
             while len(peg) < discs:
                 peg.append(0)

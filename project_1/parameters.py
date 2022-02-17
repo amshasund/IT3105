@@ -2,9 +2,9 @@
 game = 'pole_balancing'  # 'the_gambler', 'towers_of_hanoi' or 'pole_balancing'
 
 # Pivotal parameters
-episodes = 100  # The gambler: 10.000
+episodes = 500  # The gambler: 10.000
 max_steps = 300
-critic_type = "NN"  # "NN" or "table"
+critic_type = "table"  # "NN" or "table"
 neural_dim = [3, 9, 15]
 lr_actor = 0.01  # alpha_a
 lr_critic = 0.1  # alpha_c
@@ -20,11 +20,11 @@ frame_delay = 1
 pole_length = 0.5  # [0.1, 1.0] m
 pole_mass = 0.1  # [0.05, 0.5] kg
 gravity = -9.81  # [-15, -5] m/s^2
-timestep = 0.02  # [0.01, 0.1] s
+timestep = 0.1  # [0.01, 0.1] s
 
 # Towers of hanoi
 pegs = 3  # [3,5]
 discs = 4  # [2,6]
 
 # The gambler
-win_probability = 0.6  # [0, 1.0]
+win_probability = 0.4  # [0, 1.0]

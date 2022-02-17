@@ -16,8 +16,6 @@ class TowersPlayer:
         return self.env.game_board
 
     def get_reward(self):
-        # TODO: Må håndtere tid
-
         if self.is_game_over() and not self.num_moves >= max_steps:
             self.reward = 20
 
@@ -145,16 +143,37 @@ class TowersWorld:
     def get_actions(self):
         return self.player.get_legal_options()
 
-    def get_state(self):
+    def get_state(self, state_type):
         state = copy.deepcopy(self.player.get_game_board())
-        state = tuple(tuple(s) for s in state)
-        return state
+        return self.state_to_send(state)
 
-    def get_all_possible_states(self):
-        pass
-
-    def get_possible_actions_from_state(self, state):
+    def get_possible_actions_from_state(self, state_received):
+        state = self.received_to_state(state_received)
         return self.player.get_legal_options(state)
+
+    @staticmethod
+    def state_to_send(state):
+        send = [-1] * discs
+        for peg_num in range(len(state)):
+            for disc in state[peg_num]:
+                send[disc - 1] = peg_num
+
+        send = tuple(send)
+        return send
+
+    @staticmethod
+    def received_to_state(received):
+        state = []
+        state_received = list(received)
+        # Create the state shape
+        for p in range(pegs):
+            state.append(copy.deepcopy([]))
+
+        for index, peg in enumerate(state_received[::-1]):
+            # Reversed list - must reverse indices
+            disc = discs - index
+            state[peg].append(disc)
+        return state
 
     def do_action(self, action):
         self.player.move_disc(action)
@@ -167,7 +186,10 @@ class TowersWorld:
         self.player.reset_player()
 
     def is_game_over(self):
-        return self.player.is_game_over()
+        is_over = self.player.is_game_over()
+        # if is_over:
+        # print("You used ", self.player.num_moves, " moves")
+        return is_over
 
     def save_history(self, episode, str_states):
         self.moves_per_episode[episode] = self.player.num_moves
@@ -188,7 +210,7 @@ class TowersWorld:
         max = 20
         counter = 0
         for state_tuple in self.states_for_current_episode:
-            state = list(state_tuple)
+            state = self.received_to_state(state_tuple)
             if counter < max:
                 self.environment.print_game_board(state)
                 counter += 1

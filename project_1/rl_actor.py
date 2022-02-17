@@ -1,7 +1,5 @@
 import random
 
-import tensorflow as tf
-
 from parameters import (
     lr_actor,
     discount_factor_actor,
@@ -10,66 +8,40 @@ from parameters import (
 
 
 class Actor:
-    def __init__(self, critic, sim_world):
-        self.critic = critic
-        self.sim_world = sim_world
+    def __init__(self):
         self.policy = dict()
         self.eligibility = dict()
 
-    # TODO: Send in possible_actions instead of using sim_world
-    def get_best_action(self, state, epsilon):
+    def get_best_action(self, state, epsilon, possible_actions):
         random_action = random.choices(
             population=[False, True],
             weights=[1 - epsilon, epsilon],
             k=1,
         )[0]
-        if random_action:
-            return random.choice(
-                self.sim_world.get_possible_actions_from_state(
-                    state)
-            )
+        # For random choice, policy being empty or for state NOT in policy
+        if (random_action) or (state not in self.policy):
+            return random.choice(possible_actions)
+        # Choosing action based on experience
         else:
-            # For policy being empty
-            if not self.policy:
-                return random.choice(
-                    self.sim_world.get_possible_actions_from_state(
-                        state)
-                )
+            state_actions = self.policy[state]
+            highest_value = max(state_actions.values())
+            best_actions = []
 
-            # For state NOT in policy
-            elif state not in list(self.policy.keys()):
-                return random.choice(
-                    self.sim_world.get_possible_actions_from_state(
-                        state)
-                )
-            else:
-                state_actions = self.policy[state]
-                # print(self.policy)
-                # print(state_actions)
-                # print(state_actions.values())
+            # Choose random from the best actions
+            for key, value in state_actions.items():
+                if value == highest_value:
+                    best_actions.append(key)
+            return random.choice(best_actions)
 
-                highest_value = max(state_actions.values())
-                best_actions = []
-                for key, value in state_actions.items():
-                    if value == highest_value:
-                        best_actions.append(key)
-                # print(best_actions)
-                return random.choice(best_actions)
-
-    # TODO: Send in possible_actions instead of using sim_world
-    def add_state(self, state):
-
+    def add_state(self, state, possible_actions):
+        """ Method that initializes a state in eligibility and policy """
         # Add state to eligibility
-        # For empty eligibility or  for state not in eligibility
         if state not in self.eligibility:
             self.eligibility[state] = dict()
-            all_actions_for_state = self.sim_world.get_possible_actions_from_state(
-                state)
-            for a in all_actions_for_state:
+            for a in possible_actions:
                 self.eligibility[state][a] = 0
 
         # Add state to policy
-        # For empty policy or state not in policy
         if state not in self.policy:
             self.policy[state] = dict.fromkeys(self.eligibility[state], 0)
 
@@ -77,7 +49,7 @@ class Actor:
 
         if value is None:
             self.eligibility[state][action] *= (
-                discount_factor_actor * eligibility_decay_actor
+                    discount_factor_actor * eligibility_decay_actor
             )
         else:
             self.eligibility[state][action] = value
@@ -85,9 +57,8 @@ class Actor:
     def reset_eligibilities(self):
         self.eligibility.clear()
 
-    # TODO: send in TD_error instead of importing critic
-    def set_policy(self, state, action):
+    def set_policy(self, state, action, TD_error):
         self.policy[state][action] += (
-            lr_actor * self.critic.get_TD_error() *
-            self.eligibility[state][action]
+                lr_actor * TD_error *
+                self.eligibility[state][action]
         )

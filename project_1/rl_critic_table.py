@@ -31,17 +31,17 @@ class CriticTable:
 
     def set_TD_error(self, r, state, new_state, game_over):
         self.TD_error = (
-            r
-            + discount_factor_critic *
-            self.get_value(new_state) * (not game_over)
-            - self.get_value(state)
+                r
+                + discount_factor_critic *
+                self.get_value(new_state) * (not game_over)
+                - self.get_value(state)
         )
 
     def set_eligibility(self, state, value=None):
 
         if value is None:
             self.eligibility[state] *= discount_factor_critic * \
-                eligibility_decay_critic
+                                       eligibility_decay_critic
         else:
             self.eligibility[state] = value
 
@@ -49,6 +49,5 @@ class CriticTable:
         self.eligibility.clear()
 
     def set_value_for_state(self, state):
-
         self.V[state] += lr_critic * self.get_TD_error() * \
-            self.eligibility[state]
+                         self.eligibility[state]

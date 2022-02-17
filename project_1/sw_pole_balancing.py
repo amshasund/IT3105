@@ -63,14 +63,13 @@ class PolePlayer:
         elif self.num_pushes == max_steps:
             self.reward = 5
 
-        # For legal moving
+        # For staying alive
         else:
-            self.reward = 1  # 1 * self.num_pushes // 10
+            self.reward = 1
 
         return self.reward
 
     def update_situation(self):
-        # TODO: Try with booleans
         location = True if self.env.cart.location > 0 else False
         angle = True if self.env.pole.angle > 0 else False
         angle_vel = True if self.env.pole.angular_velocity > 0 else False
@@ -81,13 +80,6 @@ class PolePlayer:
                      angle,
                      angle_vel
                      ]
-
-        # situation = [
-        #   round(self.env.cart.location, 2),
-        #  round(self.env.cart.velocity, 2),
-        # round(self.env.pole.angle, 2),
-        # round(self.env.pole.angular_velocity, 2),
-        # ]
         return situation
 
     def add_force(self, action):
@@ -183,17 +175,23 @@ class PoleWorld:
     def get_actions(self):
         return self.player.get_legal_push()
 
-    def get_state(self):
+    def get_state(self, state_type):
         state = copy.deepcopy(self.player.get_situation())
-        state = tuple(state)
-        return state
-
-    def get_all_possible_states(self):
-        pass
+        return tuple(self.state_to_send(state, state_type))
 
     def get_possible_actions_from_state(self, state):
-        # all actions are legal for all states
+        # All actions are legal for all states
         return self.get_actions()
+
+    @staticmethod
+    def state_to_send(state, state_type):
+        if state_type == "table":
+            send = []
+            for parameter in state:
+                send.append(True if parameter > 0 else False)
+            return send
+        else:
+            return state
 
     def do_action(self, action):
         self.player.add_force(action)
@@ -205,11 +203,12 @@ class PoleWorld:
     def is_game_over(self):
         # Pole out of balance
         if not self.environment.is_state_legal():
+            print("You lost ..")
             return True
 
         # Maximum timesteps reached
         elif self.player.num_pushes == max_steps:
-            print("Max timesteps reached!")
+            print("You won!")
             return True
 
         else:
@@ -227,7 +226,7 @@ class PoleWorld:
         self.moves_per_episode[episode] = self.player.num_pushes
         print("Number of moves: ", self.moves_per_episode[episode])
 
-        if self.moves_per_episode[episode] > self.moves_per_episode[self.best_episode]:
+        if self.moves_per_episode[episode] >= self.moves_per_episode[self.best_episode]:
             self.best_angles = []
             self.best_episode = episode
             self.best_angles = copy.deepcopy(self.current_angles)
@@ -247,7 +246,7 @@ class PoleWorld:
         # Plot the most successful episode
         num_moves = self.moves_per_episode[episode]
         x = list(range(num_moves))
-        y = self.best_angles
+        y = self.best_angles[:num_moves]
 
         plt.plot(x, y)
         plt.xlabel("Timesteps")

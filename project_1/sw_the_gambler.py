@@ -76,39 +76,34 @@ class GamblerEnv:
         self.coin = Coin()
 
     @staticmethod
-    def get_range_of_units():
-        return list(range(0, 100 + 1))
-
-    @staticmethod
     def get_legal_bets(units):
+        """ Returns legal bets for a state with a
+        given amount of units """
         if units > 50:
             return list(range(1, 100 - units + 1))
         return list(range(1, units + 1))
 
     def perform_bet(self, bet):
-        # print("Bet placed: " + str(bet))
-        # print("Flips coin ..")
+        """ Method that flips a coin and returns if the
+        player lost the bet or not """
         flip_result = self.coin.flip()
         if flip_result:
-            # print("Right side!")
             return bet
-        # print("Wrong side..")
         return -bet
 
 
 class GamblerWorld:
     def __init__(self):
+        """ Initializes the SimWorld for The Gambler.
+        The world consists of an environment and a player """
         self.environment = GamblerEnv()
         self.player = GamblerPlayer(self.environment)
 
     def get_actions(self):
         return self.player.get_possible_bets()
 
-    def get_state(self):
+    def get_state(self, state_type):
         return self.player.get_units()
-
-    def get_all_possible_states(self):
-        return self.environment.get_range_of_units()
 
     def get_possible_actions_from_state(self, state):
         # State equals amount of units
@@ -123,10 +118,10 @@ class GamblerWorld:
     def is_game_over(self):
         state = self.get_state()
         if state == 100:
-            # print("You won!")
+            print("You won!")
             return True
         elif state == 0:
-            # print("You lost..")
+            print("You lost..")
             return True
         return False
 

@@ -14,6 +14,8 @@ play of the TOPP.
 # TODO: FIX THESE
 
 hex_board_size = 3      # 3 <= k <= 10
+number_actual_games = 1     # TODO: What is this? Same as num_games?
+number_search_games = 1     # TODO: What is this?
 
 # mcts parameters
 episodes = 1

@@ -23,6 +23,7 @@ search_games_per_move = 1
 # etc
 
 # actor net
+save_interval = 20 # TODO: what is the range []
 learning_rate = 0.1
 hidden_layers = [1, 5, 2, 4]
 activation_function = ["linear", "sigmoid", "tanh", "RELU"]

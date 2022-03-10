@@ -1,3 +1,22 @@
+class Node:
+    def __init__(self, state):
+        self.parent = None
+        self.children = []
+        self.state = state
+
+
+class MonteCarloTree:
+    def __init__(self) -> None:
+        self.state = None
+        
+    
+    def init_tree(self, root):
+        root = Node()
+
+    def search(self):
+        pass
+
+
 
 """ 
 # Search to a leaf and update hex_mc
@@ -13,4 +32,4 @@
                     
                     # Perform Backpropagation 
                     self.mcts.perform_backpropagation(final, root)
-                    """
+"""

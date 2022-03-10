@@ -21,31 +21,25 @@ class ANet:
     # normally calls for a cross-entropy loss/error function; and to
     # produce a probability distribution in the output vector, the
     # softmax activation function is recommended.
-
-    def build_model(self, loss=tf.keras.losses.MeanSquaredError()):
+    
+    # TODO: Bianry Cross entropy ? Categorical ? Or Sparse Categorical?
+    def build_model(self, loss=tf.keras.losses.SparseCategoricalCrossentropy):
         # Create Neural Net
         model = tf.keras.models.Sequential()
 
-        # TODO: No need for this
-        # Initialize weights and biases
-        initializer = tf.keras.initializer.TruncatedNormal(
-            mean=0., stddev=1.)  # TODO
-
         # Add input layer
-        model.add(tf.keras.layers.Input(shape=(self.num_input_nodes,)))  # TODO
+        model.add(tf.keras.layers.Input(shape=(self.num_input_nodes,))) 
 
         # Add hidden layers
         for i in range(len(hidden_layers)):
             model.add(tf.keras.layers.Dense(
                 hidden_layers[i],
-                activation=activation_function[i],
-                kernel_initializer=initializer,       # TODO
-                use_bias=True,                        # TODO
-                bias_initializer=initializer))        # TODO
+                activation=activation_function[i])) 
 
         # Add output layer
-        # TODO: output size same as amount of possible moves (hex board size)
-        model.add(tf.keras.layers.Dense(1, activation='sigmoid'))  # TODO
+        # TODO: should we remove the already placed pieces from this? 
+        # should not be able to move pieces to a place where another already exists.
+        model.add(tf.keras.layers.Dense(hex_board_size**2, activation='softmax')) 
 
         # Using stochastic gradient descent when compiling
         # Optimizer is a string, could be a problem that it is not a tf function

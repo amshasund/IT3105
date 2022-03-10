@@ -1,4 +1,6 @@
 ## Questions to studass
+- [ ] SparseCategorialCrossentropy or CategoricalCrossentropy? Should we use one-hot encoding?
+
 - [x] Can we use same initializer for weights and biases in neural net
 - [x] What values should we use in the initializer
 - [x] Should we initialize weights and biases in input/output layer as well?

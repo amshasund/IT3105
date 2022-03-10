@@ -1,6 +1,6 @@
 # From pseudocode
 from anet import ANet
-from mcts import MCTS
+from mct import MonteCarloTree
 from hex import Hex
 
 from parameters import (
@@ -13,39 +13,47 @@ from parameters import (
 class RLSystem:
     def __init__(self):
         self.hex = Hex()
-        self.mcts = MCTS()
+        self.mct = MonteCarloTree()
         self.anet = ANet()
 
     def algorithm(self):
-        rbuf = [] 
+        # Intialize replay buffer
+        replay_buffer = [] 
+        
+        # Create neural nel
         self.anet.build_model()
         
         # Play games
         for actual_game in range(number_actual_games):
+            # Initialize actual game board
             self.hex.init_game_board()
-            state_init = self.hex.get_state()  # TODO: set s_init to starting board state
-            # TODO: init mct to a single root, which represents s_init
-            self.mcts.init_tree(state_init)
-            root = state_init
             
+            # Set start state
+            state_init = self.hex.get_state()
+            
+            # TODO: init mct to a single root, which represents s_init
+            root = state_init
+            self.mct.init_tree(root)
+        
             while not self.hex.game_over():
                 hex_mc = Hex(root)
                 
-                self.mcts.search_tree() #TODO: implement thios using algorithm 1 from materials ref studass
+                self.mct.search_tree() #TODO: implement this using algorithm 1 from materials ref studass
                 
-                visit_dist =  self.mcts.get_distribution(root)
-                rbuf.append((root, visit_dist))
+                visit_dist =  self.mct.get_distribution(root)
+                replay_buffer.append((root, visit_dist))
 
                 # Choose actual move
+                # TODO: Send in reformatted board state
                 actual_move = self.anet.choose_move(visit_dist)
 
                 # Perform move
                 self.hex.perform_move(actual_move)
                 successor_state = self.hex.get_state()
-                self.mcts.retain_and_discard(successor_state)
+                self.mct.retain_and_discard(successor_state)
                 root = successor_state
             
-            self.anet.train(rbuf)
+            self.anet.train(replay_buffer)
             # Save parameters for tournament
             if actual_game % save_interval == 0:
                 self.anet.save_parameters()

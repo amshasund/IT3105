@@ -5,13 +5,18 @@ from parameters import (
 )
 
 class Hex:
-    def __init__(self) -> None:
+    def __init__(self):
         self.board = None
         self.current_player = None
+        self.neighbours = [(-1,0), (0,-1), (-1,1), (0,1), (1,0), (1,-1)]
     
     def init_game_board(self):
         self.board = np.zeros((hex_board_size, hex_board_size))
         self.current_player = random.randint(1, 2)
+    
+    def set_game_state(self, state):
+        self.current_player = state[0]
+        self.board = state[1]
 
     def get_state(self, reformat=False):
         if reformat:
@@ -73,3 +78,15 @@ class Hex:
         col = position[1]
         self.board[row, col] = moving_player
         self.switch_player()
+
+    def game_over(self):
+        # Check for full board
+        if 0 not in self.board:
+            return True
+        
+        # Check for winner
+        # TODO: what to do here?? Use a*?
+        # Search from last moved piece and find both outer edges
+        
+        else:
+            return False

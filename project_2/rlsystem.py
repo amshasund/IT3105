@@ -13,9 +13,9 @@ from parameters import (
 class RLSystem:
     def __init__(self):
         self.hex = Hex()
-        self.mct = MonteCarloTree()
         self.anet = ANet()
-
+        self.mct = MonteCarloTree(self.anet)
+        
     def algorithm(self):
         # Intialize replay buffer
         replay_buffer = [] 
@@ -35,10 +35,11 @@ class RLSystem:
             root = state_init
             self.mct.init_tree(root)
         
-            while not self.hex.game_over():
-                hex_mc = Hex(root)
-                
-                self.mct.search_tree() #TODO: implement this using algorithm 1 from materials ref studass
+            while not self.hex.game_over(): # TODO
+                hex_mc = Hex()
+                hex_mc.set_game_state(root)
+
+                self.mct.search(hex_mc) #TODO: implement this using algorithm 1 from materials ref studass
                 
                 visit_dist =  self.mct.get_distribution(root)
                 replay_buffer.append((root, visit_dist))

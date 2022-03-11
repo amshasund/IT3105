@@ -1,5 +1,6 @@
 ## Questions to studass
-- [ ] SparseCategorialCrossentropy or CategoricalCrossentropy? Should we use one-hot encoding?
+- [x] SparseCategorialCrossentropy or CategoricalCrossentropy? Should we use one-hot encoding?
+- [x] How to know when game is over? A*? Keep track of neighbours?
 
 - [x] Can we use same initializer for weights and biases in neural net
 - [x] What values should we use in the initializer

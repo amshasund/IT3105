@@ -1,4 +1,6 @@
 ## Questions to studass
+- [ ] Does reformat board work with np.where(Piece.player == 1) ?
+
 - [x] SparseCategorialCrossentropy or CategoricalCrossentropy? Should we use one-hot encoding?
 - [x] How to know when game is over? A*? Keep track of neighbours?
 

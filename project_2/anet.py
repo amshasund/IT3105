@@ -22,7 +22,6 @@ class ANet:
     # produce a probability distribution in the output vector, the
     # softmax activation function is recommended.
     
-    # TODO: Bianry Cross entropy ? Categorical ? Or Sparse Categorical?
     def build_model(self, loss=tf.keras.losses.BinaryCrossentropy):
         # Create Neural Net
         model = tf.keras.models.Sequential()

@@ -7,7 +7,6 @@ from parameters import (
     hex_board_size,
 )
 
-
 class Piece:
     def __init__(self, position, player, is_start_edge, is_end_edge):
         self.position = position  # [x,y]
@@ -26,7 +25,7 @@ class Piece:
             self.neighbouring_friends.append(neighbours)
 
         # add this object (self) to list of neighbours of all its neighbours
-        for neighbour in self.neighbours:
+        for neighbour in self.neighbouring_friends:
             neighbour.add_neighbouring_friends(self)
 
     def get_position(self):
@@ -47,16 +46,22 @@ class Piece:
     def get_is_end_edge(self):
         return self.is_end_edge
 
+    def set_has_visited(self, is_visited):
+        self.has_visited = is_visited
 
 class Hex:
     def __init__(self):
         self.board = None
         self.current_player = None
-        self.neighbours = [(-1, 0), (0, -1), (-1, 1), (0, 1), (1, 0), (1, -1)]
+        self.relative_neighbours = [(-1, 0), (0, -1), (-1, 1), (0, 1), (1, 0), (1, -1)]
         self.last_move = None
         self.pieces = {
             1: [],
             2: []
+        }
+        self.edge_pieces = {
+            1: [[],[]],
+            2: [[],[]],
         }
 
     def init_game_board(self):
@@ -89,19 +94,29 @@ class Hex:
         pos = self.last_move.get_position()  # [x, y]
         player = self.last_move.get_player()
         neighbouring_friends = []
-        for relative_neighbour in self.neighbours:
-            check_pos = []
-            check_pos[0] = pos[0] + relative_neighbour[0]
-            check_pos[1] = pos[1] + relative_neighbour[1]
+        for rel in self.relative_neighbours:
+            print(pos)
+            print(rel)
+            check_pos = [pos[0] + rel[0], pos[1]+rel[1]]
+            #check_pos.append(pos[0] + rel[0])
+            #check_pos.append(pos[1] + rel[1])
+            print(check_pos)
+            
+            # Make sure we only look at positions on the board
+            if any(n < 0 for n in check_pos):
+                continue
 
             # Get piece on possible neighbour position
             # Piece object in position of neighbour
             possible_neighbour = self.board[check_pos[0]][check_pos[1]]
-            neighbouring_player = possible_neighbour.get_player()
 
-            # Add only friendly neighbours (BFFs)
-            if neighbouring_player == player:
-                neighbouring_friends.append(possible_neighbour)
+            # Check if neighbour is not a Piece
+            if isinstance(possible_neighbour, Piece):
+                neighbouring_player = possible_neighbour.get_player()
+
+                # Add only friendly neighbours (BFFs)
+                if neighbouring_player == player:
+                    neighbouring_friends.append(possible_neighbour)
 
         return neighbouring_friends
 
@@ -129,9 +144,14 @@ class Hex:
     def perform_move(self, actual_move):
         moving_player = actual_move[0]
         position = actual_move[1]
+        
+        # Setting position coordinates
         row = position[0]
         col = position[1]
+        
+        # Check if piece is placed on a edge
         start_edge, end_edge = self.is_edge(position, moving_player)
+
         # Make a new piece from the state info
         piece = Piece(position, moving_player, start_edge, end_edge)
         self.last_move = piece  # save last move to use in game_over check
@@ -141,15 +161,72 @@ class Hex:
         piece.add_neighbouring_friends(friendly_neighbours)
 
         # Add piece to board and list of pieces
-        self.board[row][col] = piece
-        self.pieces[moving_player] = piece
+        self.board[row][col] = piece # TODO: cannot have a board with zeros and pieces -> maybe we can have a board with only pieces
+        self.pieces[moving_player] = piece # TODO: Do we need this?
 
+        # Add possible start and end pieces to the dictionary
+        # to keep track of end pieces for each player
+        if start_edge:
+            self.edge_pieces[moving_player][0] = piece # TODO: Remember to reset these lists after a game
+        elif end_edge:
+            self.edge_pieces[moving_player][1] = piece # TODO: Remember to reset these lists after a game
+        
         # Switch to next player
         self.switch_player()
+        
+    def search_path(self, start_piece, end_piece):
+        """ Method that suches for a path from start_piece to en_piece
+        and returns True if a path is found and False otherwise """
+        if start_piece.neighbouring_friends:
+            for neighbor in start_piece.neighbouring_friends:
+                while neighbor is not end_piece:
+                    self.search_patch(neighbor, end_piece)
+                if neighbor is end_piece:
+                    return True
+        return False
+        
+    def find_edge_neighbour(self, piece):
+        # TODO: Continue on this function
+        # TODO: Do we need this function?
+        piece.set_has_visited(True)
 
-    def find_edge_neighbour(self):
+        for row in self.board:
+            for p in row:
+                if p.is_edge == True and p.get_player == self.current_player:
+                    print(p, "This is edge")
+                
+        # Handle no neighbours
+        if piece.neighbouring_friends:
+            # Go through all piece's neighbours
+            for neighbour in piece.neighbouring_friends:
+                # Continue as long as the neighbours is not on a edge
+                while not (neighbour.get_is_edge()):
+                    if not neighbour.get_has_visited():
+                        self.find_edge_neighbor(neighbour)
+                
+                # Edge piece is found
+                return neighbour
+        
+            # goal_1: piece.neighbouring_friend where start_edge = True <- can be several start edges
+            # goal_2: piece.neighbouring_friend where end_edge = True 
 
+            # Use a*?
+            # Search from last moved piece and find both outer edges
+        
     def game_over(self):
+        start_edge = self.edge_pieces[self.current_player][0]
+        end_edge = self.edge_pieces[self.current_player][1]
+        # Pieces on both edges for current player
+        if len(start_edge>=1) and len(end_edge>=1):
+            # Search all possible path combinations
+            # for every start piece to every end piece
+            for start_piece in start_edge:
+                for end_piece in end_edge:
+                    return self.search_path(start_piece, end_piece)
+        else:
+            return False
+
+        """ 
         # Check for full board
         if 0 not in self.board:
             return True
@@ -160,7 +237,6 @@ class Hex:
         possible_winner = [1 if self.current_player == 2 else 2]
 
         # Check for pieces in the edges
-
         is_start_edge = False
         is_end_edge = False
         for piece in self.pieces[possible_winner]:
@@ -178,15 +254,10 @@ class Hex:
             return False
 
         # Search after winning path from last moved piece position to both start and end edges
-        for neighbours in self.last_move.get_neighbouring_friends():
-            pass
-
-            # TODO: Continue on this function
-            # Use a*?
-            # Search from last moved piece and find both outer edges
-
-        else:
-            return False
+        self.find_edge_neighbour(self.last_move)
+       
+        return False
+        """
 
     def print_game_board(self):
         """ Prints a beautiful representation of the Hex board"""

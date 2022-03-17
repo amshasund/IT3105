@@ -1,3 +1,5 @@
+## TODOs
+- [ ] Not alout to overwrite another players piece on the board
 ## Questions to studass
 - [ ] Does reformat board work with np.where(Piece.player == 1) ?
 

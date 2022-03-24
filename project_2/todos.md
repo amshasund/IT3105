@@ -1,5 +1,7 @@
 ## TODOs
-- [ ] Not allowed to overwrite another players piece on the board
+- [ ] Reset board after game is over
+- [ ] Fortsette refactoring
+- [x] Not allowed to overwrite another players piece on the board
 - [ ] Add player and position as parameters to find_neighbours function
 ## Questions to studass
 - [ ] Does reformat board work with np.where(Piece.player == 1) ?

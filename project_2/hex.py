@@ -67,6 +67,7 @@ class Hex:
             1: [[], []],
             2: [[], []],
         }
+        self.is_winner = False
 
     def init_game_board(self):
         self.board = [[0 for i in range(hex_board_size)]
@@ -76,6 +77,9 @@ class Hex:
     def set_game_state(self, state):
         self.current_player = state[0]
         self.board = state[1]
+    
+    def get_hex_board(self):
+        return self.board
 
     def get_state(self, reformat=False):
         if reformat:
@@ -144,15 +148,28 @@ class Hex:
             end_edge = True
 
         return start_edge, end_edge
+    
+    def get_legal_moves(self, board):
+        self.print_game_board(board)
+        legal_moves = [(ix,iy) for ix, row in enumerate(board) for iy, i in enumerate(row) if i == 0]
+        print("Legal moves: ", legal_moves)
+        return legal_moves
+            
 
-    # actual move = [player, piece_positon], ex: [2, [2,1]]
     def perform_move(self, actual_move):
+        # actual move = [player, piece_positon], ex: [2, [2,1]]
         moving_player = actual_move[0]
         position = actual_move[1]
 
         # Setting position coordinates
         row = position[0]
         col = position[1]
+        
+        # Check if actual move is legal
+        legal_moves = self.get_legal_moves(self.board)
+        if (row, col) not in legal_moves:
+            print("Illegal move registrated - only one of the following moves: " + str(legal_moves))
+            return False
 
         # Check if piece is placed on a edge
         start_edge, end_edge = self.is_edge(position, moving_player)
@@ -188,7 +205,7 @@ class Hex:
         # TODO: Check for longer path
         start_piece.set_has_visited(True)
         if start_piece.neighbouring_friends:
-            print(start_piece.neighbouring_friends)
+            #print(start_piece.neighbouring_friends)
             for neighbour in start_piece.neighbouring_friends:
                 while neighbour is not end_piece and not neighbour.get_has_visited():
                     path_exists = self.search_path(neighbour, end_piece)
@@ -230,8 +247,8 @@ class Hex:
         player = self.last_move.get_player()
         start_edge = self.edge_pieces[player][0]
         end_edge = self.edge_pieces[player][1]
-        print(start_edge)
-        print(end_edge)
+        #print(start_edge)
+        #print(end_edge)
 
         # Pieces on both edges for current player
         if len(start_edge) >= 1 and len(end_edge) >= 1:
@@ -276,7 +293,7 @@ class Hex:
         return False
         """
 
-    def print_game_board(self):
+    def print_game_board(self, board):
         """ Prints a beautiful representation of the Hex board"""
         board = self.board
         column_names = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -306,3 +323,4 @@ class Hex:
             indent += 2
         headings = " "*(indent-2)+headings
         print(headings)
+        print("\nR: Player 1 (num) \nB: Player 2 (alph)")

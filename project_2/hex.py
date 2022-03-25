@@ -38,8 +38,7 @@ class Piece:
 class Hex:
     def __init__(self):
         self.board = None
-        self.last_move = None
-        self.is_winner = False
+        self.prev_move = None
 
     def init_game_board(self):
         self.board = [[0 for i in range(hex_board_size)]
@@ -47,16 +46,19 @@ class Hex:
     
     def reset_game_board(self):
         self.board = None
-        self.last_move = None
-        self.is_winner = False
+        self.prev_move = None
     
     def get_hex_board(self):
         return self.board
+    
+    def set_game_state(self, state):
+        self.board = state[0]
+        self.prev_move = state[1]
 
     def get_state(self, reformat=False):
         if reformat:
-            return [self.last_move.get_player(), self.reformat_board()]
-        return [self.last_move.get_player(), self.board]
+            return [self.reformat_board(), self.prev_move]
+        return [self.board, self.prev_move]
 
     def reformat_board(self):
         # TODO: Figure out how to do when using Piece objects
@@ -117,10 +119,10 @@ class Hex:
 
         # Make a new piece from the state info
         piece = Piece(position, moving_player)
-        self.last_move = piece  # save last move to use in game_over check
+        self.prev_move = piece  # save last move to use in game_over check
 
         # Find all neighbouring pieces of same player and add them to friendly neighbours in Piece
-        friendly_neighbours = self.find_neighbours(self.last_move.get_position(), self.last_move.get_player())
+        friendly_neighbours = self.find_neighbours(self.prev_move.get_position(), self.prev_move.get_player())
         piece.add_neighbouring_friends(friendly_neighbours)
 
         # Add piece to board and list of pieces
@@ -151,12 +153,12 @@ class Hex:
             start = [row[0] for row in self.board if (isinstance(row[0], Piece) and row[0].get_player() == player) ]
             end = [row[-1] for row in self.board if (isinstance(row[-1], Piece) and row[-1].get_player() == player)]
         if player == 2:
-            start = [x for x in self.board[0] if (isinstance(x, Piece) and x.get_player() == player)]
-            end = [x for x in self.board[-1] if (isinstance(x, Piece) and x.get_player() == player)]
+            start = [p for p in self.board[0] if (isinstance(p, Piece) and p.get_player() == player)]
+            end = [p for p in self.board[-1] if (isinstance(p, Piece) and p.get_player() == player)]
         return start, end
 
     def game_over(self):
-        player = self.last_move.get_player()
+        player = self.prev_move.get_player()
         start_edge, end_edge = self.get_edges(player)
 
         # Pieces on both edges for current player

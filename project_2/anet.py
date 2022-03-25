@@ -47,3 +47,20 @@ class ANet:
                           tf.keras.metrics.categorical_accuracy])
 
         self.model = model
+
+    def train_model(self, reward, state, new_state):
+        # Input: game state + legal_moves
+        # Output: probability distribution over all legal moves
+        state = self.reshape_state(state)
+        target = reward + discount_factor_critic * self.get_value(new_state)
+        self.nn_model.fit(state, target, verbose=0)
+    
+    def choose_move(self, state, legal_moves):
+        # Explorative for rollout (behaviour (default) policy)
+        # More exploitative for actual moves (target policy)
+        state = self.reshape_state(state)
+        value = self.nn_model(state)
+        return value
+
+    def reshape_state(state):
+        pass

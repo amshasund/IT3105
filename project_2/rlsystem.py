@@ -29,7 +29,7 @@ class RLSystem:
             # Initialize actual game board
             self.hex.init_game_board()
 
-            # Set start state
+            # Set start state: [board, last_move]
             state_init = self.hex.get_state()
 
             # TODO: init mct to a single root, which represents s_init

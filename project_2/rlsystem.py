@@ -36,7 +36,7 @@ class RLSystem:
             root = copy.deepcopy(state_init)
             self.mct.init_tree(root)
 
-            while not self.hex.game_over():  # TODO
+            while not self.hex.game_over(): 
                 hex_mc = Hex()
                 hex_mc.set_game_state(root)
 

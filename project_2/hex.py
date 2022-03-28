@@ -158,18 +158,19 @@ class Hex:
         return start, end
 
     def game_over(self):
-        player = self.prev_move.get_player()
-        start_edge, end_edge = self.get_edges(player)
+        if self.prev_move:
+            player = self.prev_move.get_player()
+            start_edge, end_edge = self.get_edges(player)
 
-        # Pieces on both edges for current player
-        if len(start_edge) >= 1 and len(end_edge) >= 1:
-            # Search possible path combinations from all start pieces
-            for start_piece in start_edge:
-                path = self.search_path(start_piece, end_edge)
-                self.reset_visit()
-                if path:
-                    self.reset_game_board()
-                    return True
+            # Pieces on both edges for current player
+            if len(start_edge) >= 1 and len(end_edge) >= 1:
+                # Search possible path combinations from all start pieces
+                for start_piece in start_edge:
+                    path = self.search_path(start_piece, end_edge)
+                    self.reset_visit()
+                    if path:
+                        self.reset_game_board()
+                        return True
         return False
 
     def print_game_board(self, board):

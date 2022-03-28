@@ -1,5 +1,5 @@
 ## TODOs
-- [ ] Implement a tree policy function in mcts
+- [ ] Implement a tree policy function in mcts node_to_leaf
 - [x] Reset board after game is over
 - [x] Fortsette refactoring (reformat)
 - [x] Not allowed to overwrite another players piece on the board

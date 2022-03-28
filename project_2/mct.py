@@ -1,20 +1,22 @@
 import copy
+import random
 from parameters import (
-    number_search_games
+    number_search_games, starting_player
 )
+
 
 class Node:
     def __init__(self, state, parent=None):
         self.parent = parent
         self.children = []
         self.state = state
-    
+
     def get_state(self):
         return self.state
-    
+
     def set_parent(self, parent):
         self.parent = parent
-    
+
     def get_parent(self):
         return self.parent
 
@@ -29,13 +31,14 @@ class Node:
 
 
 class MonteCarloTree:
-    def __init__(self):
-        self.root  = None
-    
+    def __init__(self, anet):
+        self.root = None
+        self.anet = anet
+
     def init_tree(self, root):
         self.root = Node(root)
 
-    def node_to_leaf(self, game, node):
+    def node_to_leaf(self, node):
         leaf = False
         while not leaf:
             # Node has no children -> node is leaf node
@@ -44,14 +47,18 @@ class MonteCarloTree:
             # If node has children -> not a leaf node -> get node's children:
             else:
                 # TODO: use tree policy to choose child to look at
-                node = node.get_children()[0] # using depth first here, not ideal
+                # now: choosing a random child
+                node = random.choice(node.get_children())
         return leaf
-    
+
     def expand_leaf(self, parent, game):
         # get list of all legal moves on current board
         legal_moves = game.get_legal_moves(game.get_hex_board())
         # get player based on who made the previous move
-        player = (2 if game.prev_move.get_player() == 1 else 1)
+        if game.prev_move:
+            player = (2 if game.prev_move.get_player() == 1 else 1)
+        else:
+            player = starting_player
 
         for move in legal_moves:
             # make a copy of game for simulation
@@ -75,7 +82,7 @@ class MonteCarloTree:
         for _ in range(number_search_games):
             '''
             1: use tree policy Pt to search from root to a leaf L of MCT - update game with each move
-            
+
             1.1: expand leaf
             2: use anet to choose rollout actions from L to a final state F - update game with each move
             3: perform mcts backpropagation from F to root
@@ -90,14 +97,13 @@ class MonteCarloTree:
 
             # Rollout from leaf with actor network policy
             while not game.game_over():
-                move = self.anet.choose_move(game.get_state(), game.get_legal_moves(game.get_hex_board()))
+                move = self.anet.choose_move(
+                    game.get_state(), game.get_legal_moves(game.get_hex_board()))
                 game.perform_move(move)
 
-            
             final = game.get_state()
-            # Perform Backpropagation 
+            # Perform Backpropagation
             self.perform_backpropagation(final, self.root)
-
 
     def perform_backpropagation(final, root):
         node = final

@@ -22,7 +22,7 @@ class RLSystem:
         replay_buffer = []
 
         # Create neural nel
-        self.anet.build_model()
+        #self.anet.build_model()
 
         # Play games
         for actual_game in range(number_actual_games):
@@ -36,7 +36,7 @@ class RLSystem:
             root = copy.deepcopy(state_init)
             self.mct.init_tree(root)
 
-            while not self.hex.game_over(): 
+            while not self.hex.game_over():
                 hex_mc = Hex()
                 hex_mc.set_game_state(root)
 

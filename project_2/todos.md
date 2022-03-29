@@ -1,18 +1,20 @@
 ## TODOs
-- [ ] Implement a tree policy function in mcts node_to_leaf
+- [x] Implement backprop
+- [ ] Opt: Implement a tree policy function in mcts node_to_leaf
+- [ ] Opt: Dont choose argmax, use prob distribution (anet)
 - [x] Reset board after game is over
 - [x] Fortsette refactoring (reformat)
 - [x] Not allowed to overwrite another players piece on the board
 - [x] Add player and position as parameters to find_neighbours function
 
 ## Questions to studass
-- [ ] How to control explore and not?
-- [ ] How does the network know which moves are legal?
-- [ ] What should target be in train model?
+- [x] How to control explore and not?
+- [x] How does the network know which moves are legal? - vet ikke, men vi sender inn null på moves som ikke er lov sånn at det ikke blir valgt
+- [x] What should target be in train model?
 - [ ] How to represent a state in MCT
-- [ ] Does reformat board work with np.where(Piece.player == 1) ?
-- [ ] Should we rollout from all children, or follow tree-policy in choosing this as well?
-- [ ] How should we represent board for input to anet?
+- [x] Does reformat board work with np.where(Piece.player == 1) ?
+- [x] Should we rollout from all children, or follow tree-policy in choosing this as well? - Only one of the children
+- [x] How should we represent board for input to anet?
 
 - [x] SparseCategorialCrossentropy or CategoricalCrossentropy? Should we use one-hot encoding?
 - [x] How to know when game is over? A*? Keep track of neighbours?

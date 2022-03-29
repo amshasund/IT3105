@@ -8,7 +8,6 @@ from parameters import (
     activation_function,
     optimizer, 
     starting_player,
-    explore_prob
 )
 
 
@@ -46,33 +45,30 @@ class ANet:
 
         self.model = model
 
-    def train_model(self, replay_buffer):
+    def train_model(self, current_state, replay_buffer):
         # Input: game state + legal_moves
+        # Replay_buffer: sannsynligheter etter MCT
         # Output: probability distribution over all legal moves
-        # TODO: What is replay_buffer???
-        self.model.fit(np.array(state), np.array(target), verbose=0)
+        # TODO; Nomalize replay buffer data
+        self.model.fit(np.array(current_state), np.array(replay_buffer), verbose=0)
 
 
     def choose_move(self, state, legal_moves, try_explore=False):
-        # Explorative for rollout (behaviour (default) policy)
-        # More exploitative for actual moves (target policy)
         player = state[1]
         board = state[0]
+        # -1 og 1 bedre enn 1 og 2
         # input: [1 0 0 0 0 0 0 0 0 0] means that player 1 starts with clean board
         state = np.insert(board, 0, player)
         state = self.reshape_state(state)
-        if try_explore and random.choices(population=[True, False], weights=[explore_prob, 1 - explore_prob], k=1)[0]:
-            distribution = np.random.normal(size=hex_board_size**2)
-        else:
-            distribution = np.array(self.model(state)[0])
 
+        distribution = np.array(self.model(state)[0])
         # eliminate illegal moves
         dist_move = np.reshape(distribution, (hex_board_size, hex_board_size)) * np.array(legal_moves)
         # get index of the best move
+        # When choosing move, use prob from anet to choose a move [0.4, 0.45, 0.1, 0.05]
         chosen_move = np.unravel_index(np.argmax(dist_move, axis=None), dist_move.shape)
 
         print("chosen move", chosen_move)
-
         return [player, chosen_move]
     
     def reshape_state(self, state):

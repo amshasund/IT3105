@@ -10,9 +10,24 @@ class Node:
         self.parent = parent
         self.children = []
         self.state = state
+        self.count = 0
+        self.value = 0
 
     def get_state(self):
         return self.state
+    
+    def get_count(self):
+        return self.count
+    
+    def get_value(self):
+        return self.value
+    
+    def update_count(self):
+        self.count += 1
+    
+    def update_value(self, value):
+        # TODO: Do maths here!!
+        self.value += value
 
     def set_parent(self, parent):
         self.parent = parent
@@ -47,6 +62,7 @@ class MonteCarloTree:
             # If node has children -> not a leaf node -> get node's children:
             else:
                 # TODO: use tree policy to choose child to look at
+                
                 # now: choosing a random child
                 node = random.choice(node.get_children())
         return leaf
@@ -68,7 +84,7 @@ class MonteCarloTree:
                 # simulate a legal move on the game
                 temp_game.perform_move([player, move])
                 # get new game state
-                state = temp_game.get_state()
+                state = copy.deepcopy(temp_game.get_state())
                 # make child node with new game state and parent
                 child = Node(state, parent)
                 # add child to parent
@@ -91,25 +107,37 @@ class MonteCarloTree:
             # Find a leaf based on tree policy
             leaf = self.node_to_leaf(self.root)
             # Update game with move to leaf node
-            game.set_game_state(leaf.get_state())
+            game.reset_game_board()
+            game.set_game_state(copy.deepcopy(leaf.get_state()))
+            player = (leaf.get_state()[1].get_player() if leaf.get_state()[1] else starting_player)
             # Expand leaf with all its children (legal moves)
             # TODO: Is this just to know which nodes have been rolled out??
             self.expand_leaf(leaf, game)
 
             # Rollout from leaf with actor network policy
+            # ROLLOUT START
             while not game.game_over():
                 move = self.anet.choose_move(
                     game.get_state(True), game.get_legal_moves(game.get_hex_board()))
                 game.perform_move(move)
-
-            final = game.get_state()
+            winner = game.game_over()
+            # ROLLOUT END
+            reward = game.get_reward(winner, player)
+            
             # Perform Backpropagation
-            self.perform_backpropagation(final, self.root)
+            self.perform_backpropagation(leaf, reward)
 
-    def perform_backpropagation(final, root):
-        node = final
-        while node is not root:
-            node = None          # TODO: Implement
-
-    def select_moce(self):
-        pass
+    def perform_backpropagation(self, final, reward):
+        if final.get_parent():
+            final.update_count()
+            final.update_value(reward)
+            print("Has parent: ", final.get_state()[0])
+            print("Count: ", final.get_count())
+            print("Value: ", final.get_value())
+            self.perform_backpropagation(final.get_parent(), reward)
+        else:
+            final.update_count()
+            final.update_value(reward)
+            print("Has no parent: ", final.get_state()[0])
+            print("Count: ", final.get_count())
+            print("Value: ", final.get_value())

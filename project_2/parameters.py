@@ -15,7 +15,7 @@ play of the TOPP.
 
 hex_board_size = 3      # 3 <= k <= 10
 number_actual_games = 1     # TODO: What is this? Same as num_games?
-number_search_games = 1     # TODO: What is this?
+number_search_games = 2     # TODO: What is this?
 starting_player = 1         # 1 or 2
 # mcts parameters
 episodes = 1
@@ -29,7 +29,6 @@ hidden_layers = [1, 5, 2, 4]
 activation_function = ["linear", "sigmoid", "tanh", "ReLU"]
 optimizer = "sgd"  # adagrad, stochastic gradient descent, rmsprop or adam
 num_cached = 3
-explore_prob = 0.7
 
 # round-robin play
 num_games = 5

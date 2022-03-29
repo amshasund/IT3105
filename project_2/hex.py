@@ -41,13 +41,17 @@ class Hex:
         self.board = None
         self.prev_move = None
 
+
     def init_game_board(self):
         self.board = [[0 for i in range(hex_board_size)]
                       for j in range(hex_board_size)]
+        self.prev_move = None
+
     
     def reset_game_board(self):
         self.board = None
         self.prev_move = None
+
     
     def get_hex_board(self):
         return self.board
@@ -60,6 +64,15 @@ class Hex:
         if reformat:
             return self.reformat_state()
         return [self.board, self.prev_move]
+    
+    def get_reward(self, winner, player):
+        if winner:
+            if winner == player:
+                return 1
+            else:
+                return -1
+        else:
+            return 0
 
     def reformat_state(self):
         # TODO: Figure out how to do when using Piece objects
@@ -178,8 +191,7 @@ class Hex:
                     path = self.search_path(start_piece, end_edge)
                     self.reset_visit()
                     if path:
-                        self.reset_game_board()
-                        return True
+                        return player
         return False
 
     def print_game_board(self, board):

@@ -22,7 +22,7 @@ class RLSystem:
         replay_buffer = []
 
         # Create neural nel
-        #self.anet.build_model()
+        self.anet.build_model()
 
         # Play games
         for actual_game in range(number_actual_games):

@@ -7,14 +7,16 @@ from parameters import (
     hidden_layers,
     activation_function,
     optimizer, 
-    starting_player
+    starting_player,
+    explore_prob
 )
 
 
 class ANet:
     def __init__(self):
-        self.num_input_nodes = hex_board_size**2 + \
-            1  # one extra input to know which player
+        self.num_input_nodes = hex_board_size**2 + 1  
+        # one extra input to know which player
+
         self.model = None
 
     def build_model(self, loss=tf.keras.losses.BinaryCrossentropy):
@@ -44,31 +46,34 @@ class ANet:
 
         self.model = model
 
-    def train_model(self, reward, state, new_state):
+    def train_model(self, replay_buffer):
         # Input: game state + legal_moves
         # Output: probability distribution over all legal moves
-        state = self.reshape_state(state)
-        target = reward + discount_factor_critic * self.get_value(new_state)
-        self.model.fit(state, target, verbose=0)
+        # TODO: What is replay_buffer???
+        self.model.fit(np.array(state), np.array(target), verbose=0)
 
-    def choose_move(self, state, legal_moves):
+
+    def choose_move(self, state, legal_moves, try_explore=False):
         # Explorative for rollout (behaviour (default) policy)
         # More exploitative for actual moves (target policy)
-        #state = self.reshape_state(state)
-        
-        #value = self.model(state)
-        
-        if state[1]:
-            player = (2 if state[1].get_player() == 1 else 1)
+        player = state[1]
+        board = state[0]
+        # input: [1 0 0 0 0 0 0 0 0 0] means that player 1 starts with clean board
+        state = np.insert(board, 0, player)
+        state = self.reshape_state(state)
+        if try_explore and random.choices(population=[True, False], weights=[explore_prob, 1 - explore_prob], k=1)[0]:
+            distribution = np.random.normal(size=hex_board_size**2)
         else:
-            player = starting_player
-        # For test
-        return [player, random.choice(legal_moves)]
+            distribution = np.array(self.model(state)[0])
 
+        # eliminate illegal moves
+        dist_move = np.reshape(distribution, (hex_board_size, hex_board_size)) * np.array(legal_moves)
+        # get index of the best move
+        chosen_move = np.unravel_index(np.argmax(dist_move, axis=None), dist_move.shape)
+
+        print("chosen move", chosen_move)
+
+        return [player, chosen_move]
+    
     def reshape_state(self, state):
-        """Reshapes the state from [[GameBoard], [Player]] to [gamebord1D, player]"""
-        reshaped_state = []
-        reshaped_state.append(state[0].flatten())
-        reshaped_state.append(state[1])
-        print("reshaped state", reshaped_state)
-        return reshaped_state
+        return np.reshape(state, (1,-1))

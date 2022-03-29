@@ -1,5 +1,6 @@
 import random
-from parameters import hex_board_size
+import numpy as np
+from parameters import hex_board_size, starting_player
 
 class Piece:
     def __init__(self, position, player):
@@ -57,14 +58,21 @@ class Hex:
 
     def get_state(self, reformat=False):
         if reformat:
-            return [self.reformat_board(), self.prev_move]
+            return self.reformat_state()
         return [self.board, self.prev_move]
 
-    def reformat_board(self):
+    def reformat_state(self):
         # TODO: Figure out how to do when using Piece objects
         """ Reformats the presentation of the board
         for the RL system """
-        pass
+        ref_board = [[piece.get_player() if isinstance(piece, Piece) else piece for piece in row] for row in self.board]
+        ref_board = np.array(ref_board).flatten()
+        if self.prev_move:
+            next_player = self.switch_player(self.prev_move.get_player())
+        else:
+            next_player = starting_player
+        return [ref_board, next_player]
+        
 
     def switch_player(self, last_player):
         next_player_dict = {
@@ -99,8 +107,8 @@ class Hex:
         return neighbouring_friends
     
     def get_legal_moves(self, board):
-        legal_moves = [(ix,iy) for ix, row in enumerate(board) for iy, i in enumerate(row) if i == 0]
-        return legal_moves    
+        legal_moves = [[1 if i == 0 else 0 for i in row] for row in self.board]
+        return legal_moves
 
     def perform_move(self, actual_move):
         # actual move = [player, piece_positon], ex: [2, [2,1]]
@@ -113,8 +121,8 @@ class Hex:
         
         # Check if actual move is legal
         legal_moves = self.get_legal_moves(self.board)
-        if (row, col) not in legal_moves:
-            print("Illegal move registrated - only one of the following moves: " + str(legal_moves))
+        if legal_moves[row][col] == 0:
+            print("Illegal move registrated")
             return False
 
         # Make a new piece from the state info
@@ -127,6 +135,7 @@ class Hex:
 
         # Add piece to board and list of pieces
         self.board[row][col] = piece
+        self.print_game_board(self.board)
     
     def reset_visit(self):
         for row in self.board:

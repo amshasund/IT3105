@@ -6,6 +6,9 @@
 - [x] Add player and position as parameters to find_neighbours function
 
 ## Questions to studass
+- [ ] How to control explore and not?
+- [ ] How does the network know which moves are legal?
+- [ ] What should target be in train model?
 - [ ] How to represent a state in MCT
 - [ ] Does reformat board work with np.where(Piece.player == 1) ?
 - [ ] Should we rollout from all children, or follow tree-policy in choosing this as well?

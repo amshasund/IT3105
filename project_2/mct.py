@@ -61,19 +61,20 @@ class MonteCarloTree:
             player = starting_player
 
         for move in legal_moves:
-            # make a copy of game for simulation
-            # TODO: Is this bad????
-            temp_game = copy.deepcopy(game)
-            # simulate a legal move on the game
-            temp_game.perform_move([player, move])
-            # get new game state
-            state = temp_game.get_state()
-            # make child node with new game state and parent
-            child = Node(state, parent)
-            # add child to parent
-            parent.add_children(child)
-            # reset temp_game for new loop (not necessary)
-            temp_game = None
+            if move == 1:
+                # make a copy of game for simulation
+                # TODO: Is this bad????
+                temp_game = copy.deepcopy(game)
+                # simulate a legal move on the game
+                temp_game.perform_move([player, move])
+                # get new game state
+                state = temp_game.get_state()
+                # make child node with new game state and parent
+                child = Node(state, parent)
+                # add child to parent
+                parent.add_children(child)
+                # reset temp_game for new loop (not necessary)
+                temp_game = None
 
     def search(self, hex_mc):
         game = hex_mc
@@ -98,7 +99,7 @@ class MonteCarloTree:
             # Rollout from leaf with actor network policy
             while not game.game_over():
                 move = self.anet.choose_move(
-                    game.get_state(), game.get_legal_moves(game.get_hex_board()))
+                    game.get_state(True), game.get_legal_moves(game.get_hex_board()))
                 game.perform_move(move)
 
             final = game.get_state()

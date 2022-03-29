@@ -26,9 +26,10 @@ search_games_per_move = 1
 save_interval = 20 # TODO: what is the range []
 learning_rate = 0.1
 hidden_layers = [1, 5, 2, 4]
-activation_function = ["linear", "sigmoid", "tanh", "RELU"]
+activation_function = ["linear", "sigmoid", "tanh", "ReLU"]
 optimizer = "sgd"  # adagrad, stochastic gradient descent, rmsprop or adam
 num_cached = 3
+explore_prob = 0.7
 
 # round-robin play
 num_games = 5

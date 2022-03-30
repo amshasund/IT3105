@@ -1,4 +1,5 @@
 ## TODOs
+- [ ] Get node from state to use for visit_dist
 - [x] Implement backprop
 - [ ] Opt: Implement a tree policy function in mcts node_to_leaf
 - [x] Opt: Dont choose argmax, use prob distribution (anet)

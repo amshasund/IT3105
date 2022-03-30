@@ -49,26 +49,39 @@ class ANet:
         # Input: game state + legal_moves
         # Replay_buffer: sannsynligheter etter MCT
         # Output: probability distribution over all legal moves
-        # TODO; Nomalize replay buffer data
-        self.model.fit(np.array(current_state), np.array(replay_buffer), verbose=0)
+
+        # Normalize replay buffer data
+        replay_buffer = np.array(replay_buffer) / np.sum(replay_buffer)
+        self.model.fit(np.array(current_state), replay_buffer, verbose=0)
 
 
-    def choose_move(self, state, legal_moves, try_explore=False):
+    def choose_move(self, state, legal_moves):
         player = state[1]
         board = state[0]
+        
         # -1 og 1 bedre enn 1 og 2
         # input: [1 0 0 0 0 0 0 0 0 0] means that player 1 starts with clean board
         state = np.insert(board, 0, player)
+
+        # Make state ready for input to actor net model
         state = self.reshape_state(state)
 
+        # Get preference distribution from actor net model
         distribution = np.array(self.model(state)[0])
-        # eliminate illegal moves
-        dist_move = np.reshape(distribution, (hex_board_size, hex_board_size)) * np.array(legal_moves)
-        # get index of the best move
-        # When choosing move, use prob from anet to choose a move [0.4, 0.45, 0.1, 0.05]
-        chosen_move = np.unravel_index(np.argmax(dist_move, axis=None), dist_move.shape)
 
-        print("chosen move", chosen_move)
+        # Eliminate illegal moves
+        dist_move = distribution * np.array(legal_moves).flatten()
+
+        # Normalize dist_move to ensure no error from np.random.choice
+        dist_move = dist_move / np.sum(dist_move)
+        
+        # When choosing move, use prob from anet to choose a move [0.4, 0.45, 0.1, 0.05]
+        # Find 1d index of flattened dist_move
+        chosen_move_flattened = np.random.choice(range(len(dist_move)), p=dist_move)
+        
+        # Find 2d index from 1d index based on shape of legal_moves
+        chosen_move = np.unravel_index(chosen_move_flattened, np.array(legal_moves).shape)
+        
         return [player, chosen_move]
     
     def reshape_state(self, state):

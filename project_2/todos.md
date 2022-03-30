@@ -1,7 +1,7 @@
 ## TODOs
 - [x] Implement backprop
 - [ ] Opt: Implement a tree policy function in mcts node_to_leaf
-- [ ] Opt: Dont choose argmax, use prob distribution (anet)
+- [x] Opt: Dont choose argmax, use prob distribution (anet)
 - [x] Reset board after game is over
 - [x] Fortsette refactoring (reformat)
 - [x] Not allowed to overwrite another players piece on the board

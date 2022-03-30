@@ -1,5 +1,6 @@
 import copy
 import random
+import numpy as np
 from parameters import (
     number_search_games, starting_player
 )
@@ -15,6 +16,12 @@ class Node:
 
     def get_state(self):
         return self.state
+    
+    def get_board(self):
+        return self.state[0]
+    
+    def get_player(self):
+        return (self.state[1].get_player() if self.state[1] else starting_player)
     
     def get_count(self):
         return self.count
@@ -52,6 +59,9 @@ class MonteCarloTree:
 
     def init_tree(self, root):
         self.root = Node(root)
+    
+    def get_root(self):
+        return self.root
 
     def node_to_leaf(self, node):
         leaf = False
@@ -62,7 +72,6 @@ class MonteCarloTree:
             # If node has children -> not a leaf node -> get node's children:
             else:
                 # TODO: use tree policy to choose child to look at
-                
                 # now: choosing a random child
                 node = random.choice(node.get_children())
         return leaf
@@ -92,7 +101,7 @@ class MonteCarloTree:
                 # reset temp_game for new loop (not necessary)
                 temp_game = None
 
-    def search(self, hex_mc):
+    def search(self, hex_mc, root):
         game = hex_mc
 
         # Search to a leaf and update hex_mc
@@ -105,16 +114,17 @@ class MonteCarloTree:
             3: perform mcts backpropagation from F to root
             '''
             # Find a leaf based on tree policy
-            leaf = self.node_to_leaf(self.root)
+            leaf = self.node_to_leaf(root)
             # Update game with move to leaf node
             game.reset_game_board()
             game.set_game_state(copy.deepcopy(leaf.get_state()))
-            player = (leaf.get_state()[1].get_player() if leaf.get_state()[1] else starting_player)
+            player = leaf.get_player()
             # Expand leaf with all its children (legal moves)
-            # TODO: Is this just to know which nodes have been rolled out??
+            
             self.expand_leaf(leaf, game)
 
             # Rollout from leaf with actor network policy
+
             # ROLLOUT START
             while not game.game_over():
                 move = self.anet.choose_move(
@@ -131,13 +141,23 @@ class MonteCarloTree:
         if final.get_parent():
             final.update_count()
             final.update_value(reward)
-            print("Has parent: ", final.get_state()[0])
+            print("Has parent: ", final.get_board())
             print("Count: ", final.get_count())
             print("Value: ", final.get_value())
             self.perform_backpropagation(final.get_parent(), reward)
         else:
             final.update_count()
             final.update_value(reward)
-            print("Has no parent: ", final.get_state()[0])
+            print("Has no parent: ", final.get_board())
             print("Count: ", final.get_count())
             print("Value: ", final.get_value())
+        
+    def get_distribution(self, root):
+        # root -> list of [board, prev_move] from Hex for root state
+        dist = np.zeros(len(np.array(root[0]).flatten()))
+        print(dist)
+
+    def get_node_from_state(self, state, node):
+        # TODO: Do some recursive shit here
+        if node.get_state() == state:
+            return node

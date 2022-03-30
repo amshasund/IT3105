@@ -3,6 +3,7 @@ from anet import ANet
 from mct import MonteCarloTree
 from hex import Hex
 import copy
+import numpy as np
 
 from parameters import (
     number_actual_games,
@@ -33,22 +34,23 @@ class RLSystem:
             state_init = self.hex.get_state()
 
             # TODO: init mct to a single root, which represents s_init
-            root = copy.deepcopy(state_init)
-            self.mct.init_tree(root)
+            root_state = copy.deepcopy(state_init)
+            self.mct.init_tree(root_state)
+            root = self.mct.get_root()
 
             while not self.hex.game_over():
                 hex_mc = Hex()
-                hex_mc.set_game_state(root)
+                hex_mc.set_game_state(root.get_state())
 
                 # TODO: implement this using algorithm 1 from materials ref studass
-                self.mct.search(hex_mc)
+                self.mct.search(hex_mc, root)
 
                 visit_dist = self.mct.get_distribution(root)
                 replay_buffer.append((root, visit_dist))
 
                 # Choose actual move
                 # TODO: Send in reformatted board state
-                actual_move = self.anet.choose_move(visit_dist)
+                actual_move = np.unravel_index(np.argmax(visit_dist), np.array(root.get_board()).shape)
 
                 # Perform move
                 self.hex.perform_move(actual_move)

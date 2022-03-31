@@ -45,19 +45,21 @@ class RLSystem:
                 # TODO: implement this using algorithm 1 from materials ref studass
                 self.mct.search(hex_mc, root)
 
-                visit_dist = self.mct.get_distribution(root)
+                visit_dist = self.mct.get_distribution(root, self.hex.get_legal_moves())
                 replay_buffer.append((root, visit_dist))
 
                 # Choose actual move
                 # TODO: Send in reformatted board state
-                actual_move = np.unravel_index(np.argmax(visit_dist), np.array(root.get_board()).shape)
+                new_position=np.unravel_index(np.argmax(np.array(visit_dist).flatten()), np.array(root.get_board()).shape)
+                actual_move = [self.hex.get_next_player(), list(new_position)]
 
                 # Perform move
-                self.hex.perform_move(actual_move)
-                successor_state = self.hex.get_state()
-                self.mct.retain_and_discard(successor_state)
-                root = copy.deepcopy(successor_state)
-
+                self.hex.perform_move(actual_move, print=True)
+                successor_board = self.hex.get_non_object_board(self.hex.get_hex_board())
+                self.mct.retain_and_discard(successor_board)
+                
+                root = self.mct.get_root()
+            print("Game finished")
             self.anet.train(replay_buffer)
             # Save parameters for tournament
             if actual_game % save_interval == 0:

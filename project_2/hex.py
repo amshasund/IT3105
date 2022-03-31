@@ -55,6 +55,14 @@ class Hex:
     
     def get_hex_board(self):
         return self.board
+
+    def get_next_player(self):
+        if self.prev_move:
+            prev_player = self.prev_move.get_player()
+            next_player = self.switch_player(prev_player)
+        else:
+            next_player = starting_player
+        return next_player
     
     def set_game_state(self, state):
         self.board = state[0]
@@ -78,21 +86,21 @@ class Hex:
         # TODO: Figure out how to do when using Piece objects
         """ Reformats the presentation of the board
         for the RL system """
-        ref_board = [[piece.get_player() if isinstance(piece, Piece) else piece for piece in row] for row in self.board]
+        ref_board = self.get_non_object_board(self.board)
         ref_board = np.array(ref_board).flatten()
-        if self.prev_move:
-            next_player = self.switch_player(self.prev_move.get_player())
-        else:
-            next_player = starting_player
+        next_player = self.get_next_player()
         return [ref_board, next_player]
+
+    def get_non_object_board(self, board):
+        return [[piece.get_player() if isinstance(piece, Piece) else piece for piece in row] for row in board]
         
 
-    def switch_player(self, last_player):
+    def switch_player(self, prev_player):
         next_player_dict = {
             1: 2,
             2: 1,
         }
-        return next_player_dict[last_player]
+        return next_player_dict[prev_player]
 
     def find_neighbours(self, pos, player): 
         neighbouring_friends = []
@@ -119,11 +127,11 @@ class Hex:
 
         return neighbouring_friends
     
-    def get_legal_moves(self, board):
+    def get_legal_moves(self):
         legal_moves = [[1 if i == 0 else 0 for i in row] for row in self.board]
         return legal_moves
 
-    def perform_move(self, actual_move):
+    def perform_move(self, actual_move, print=False):
         # actual move = [player, piece_positon], ex: [2, [2,1]]
         moving_player = actual_move[0]
         position = actual_move[1]
@@ -133,7 +141,7 @@ class Hex:
         col = position[1]
         
         # Check if actual move is legal
-        legal_moves = self.get_legal_moves(self.board)
+        legal_moves = self.get_legal_moves()
         if legal_moves[row][col] == 0:
             print("Illegal move registrated")
             return False
@@ -148,7 +156,8 @@ class Hex:
 
         # Add piece to board and list of pieces
         self.board[row][col] = piece
-        self.print_game_board(self.board)
+        if print:
+            self.print_game_board(self.board)
     
     def reset_visit(self):
         for row in self.board:

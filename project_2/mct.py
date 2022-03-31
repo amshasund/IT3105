@@ -7,8 +7,9 @@ from parameters import (
 
 
 class Node:
-    def __init__(self, state, parent=None):
+    def __init__(self, state, move=None, parent=None):
         self.parent = parent
+        self.move = move
         self.children = []
         self.state = state
         self.count = 0
@@ -19,6 +20,12 @@ class Node:
     
     def get_board(self):
         return self.state[0]
+    
+    def get_move(self):
+        return self.move
+    
+    def get_non_object_board(self):
+        return [[piece.get_player() if not isinstance(piece, int) else piece for piece in row] for row in self.state[0]]
     
     def get_player(self):
         return (self.state[1].get_player() if self.state[1] else starting_player)
@@ -78,28 +85,29 @@ class MonteCarloTree:
 
     def expand_leaf(self, parent, game):
         # get list of all legal moves on current board
-        legal_moves = game.get_legal_moves(game.get_hex_board())
+        legal_moves = game.get_legal_moves()
+        print("legal_moves: ", legal_moves)
         # get player based on who made the previous move
-        if game.prev_move:
-            player = (2 if game.prev_move.get_player() == 1 else 1)
-        else:
-            player = starting_player
-
-        for move in legal_moves:
-            if move == 1:
-                # make a copy of game for simulation
-                # TODO: Is this bad????
-                temp_game = copy.deepcopy(game)
-                # simulate a legal move on the game
-                temp_game.perform_move([player, move])
-                # get new game state
-                state = copy.deepcopy(temp_game.get_state())
-                # make child node with new game state and parent
-                child = Node(state, parent)
-                # add child to parent
-                parent.add_children(child)
-                # reset temp_game for new loop (not necessary)
-                temp_game = None
+        player = game.get_next_player()
+        print("player: ", player)
+        
+        for row in range(len(legal_moves)):
+            for col in range(len(legal_moves[row])):
+                if legal_moves[row][col] == 1:
+                    # make a copy of game for simulation
+                    # TODO: Is this bad????
+                    temp_game = copy.deepcopy(game)
+                    # simulate a legal move on the game
+                    temp_game.perform_move([player, [row, col]])
+                    # get new game state
+                    state = copy.deepcopy(temp_game.get_state())
+                    # make child node with new game state and parent
+                    move = [row, col]
+                    child = Node(state, move, parent)
+                    # add child to parent
+                    parent.add_children(child)
+                    # reset temp_game for new loop (not necessary)
+                    temp_game = None
 
     def search(self, hex_mc, root):
         game = hex_mc
@@ -119,16 +127,17 @@ class MonteCarloTree:
             game.reset_game_board()
             game.set_game_state(copy.deepcopy(leaf.get_state()))
             player = leaf.get_player()
-            # Expand leaf with all its children (legal moves)
             
+            # Expand leaf with all its children (legal moves)
+            print(leaf.get_board())
             self.expand_leaf(leaf, game)
 
             # Rollout from leaf with actor network policy
 
             # ROLLOUT START
             while not game.game_over():
-                move = self.anet.choose_move(
-                    game.get_state(True), game.get_legal_moves(game.get_hex_board()))
+                move = self.anet.rollout(
+                    game.get_state(True), game.get_legal_moves())
                 game.perform_move(move)
             winner = game.game_over()
             # ROLLOUT END
@@ -152,12 +161,38 @@ class MonteCarloTree:
             print("Count: ", final.get_count())
             print("Value: ", final.get_value())
         
-    def get_distribution(self, root):
-        # root -> list of [board, prev_move] from Hex for root state
-        dist = np.zeros(len(np.array(root[0]).flatten()))
-        print(dist)
+    def get_distribution(self, root, legal_moves):
+        dist = np.array(copy.deepcopy(legal_moves))
+        # get visit count from all children and place in game
+        for child in root.get_children():
+            dist[child.get_move()] *= child.get_count()
+        print("Distributioin: ", dist)
+        return dist
+
+    def retain_and_discard(self, succ_state):
+        # retain subtree rooted at succ_state
+        print("Successor state: ", succ_state)
+        new_root = self.get_node_from_state(succ_state, self.root)
+        print("New root: ", new_root)
+        self.root = new_root
+
+        # discard everything else
+        self.root.set_parent(None)
 
     def get_node_from_state(self, state, node):
-        # TODO: Do some recursive shit here
-        if node.get_state() == state:
+        print("Get node from board: ", state)
+        print("Current node: ", node)
+        print("Board of node: ", node.get_non_object_board())
+        # return node that has state
+        if node.get_non_object_board() == state:
+            print("Found node: ", node)
             return node
+        # if not, search recursively among node's children
+        elif node.get_children():
+            for child in node.get_children():
+                print("Testing child ", child, " of node ", node)
+                result = self.get_node_from_state(state, child)
+                if result:
+                    return result
+        print("Found nothing!")
+        return None

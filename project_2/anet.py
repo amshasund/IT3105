@@ -55,7 +55,7 @@ class ANet:
         self.model.fit(np.array(current_state), replay_buffer, verbose=0)
 
 
-    def choose_move(self, state, legal_moves):
+    def rollout(self, state, legal_moves):
         player = state[1]
         board = state[0]
         

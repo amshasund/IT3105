@@ -157,7 +157,7 @@ class Hex:
         # Add piece to board and list of pieces
         self.board[row][col] = piece
         if print:
-            self.print_game_board(self.board)
+            self.print_game_board()
     
     def reset_visit(self):
         for row in self.board:
@@ -203,7 +203,7 @@ class Hex:
                         return player
         return False
 
-    def print_game_board(self, board):
+    def print_game_board(self):
         """ Prints a beautiful representation of the Hex board"""
         board = self.board
         column_names = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"

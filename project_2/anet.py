@@ -18,7 +18,7 @@ class ANet:
 
         self.model = None
 
-    def build_model(self, loss=tf.keras.losses.BinaryCrossentropy):
+    def build_model(self, loss=tf.keras.losses.binary_crossentropy):
         # Create Neural Net
         model = tf.keras.models.Sequential()
 
@@ -33,7 +33,6 @@ class ANet:
 
         # Add output layer
         # TODO: should we remove the already placed pieces from this?
-        # should not be able to move pieces to a place where another already exists.
         model.add(tf.keras.layers.Dense(
             hex_board_size**2, activation='softmax'))
 
@@ -45,14 +44,28 @@ class ANet:
 
         self.model = model
 
-    def train_model(self, current_state, replay_buffer):
-        # Input: game state + legal_moves
-        # Replay_buffer: sannsynligheter etter MCT
+    def train_model(self, case):
+        # Input: [Node, visit_dist]
         # Output: probability distribution over all legal moves
-
+        node = case[0]
+        board = node.get_non_object_board()
+        print(board)
+        player = node.get_player()
+        print(player)
+        state = np.insert(board, 0, player)
+        print(state)
+        state = self.reshape_state(state)
+        print(state)
+        
         # Normalize replay buffer data
-        replay_buffer = np.array(replay_buffer) / np.sum(replay_buffer)
-        self.model.fit(np.array(current_state), replay_buffer, verbose=0)
+        target = case[1].flatten() / case[1].flatten().sum()
+        target = self.reshape_state(target)
+
+        print(target)
+        
+
+        
+        self.model.fit(np.array(state, dtype=float), np.array(target, dtype=float), verbose=0)
 
 
     def rollout(self, state, legal_moves):
@@ -84,5 +97,6 @@ class ANet:
         
         return [player, chosen_move]
     
-    def reshape_state(self, state):
-        return np.reshape(state, (1,-1))
+    @staticmethod
+    def reshape_state(state):
+        return np.array(state).reshape([1, -1])

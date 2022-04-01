@@ -4,7 +4,6 @@ from hex import Hex
 from rlsystem import RLSystem
 seed(1)
 
-
 def main():
     # TESTS
     rl_system_test = RLSystem()

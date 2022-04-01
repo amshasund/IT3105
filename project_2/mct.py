@@ -86,10 +86,8 @@ class MonteCarloTree:
     def expand_leaf(self, parent, game):
         # get list of all legal moves on current board
         legal_moves = game.get_legal_moves()
-        print("legal_moves: ", legal_moves)
         # get player based on who made the previous move
         player = game.get_next_player()
-        print("player: ", player)
         
         for row in range(len(legal_moves)):
             for col in range(len(legal_moves[row])):
@@ -129,7 +127,6 @@ class MonteCarloTree:
             player = leaf.get_player()
             
             # Expand leaf with all its children (legal moves)
-            print(leaf.get_board())
             self.expand_leaf(leaf, game)
 
             # Rollout from leaf with actor network policy
@@ -150,49 +147,53 @@ class MonteCarloTree:
         if final.get_parent():
             final.update_count()
             final.update_value(reward)
-            print("Has parent: ", final.get_board())
-            print("Count: ", final.get_count())
-            print("Value: ", final.get_value())
+            #print("Has parent: ", final.get_board())
+            #print("Count: ", final.get_count())
+            #print("Value: ", final.get_value())
             self.perform_backpropagation(final.get_parent(), reward)
         else:
             final.update_count()
             final.update_value(reward)
-            print("Has no parent: ", final.get_board())
-            print("Count: ", final.get_count())
-            print("Value: ", final.get_value())
+            #print("Has no parent: ", final.get_board())
+            #print("Count: ", final.get_count())
+            #print("Value: ", final.get_value())
         
     def get_distribution(self, root, legal_moves):
         dist = np.array(copy.deepcopy(legal_moves))
         # get visit count from all children and place in game
         for child in root.get_children():
-            dist[child.get_move()] *= child.get_count()
-        print("Distributioin: ", dist)
+            index = child.get_move()
+            row = index[0]
+            col = index[1]
+            visit_count = child.get_count()
+            dist[row][col] *= visit_count
+        #print("Distribution: ", dist)
         return dist
 
     def retain_and_discard(self, succ_state):
         # retain subtree rooted at succ_state
-        print("Successor state: ", succ_state)
+        #print("Successor state: ", succ_state)
         new_root = self.get_node_from_state(succ_state, self.root)
-        print("New root: ", new_root)
+        #print("New root: ", new_root)
         self.root = new_root
 
         # discard everything else
         self.root.set_parent(None)
 
     def get_node_from_state(self, state, node):
-        print("Get node from board: ", state)
-        print("Current node: ", node)
-        print("Board of node: ", node.get_non_object_board())
+        #print("Get node from board: ", state)
+        #print("Current node: ", node)
+        #print("Board of node: ", node.get_non_object_board())
         # return node that has state
         if node.get_non_object_board() == state:
-            print("Found node: ", node)
+            #print("Found node: ", node)
             return node
         # if not, search recursively among node's children
         elif node.get_children():
             for child in node.get_children():
-                print("Testing child ", child, " of node ", node)
+                #print("Testing child ", child, " of node ", node)
                 result = self.get_node_from_state(state, child)
                 if result:
                     return result
-        print("Found nothing!")
+        #print("Found nothing!")
         return None

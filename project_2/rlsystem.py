@@ -29,6 +29,8 @@ class RLSystem:
         for actual_game in range(number_actual_games):
             # Initialize actual game board
             self.hex.init_game_board()
+            print("NEW GAME \n")
+            self.hex.print_game_board()
 
             # Set start state: [board, last_move]
             state_init = self.hex.get_state()
@@ -60,7 +62,8 @@ class RLSystem:
                 
                 root = self.mct.get_root()
             print("Game finished")
-            self.anet.train(replay_buffer)
+            for case in replay_buffer:
+                self.anet.train_model(case)
             # Save parameters for tournament
             if actual_game % save_interval == 0:
                 self.anet.save_parameters()

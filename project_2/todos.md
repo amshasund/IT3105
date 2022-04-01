@@ -1,6 +1,6 @@
 ## TODOs
 - [ ] Create a rollout func
-- [ ] Get node from state to use for visit_dist (mct 160)
+- [x] Get node from state to use for visit_dist (mct 160)
 - [x] Implement backprop
 - [ ] Opt: Implement a tree policy function in mcts node_to_leaf
 - [x] Opt: Dont choose argmax, use prob distribution (anet)
@@ -10,7 +10,8 @@
 - [x] Add player and position as parameters to find_neighbours function
 
 ## Questions to studass
-- [ ] Set new root and discrad everything else? Mener de slett treet over og sett ny subtree som tree slik at new root har none parents?
+- [x] PLS HELP: model.fit does not work in train_model
+- [x] Set new root and discrad everything else? Mener de slett treet over og sett ny subtree som tree slik at new root har none parents?
 - [x] How to control explore and not?
 - [x] How does the network know which moves are legal? - vet ikke, men vi sender inn null på moves som ikke er lov sånn at det ikke blir valgt
 - [x] What should target be in train model?

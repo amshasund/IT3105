@@ -201,6 +201,8 @@ class Hex:
                     self.reset_visit()
                     if path:
                         return player
+        if not any(0 in row for row in self.board):
+            return -1                
         return False
 
     def print_game_board(self):

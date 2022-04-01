@@ -14,16 +14,18 @@ play of the TOPP.
 # TODO: FIX THESE
 
 hex_board_size = 3      # 3 <= k <= 10
-number_actual_games = 1     # TODO: What is this? Same as num_games?
-number_search_games = 2     # TODO: What is this?
+number_actual_games = 20     # TODO: What is this? Same as num_games?
+print_games = [1, number_actual_games]
+number_search_games = 20    # TODO: What is this?
 starting_player = 1         # 1 or 2
+
 # mcts parameters
-episodes = 1
-search_games_per_move = 1
+episodes = 10
+search_games_per_move = 3
 # etc
 
 # actor net
-save_interval = 20 # TODO: what is the range []
+save_interval = 10 # TODO: what is the range []
 learning_rate = 0.1
 hidden_layers = [1, 5, 2, 4]
 activation_function = ["linear", "sigmoid", "tanh", "ReLU"]

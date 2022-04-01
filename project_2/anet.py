@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-import random
+import h5py
 
 from parameters import (
     hex_board_size,
@@ -44,28 +44,23 @@ class ANet:
 
         self.model = model
 
-    def train_model(self, case):
-        # Input: [Node, visit_dist]
-        # Output: probability distribution over all legal moves
-        node = case[0]
-        board = node.get_non_object_board()
-        print(board)
-        player = node.get_player()
-        print(player)
-        state = np.insert(board, 0, player)
-        print(state)
-        state = self.reshape_state(state)
-        print(state)
+    def train_model(self, rbuf):
+        # Input: dict{  key=tuple(player, board.flatten()), 
+        #               value=board's visit distribution)}
         
-        # Normalize replay buffer data
-        target = case[1].flatten() / case[1].flatten().sum()
-        target = self.reshape_state(target)
+        for key in rbuf:
+            # Train on random batches of rbuf
+            if np.random.choice([True, False], p=[0.3, 0.7]):
+                state = np.array(key, dtype=float)
+                state = self.reshape_state(state)
+                
 
-        print(target)
-        
-
-        
-        self.model.fit(np.array(state, dtype=float), np.array(target, dtype=float), verbose=0)
+                target = np.array(rbuf[key], dtype=float).flatten()
+                # Normalize replay buffer data
+                target = target / target.sum()
+                target = self.reshape_state(target)
+                
+                self.model.fit(state, target, verbose=0)
 
 
     def rollout(self, state, legal_moves):
@@ -86,7 +81,12 @@ class ANet:
         dist_move = distribution * np.array(legal_moves).flatten()
 
         # Normalize dist_move to ensure no error from np.random.choice
-        dist_move = dist_move / np.sum(dist_move)
+        
+        # For cases when dist_move is all zeroes 
+        if (np.sum(dist_move) != 0):
+            dist_move = dist_move / (np.sum(dist_move))
+        else:
+            dist_move = np.array(legal_moves).flatten() / (np.sum(np.array(legal_moves).flatten()))
         
         # When choosing move, use prob from anet to choose a move [0.4, 0.45, 0.1, 0.05]
         # Find 1d index of flattened dist_move
@@ -96,6 +96,9 @@ class ANet:
         chosen_move = np.unravel_index(chosen_move_flattened, np.array(legal_moves).shape)
         
         return [player, chosen_move]
+
+    def save_model(self, game_nr):
+        self.model.save("super_model_{nr}.h5".format(nr=game_nr))
     
     @staticmethod
     def reshape_state(state):

@@ -13,10 +13,10 @@ play of the TOPP.
 
 # TODO: FIX THESE
 
-hex_board_size = 3      # 3 <= k <= 10
-number_actual_games = 20     # TODO: What is this? Same as num_games?
-print_games = [1, number_actual_games]
-number_search_games = 20    # TODO: What is this?
+hex_board_size = 4      # 3 <= k <= 10
+number_actual_games = 50
+print_games = [1, number_actual_games] # games to be printed out while running
+number_search_games = 20
 starting_player = 1         # 1 or 2
 
 # mcts parameters

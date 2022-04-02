@@ -9,7 +9,7 @@ def main():
     # TESTS
     rl_system_test = RLSystem()
     rl_system_test.algorithm()
-    tournament = Tournament()
-    tournament.create_agents()
+    #tournament = Tournament()
+    #tournament.set_up_tournament()
 
 main()

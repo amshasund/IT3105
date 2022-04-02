@@ -13,24 +13,24 @@ play of the TOPP.
 
 # TODO: FIX THESE
 
-hex_board_size = 4      # 3 <= k <= 10
-number_actual_games = 50
+hex_board_size = 3      # 3 <= k <= 10
+number_actual_games = 250
 print_games = [1, number_actual_games] # games to be printed out while running
-number_search_games = 20
+number_search_games = 200
 starting_player = 1         # 1 or 2
 
 # mcts parameters
-episodes = 10
-search_games_per_move = 3
+#episodes = 10
+#search_games_per_move = 3
 # etc
 
 # actor net
-learning_rate = 0.1
-hidden_layers = [1, 5, 2, 4]
+learning_rate = 0.01
+hidden_layers = [10, 20, 20, 10]
 activation_function = ["linear", "sigmoid", "tanh", "ReLU"]
 optimizer = "sgd"  # adagrad, stochastic gradient descent, rmsprop or adam
 num_cached = 3
-save_interval = 10          
+save_interval = 50          
 
 # Tournament 
 num_agents = number_actual_games // save_interval      # M different agents

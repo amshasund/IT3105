@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import copy
 from parameters import hex_board_size, starting_player
 
 class Piece:
@@ -39,39 +40,46 @@ class Piece:
 class Hex:
     def __init__(self):
         self.board = None
-        self.prev_move = None
+        self.next_player = starting_player
 
 
     def init_game_board(self):
         self.board = [[0 for i in range(hex_board_size)]
                       for j in range(hex_board_size)]
-        self.prev_move = None
+        self.next_player = starting_player
 
     
     def reset_game_board(self):
         self.board = None
-        self.prev_move = None
+        self.next_player = starting_player
 
     
     def get_hex_board(self):
         return self.board
 
     def get_next_player(self):
-        if self.prev_move:
-            prev_player = self.prev_move.get_player()
-            next_player = self.switch_player(prev_player)
-        else:
-            next_player = starting_player
-        return next_player
+        return self.next_player
     
     def set_game_state(self, state):
-        self.board = state[0]
-        self.prev_move = state[1]
+        """Creates a new board for simulation with pieces as a copy of the state
+        given"""
+        # state = [2 0 0 0 1 2 1 0 0 0]
+        # first num is player, rest is board
+        self.next_player = state[0]
+        state = np.delete(state, 0)
+        # state = [0 0 0 1 2 1 0 0 0]
+        for i in range(len(state)):
+            if state[i] != 0:
+                pos = list(np.unravel_index(i, np.array(self.board).shape))
+                # pos = [x, y]
+                
+                piece = Piece(pos, state[i])
+                friendly_neighbours = self.find_neighbours(pos, self.next_player)
+                piece.add_neighbouring_friends(friendly_neighbours)
 
-    def get_state(self, reformat=False):
-        if reformat:
-            return self.reformat_state()
-        return [self.board, self.prev_move]
+                row = pos[0]
+                col = pos[1]
+                self.board[row][col] = piece
     
     def get_reward(self, winner, player):
         if winner:
@@ -91,8 +99,8 @@ class Hex:
         next_player = self.get_next_player()
         return [ref_board, next_player]
 
-    def get_non_object_board(self, board):
-        return [[piece.get_player() if isinstance(piece, Piece) else piece for piece in row] for row in board]
+    def get_non_object_board(self):
+        return [[piece.get_player() if isinstance(piece, Piece) else piece for piece in row] for row in self.board]
         
 
     def switch_player(self, prev_player):
@@ -148,14 +156,16 @@ class Hex:
 
         # Make a new piece from the state info
         piece = Piece(position, moving_player)
-        self.prev_move = piece  # save last move to use in game_over check
 
         # Find all neighbouring pieces of same player and add them to friendly neighbours in Piece
-        friendly_neighbours = self.find_neighbours(self.prev_move.get_position(), self.prev_move.get_player())
+        friendly_neighbours = self.find_neighbours(position, moving_player)
         piece.add_neighbouring_friends(friendly_neighbours)
 
         # Add piece to board and list of pieces
         self.board[row][col] = piece
+
+        self.next_player = self.switch_player(moving_player)
+
         if print:
             self.print_game_board()
     
@@ -189,18 +199,17 @@ class Hex:
         return start, end
 
     def game_over(self):
-        if self.prev_move:
-            player = self.prev_move.get_player()
-            start_edge, end_edge = self.get_edges(player)
+        player = self.get_next_player()
+        start_edge, end_edge = self.get_edges(player)
 
-            # Pieces on both edges for current player
-            if len(start_edge) >= 1 and len(end_edge) >= 1:
-                # Search possible path combinations from all start pieces
-                for start_piece in start_edge:
-                    path = self.search_path(start_piece, end_edge)
-                    self.reset_visit()
-                    if path:
-                        return player
+        # Pieces on both edges for current player
+        if len(start_edge) >= 1 and len(end_edge) >= 1:
+            # Search possible path combinations from all start pieces
+            for start_piece in start_edge:
+                path = self.search_path(start_piece, end_edge)
+                self.reset_visit()
+                if path:
+                    return player
         if not any(0 in row for row in self.board):
             return -1                
         return False
@@ -236,3 +245,59 @@ class Hex:
         headings = " "*(indent-2)+headings
         print(headings)
         print("\nR: Player 1 (num) \nB: Player 2 (alph)")
+
+
+class StateManager:
+    
+    def start_game(self, start_state=False):
+        game = Hex()
+        game.init_game_board()
+        if start_state is not False:
+            # TODO: Need to reformat this
+            game.set_game_state(start_state)
+        return game
+
+    def get_state(self, game):
+        board = np.array(game.get_non_object_board()).flatten()
+        player = game.get_next_player()
+        state = np.insert(board, 0, player)
+        return state
+    
+    def do_action(self, game, action, print=False):
+        action = np.unravel_index(action, np.array(game.get_hex_board()).shape)
+        actual_move = [game.get_next_player(), action]
+        game.perform_move(actual_move, print)
+    
+    def try_action(self, game, action):
+        # action is a number in flattened legal action list
+        # make a temporary copy of the game
+        temp_game = copy.deepcopy(game)
+
+        # simulate a legal move on the temp game
+        self.do_action(temp_game, action)
+        
+        # get new temp game state
+        state = copy.deepcopy(self.get_state(temp_game))
+
+        return state, action
+    
+    def get_legal_actions(self, game):
+        return np.array(game.get_legal_moves()).flatten()
+
+    def is_final(self, game):
+        return game.game_over()
+
+    def print_state(self, game):
+        game.print_game_board()
+    
+    def get_reward(self, start, final):
+        winner = final[0]
+        player = start[0]
+        if winner:
+            if winner == player:
+                return 1
+            return -1
+        return 0
+
+    
+

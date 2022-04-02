@@ -1,7 +1,7 @@
 # From pseudocode
 from anet import ANet
 from mct import MonteCarloTree
-from hex import Hex
+from hex import StateManager
 import copy
 import numpy as np
 
@@ -15,7 +15,7 @@ from parameters import (
 
 class RLSystem:
     def __init__(self):
-        self.hex = Hex()
+        self.manager = StateManager()
         self.anet = ANet()
         self.mct = MonteCarloTree(self.anet)
 
@@ -25,61 +25,53 @@ class RLSystem:
 
         # Create neural nel
         self.anet.build_model()
+        
+        # Save untrained net
+        self.anet.save_model(0)
 
         # Play games
         for actual_game in range(1, number_actual_games+1):
             # Initialize actual game board
-            self.hex.init_game_board()
+            game = self.manager.start_game()
 
-            last_game = (True if actual_game in print_games else False)
-            if last_game:
+            print_game = (True if actual_game in print_games else False)
+            if print_game:
                 print("START GAME \n")
-                self.hex.print_game_board()
+                self.manager.print_state(game)
 
-            # Set start state: [board, last_move]
-            state_init = self.hex.get_state()
+            # Set start state: [player, board.flatten()]
+            state_init = self.manager.get_state(game)
+            self.mct.init_tree(state_init)
 
-            # TODO: init mct to a single root, which represents s_init
-            root_state = copy.deepcopy(state_init)
-            self.mct.init_tree(root_state)
-            root = self.mct.get_root()
+            while not self.manager.is_final(game):
 
-            while not self.hex.game_over():
-                hex_mc = Hex()
-                hex_mc.set_game_state(root.get_state())
+                self.mct.search(self.manager)
 
-                # TODO: implement this using algorithm 1 from materials ref studass
-                self.mct.search(hex_mc, root)
-
-                visit_dist = self.mct.get_distribution(root, self.hex.get_legal_moves())
-                # TODO: Make dictionary and have non_object board state as key
-                replay_buffer = self.add_to_rbuf(replay_buffer, root, visit_dist)
+                visit_dist = self.mct.get_distribution(self.manager.get_legal_actions(game))
+                replay_buffer = self.add_to_rbuf(replay_buffer, self.manager.get_state(game), visit_dist)
 
                 # Choose actual move
                 # TODO: Send in reformatted board state
-                new_position=np.unravel_index(np.argmax(np.array(visit_dist).flatten()), np.array(root.get_board()).shape)
-                actual_move = [self.hex.get_next_player(), list(new_position)]
+                action = np.argmax(np.array(visit_dist))
 
                 # Perform move
-                self.hex.perform_move(actual_move, print=last_game)
-                successor_board = self.hex.get_non_object_board(self.hex.get_hex_board())
-                self.mct.retain_and_discard(successor_board)
+                self.manager.do_action(game, action, print=print_game)
+                successor_state = self.manager.get_state(game)
+                self.mct.retain_and_discard(successor_state)
                 
-                root = self.mct.get_root()
-            if last_game:
-                print("WINNER: Player", self.hex.game_over())
+            if print_game:
+                print("WINNER: Player", self.manager.is_final(game))
             self.anet.train_model(replay_buffer)
             
             # Save parameters for tournament
             if actual_game % save_interval == 0:
                 self.anet.save_model(actual_game)
 
-    def add_to_rbuf(self, rbuf, root, dist):
-        board = np.array(root.get_non_object_board()).flatten()
-        board = np.insert(board, 0, root.get_player())
-        key = tuple(board)
+    def add_to_rbuf(self, rbuf, state, dist):
+        # TODO: Debug this. Check that addition is great
+        key = tuple(state)
         if rbuf and key in rbuf:
-            rbuf[key] += dist
+            rbuf[key] += np.array(dist)
         else:
-            rbuf[key] = dist
+            rbuf[key] = np.array(dist)
         return rbuf

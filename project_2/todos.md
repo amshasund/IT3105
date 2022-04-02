@@ -1,5 +1,10 @@
 ## TODOs
-- [ ] Create a rollout func
+- [ ] M = num_cashed instead of save_interval
+- [ ] Implement Tournament
+- [ ] Debugging -> do we get improvement?
+- [ ] Train models
+- [ ] Tweak parameters (opt, act, hidden_layers)
+- [x] Create a rollout func
 - [x] Get node from state to use for visit_dist (mct 160)
 - [x] Implement backprop
 - [ ] Opt: Implement a tree policy function in mcts node_to_leaf
@@ -10,6 +15,7 @@
 - [x] Add player and position as parameters to find_neighbours function
 
 ## Questions to studass
+- [ ] TIPS for: Learning rate, Nodes in hidden layers, Activation func, optimizer
 - [x] PLS HELP: model.fit does not work in train_model
 - [x] Set new root and discrad everything else? Mener de slett treet over og sett ny subtree som tree slik at new root har none parents?
 - [x] How to control explore and not?

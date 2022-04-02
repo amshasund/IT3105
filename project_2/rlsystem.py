@@ -31,6 +31,7 @@ class RLSystem:
 
         # Play games
         for actual_game in range(1, number_actual_games+1):
+            print("Running game: ", actual_game)
             # Initialize actual game board
             game = self.manager.start_game()
 

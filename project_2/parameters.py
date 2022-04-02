@@ -25,12 +25,16 @@ search_games_per_move = 3
 # etc
 
 # actor net
-save_interval = 10 # TODO: what is the range []
 learning_rate = 0.1
 hidden_layers = [1, 5, 2, 4]
 activation_function = ["linear", "sigmoid", "tanh", "ReLU"]
 optimizer = "sgd"  # adagrad, stochastic gradient descent, rmsprop or adam
 num_cached = 3
+save_interval = 10          
 
-# round-robin play
-num_games = 5
+# Tournament 
+num_agents = number_actual_games // save_interval      # M different agents
+
+
+
+

@@ -99,6 +99,14 @@ class ANet:
 
     def save_model(self, game_nr):
         self.model.save("super_model_{nr}.h5".format(nr=game_nr))
+
+        '''
+        # Calling `save('my_model')` creates a SavedModel folder `my_model`.
+        model.save("my_model")
+
+        # It can be used to reconstruct the model identically.
+        reconstructed_model = keras.models.load_model("my_model")
+        '''
     
     @staticmethod
     def reshape_state(state):

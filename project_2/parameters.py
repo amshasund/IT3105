@@ -11,7 +11,7 @@ untrained net prior to episode 1, at a fixed interval throughout the training ep
 play of the TOPP.
 """
 
-hex_board_size = 3     # 3 <= k <= 10
+hex_board_size = 4     # 3 <= k <= 10
 number_actual_games = 250
 print_games = [1, number_actual_games] # games to be printed out while running
 number_search_games = 200
@@ -25,9 +25,9 @@ epsilon = 0.9
 
 # actor net
 learning_rate = 0.0001
-hidden_layers = [5, 10, 5]
-activation_function = ["sigmoid", "sigmoid", "sigmoid"] #["linear", "sigmoid", "tanh", "ReLU"]
-optimizer = "adam"  # adagrad, stochastic gradient descent, rmsprop or adam
+hidden_layers = [5, 10, 10, 5]
+activation_function = ["tanh", "tanh", "tanh", "tanh"] #["linear", "sigmoid", "tanh", "ReLU"]
+optimizer = "sgd"  # adagrad, stochastic gradient descent, rmsprop or adam
 num_cached = 5        
 
 # Tournament 

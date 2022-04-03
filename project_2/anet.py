@@ -84,7 +84,7 @@ class ANet:
 
 
     def save_model(self, game_nr):
-        self.model.save("model3x3_{nr}.h5".format(nr=game_nr))
+        self.model.save("model34x4_{nr}.h5".format(nr=game_nr))
 
         '''
         # Calling `save('my_model')` creates a SavedModel folder `my_model`.

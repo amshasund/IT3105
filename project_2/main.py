@@ -5,10 +5,10 @@ from tournament import Tournament
 
 def main():
     # TESTS
-    #rl_system_test = RLSystem()
-    #rl_system_test.algorithm()
+    rl_system_test = RLSystem()
+    rl_system_test.algorithm()
 
-    tournament = Tournament()
-    tournament.play_tournament()
+    #tournament = Tournament()
+    #tournament.play_tournament()
 
 main()

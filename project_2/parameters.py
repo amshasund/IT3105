@@ -28,7 +28,7 @@ learning_rate = 0.0001
 hidden_layers = [5, 10, 5]
 activation_function = ["sigmoid", "sigmoid", "sigmoid"] #["linear", "sigmoid", "tanh", "ReLU"]
 optimizer = "adam"  # adagrad, stochastic gradient descent, rmsprop or adam
-num_cached = 3        
+num_cached = 5        
 
 # Tournament 
 save_interval = number_actual_games // (num_cached-1)

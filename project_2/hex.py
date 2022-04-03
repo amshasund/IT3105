@@ -51,9 +51,9 @@ class Hex:
     
     def reset_game_board(self):
         self.board = None
-        self.next_player = starting_player
+        #self.next_player = starting_player
+        self.next_player = random.randint(1,2)
 
-    
     def get_hex_board(self):
         return self.board
 

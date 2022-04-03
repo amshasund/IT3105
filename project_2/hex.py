@@ -199,8 +199,9 @@ class Hex:
         return start, end
 
     def game_over(self):
-        player = self.get_next_player()
-        start_edge, end_edge = self.get_edges(player)
+        next_player = self.get_next_player()
+        potential_winner = self.switch_player(next_player)
+        start_edge, end_edge = self.get_edges(potential_winner)
 
         # Pieces on both edges for current player
         if len(start_edge) >= 1 and len(end_edge) >= 1:
@@ -209,7 +210,7 @@ class Hex:
                 path = self.search_path(start_piece, end_edge)
                 self.reset_visit()
                 if path:
-                    return player
+                    return potential_winner 
         if not any(0 in row for row in self.board):
             return -1                
         return False
@@ -249,12 +250,12 @@ class Hex:
 
 class StateManager:
     
-    def start_game(self, start_state=False):
+    def start_game(self, specified_state=False):
         game = Hex()
         game.init_game_board()
-        if start_state is not False:
+        if specified_state is not False:
             # TODO: Need to reformat this
-            game.set_game_state(start_state)
+            game.set_game_state(specified_state)
         return game
 
     def get_state(self, game):
@@ -298,6 +299,4 @@ class StateManager:
                 return 1
             return -1
         return 0
-
-    
 

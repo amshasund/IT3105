@@ -2,7 +2,7 @@ import copy
 import random
 import numpy as np
 from parameters import (
-    number_search_games, starting_player
+    number_search_games,
 )
 
 

@@ -1,21 +1,20 @@
 import numpy as np
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 import tensorflow as tf
-import h5py
 
 from parameters import (
     hex_board_size,
     hidden_layers,
     activation_function,
     optimizer, 
-    starting_player,
 )
 
-
+ 
 class ANet:
     def __init__(self):
         self.num_input_nodes = hex_board_size**2 + 1  
         # one extra input to know which player
-
         self.model = None
 
     def build_model(self, loss=tf.keras.losses.binary_crossentropy):
@@ -49,7 +48,7 @@ class ANet:
         #               value=board's visit distribution)}
         for key in rbuf:
             # Train on random batches of rbuf
-            if np.random.choice([True, False], p=[0.3, 0.7]):
+            if np.random.choice([True, False], p=[0.5, 0.5]):
                 state = np.array(key, dtype=float)
                 state = self.reshape_state(state)
                 target = np.array(rbuf[key], dtype=float).flatten()

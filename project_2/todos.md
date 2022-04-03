@@ -1,5 +1,7 @@
 ## TODOs
-- [ ] M = num_cashed instead of save_interval
+- [ ] argmax og argmin??? trene best and bad?
+- [ ] debug visit = true/false in mcts - reset after each iteration?
+- [x] M = num_cashed instead of save_interval
 - [ ] Implement Tournament
 - [ ] Debugging -> do we get improvement?
 - [ ] Train models

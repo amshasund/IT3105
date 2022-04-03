@@ -2,16 +2,13 @@
 from anet import ANet
 from mct import MonteCarloTree
 from hex import StateManager
-import copy
 import numpy as np
 
 from parameters import (
     number_actual_games,
-    number_search_games,
     save_interval,
     print_games
 )
-
 
 class RLSystem:
     def __init__(self):
@@ -43,11 +40,9 @@ class RLSystem:
             # Set start state: [player, board.flatten()]
             state_init = self.manager.get_state(game)
             self.mct.init_tree(state_init)
-
+            
             while not self.manager.is_final(game):
-
                 self.mct.search(self.manager)
-
                 visit_dist = self.mct.get_distribution(self.manager.get_legal_actions(game))
                 replay_buffer = self.add_to_rbuf(replay_buffer, self.manager.get_state(game), visit_dist)
 
@@ -59,9 +54,10 @@ class RLSystem:
                 self.manager.do_action(game, action, print=print_game)
                 successor_state = self.manager.get_state(game)
                 self.mct.retain_and_discard(successor_state)
-                
+               
             if print_game:
                 print("WINNER: Player", self.manager.is_final(game))
+            
             self.anet.train_model(replay_buffer)
             
             # Save parameters for tournament

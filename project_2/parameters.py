@@ -11,30 +11,29 @@ untrained net prior to episode 1, at a fixed interval throughout the training ep
 play of the TOPP.
 """
 
-# TODO: FIX THESE
-
-hex_board_size = 3      # 3 <= k <= 10
+hex_board_size = 3     # 3 <= k <= 10
 number_actual_games = 250
 print_games = [1, number_actual_games] # games to be printed out while running
 number_search_games = 200
-starting_player = 1         # 1 or 2
+starting_player = 1      # 1 or 2
 
 # mcts parameters
+epsilon = 0.9
 #episodes = 10
 #search_games_per_move = 3
 # etc
 
 # actor net
-learning_rate = 0.01
-hidden_layers = [10, 20, 20, 10]
-activation_function = ["linear", "sigmoid", "tanh", "ReLU"]
-optimizer = "sgd"  # adagrad, stochastic gradient descent, rmsprop or adam
-num_cached = 3
-save_interval = 50          
+learning_rate = 0.0001
+hidden_layers = [5, 10, 5]
+activation_function = ["sigmoid", "sigmoid", "sigmoid"] #["linear", "sigmoid", "tanh", "ReLU"]
+optimizer = "adam"  # adagrad, stochastic gradient descent, rmsprop or adam
+num_cached = 3        
 
 # Tournament 
+save_interval = number_actual_games // (num_cached-1)
 num_agents = number_actual_games // save_interval      # M different agents
-
+games_pr_meet = 25  # G number of games between any two agents in a serie
 
 
 

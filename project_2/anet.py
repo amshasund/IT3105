@@ -107,7 +107,7 @@ class ANet:
         return np.random.choice(range(len(distribution)), p=distribution)
 
     def save_model(self, game_nr):
-        self.model.save("models/super_model3x3_{nr}.h5".format(nr=game_nr))
+        self.model.save("models/crazy_model3x3_{nr}.h5".format(nr=game_nr))
 
         '''
         # Calling `save('my_model')` creates a SavedModel folder `my_model`.

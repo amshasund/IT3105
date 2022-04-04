@@ -14,7 +14,7 @@ play of the TOPP.
 hex_board_size = 3     # 3 <= k <= 10
 number_actual_games = 250
 print_games = [1, number_actual_games]  # games to be printed out while running
-number_search_games = 500       # test 500
+number_search_games = 1000       # test 500
 starting_player = 1      # 1 or -1
 
 # mcts parameters

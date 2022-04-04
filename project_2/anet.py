@@ -1,21 +1,25 @@
-import numpy as np
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
-import absl.logging
-absl.logging.set_verbosity(absl.logging.ERROR)
-import tensorflow as tf
-
+import numpy as np
+import random
 from parameters import (
     hex_board_size,
     hidden_layers,
     activation_function,
-    optimizer, 
+    optimizer,
+    temperature,
+    batch_size
 )
+import absl.logging
+absl.logging.set_verbosity(absl.logging.ERROR)
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+import tensorflow as tf
 
- 
+
+
+
 class ANet:
     def __init__(self):
-        self.num_input_nodes = hex_board_size**2 + 1  
+        self.num_input_nodes = hex_board_size**2 + 1
         # one extra input to know which player
         self.model = None
 
@@ -45,36 +49,33 @@ class ANet:
         self.model = model
 
     def train_model(self, rbuf):
-        # Input: dict{  key=tuple(player, board.flatten()), 
-        #               value=board's visit distribution)}
+        # print("rbuf", rbuf)
+        # [(s,t), (s,t), (s,t), ...]
+        random.shuffle(rbuf)
+        arrays = list(map(list, zip(*rbuf)))
+        states = arrays[0]
+        targets = arrays[1]
+        
+        # Normalize to avoid overflow
+        targets = [distribution/sum(distribution) for distribution in targets]
+        # []**(1/T) <- beware of integer overflow
+        targets = [np.array(distribution)**(1/temperature)
+                   for distribution in targets]
+        # Normalize again
+        targets = [distribution/sum(distribution) for distribution in targets]
 
-        # TODO: use minibatch from keras
-        # make array of states and targets
-        # shuffle
+        # kan også flippe 180 grader for å trene meir
+        # default batchsize 32 elements, use shuffle
 
-        # rbuf = [(x1,y1),(x2,y2), ...]
-        # x_array = 
-        # y_array = 
-        # Train on one-hot of argmax of target
-        # [5, 3, 2]
-        # []**(1/T) -> T = 0.1 (T mot null, tilsvarer nesten one-hot)
-        # opphøy i 10 og normaliser på nytt 
-        # beware of integer overflow <- normaliser array før opphøying
-        for key in rbuf:
-            # Train on random batches of rbuf
-            if np.random.choice([True, False], p=[0.5, 0.5]):
-                state = np.array(key, dtype=float)
-                state = self.reshape_state(state)
-                target = np.array(rbuf[key], dtype=float).flatten()
-                
-                # Normalize replay buffer data
-                target = target / target.sum()
-                target = self.reshape_state(target)
+        # TODO: How many in a minibatch????
+        states = [self.reshape_state(s) for s in states]
+        targets = [self.reshape_state(t) for t in targets]
 
-                # kan også flippe 180 grader for å trene meir
-                
-                self.model.fit(state, target, verbose=0) # default batchsize 32 elements, use shuffle
-
+        # print('states', states)
+        # print('targets', targets)
+        for i in range(len(states)):
+            self.model.fit(states[i], targets[i],
+                       shuffle=True, verbose=0)
 
     def choose_action(self, state, model, legal_actions):
         # Make state ready for input to actor net model
@@ -93,21 +94,20 @@ class ANet:
         distribution = distribution * legal_actions
 
         # Normalize distribution to ensure no error from np.random.choice
-        
-        # For cases when distribution is all zeroes 
+
+        # For cases when distribution is all zeroes
         if (np.sum(distribution) != 0):
             distribution = distribution / (np.sum(distribution))
         else:
             distribution = legal_actions / (np.sum(legal_actions))
-        
+
         # When choosing move, use prob from anet to choose a move [0.4, 0.45, 0.1, 0.05]
 
         # Find 1d index of flattened distribution
         return np.random.choice(range(len(distribution)), p=distribution)
 
-
     def save_model(self, game_nr):
-        self.model.save("models/cool_model3x3_{nr}.h5".format(nr=game_nr))
+        self.model.save("models/super_model3x3_{nr}.h5".format(nr=game_nr))
 
         '''
         # Calling `save('my_model')` creates a SavedModel folder `my_model`.
@@ -116,7 +116,7 @@ class ANet:
         # It can be used to reconstruct the model identically.
         reconstructed_model = keras.models.load_model("my_model")
         '''
-    
+
     @staticmethod
     def reshape_state(state):
         return np.array(state).reshape([1, -1])
@@ -128,13 +128,13 @@ class LiteModel:
     @classmethod
     def from_file(cls, model_path):
         return LiteModel(tf.lite.Interpreter(model_path=model_path))
-    
+
     @classmethod
     def from_keras_model(cls, kmodel):
         converter = tf.lite.TFLiteConverter.from_keras_model(kmodel)
         tflite_model = converter.convert()
         return LiteModel(tf.lite.Interpreter(model_content=tflite_model))
-    
+
     def __init__(self, interpreter):
         self.interpreter = interpreter
         self.interpreter.allocate_tensors()
@@ -146,7 +146,7 @@ class LiteModel:
         self.output_shape = output_det["shape"]
         self.input_dtype = input_det["dtype"]
         self.output_dtype = output_det["dtype"]
-        
+
     def predict(self, inp):
         inp = inp.astype(self.input_dtype)
         count = inp.shape[0]
@@ -156,7 +156,7 @@ class LiteModel:
             self.interpreter.invoke()
             out[i] = self.interpreter.get_tensor(self.output_index)[0]
         return out
-    
+
     def predict_single(self, inp):
         """ Like predict(), but only for a single record. The input data can be a Python list. """
         inp = np.array([inp], dtype=self.input_dtype)

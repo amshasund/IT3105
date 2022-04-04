@@ -8,8 +8,11 @@ from parameters import (
     number_actual_games,
     save_interval,
     print_games,
-    train_interval
+    train_interval,
+    temperature,
+    decay_at_action
 )
+
 
 class RLSystem:
     def __init__(self):
@@ -24,7 +27,7 @@ class RLSystem:
 
         # Create neural nel
         self.anet.build_model()
-        
+
         # Save untrained net
         self.anet.save_model(0)
 
@@ -39,43 +42,46 @@ class RLSystem:
                 print("START GAME \n")
                 self.manager.print_state(game)
 
-            # Set start state: [player, board.flatten()]
             state_init = self.manager.get_state(game)
-            self.mct.init_tree(state_init) 
-            # TODO: send in litemodel of anet to use for rollout
-            # __call__ if we want model(state) and not model.predict(state)
-            
+            self.mct.init_tree(state_init)
+
+            action_counter = 0
+
             while not self.manager.is_final(game):
                 # Using Lite ANet model
                 lite_model = self.lite_model.from_keras_model(self.anet.model)
                 self.mct.search(self.manager, lite_model)
-                visit_dist = self.mct.get_distribution(self.manager.get_legal_actions(game))
-                replay_buffer.append((self.manager.get_state(game), visit_dist))
+                visit_dist = self.mct.get_distribution(
+                    self.manager.get_legal_actions(game))
+                replay_buffer.append(
+                    (self.manager.get_state(game), visit_dist))
 
                 # Choose actual move
-                # vurdere visit_dist**(1/T) og så normalisere og velge fra distribution
-                # kan decaye T etter feks 30 moves i et game
-                action = np.argmax(np.array(visit_dist))
+                action_dist = self.get_action_dist(visit_dist, action_counter)
+                action = np.random.choice(
+                    range(len(action_dist)), p=action_dist)
 
                 # Perform move
                 self.manager.do_action(game, action, print=print_game)
+                action_counter += 1
                 successor_state = self.manager.get_state(game)
                 self.mct.retain_and_discard(successor_state)
-               
+
             if print_game:
                 print("WINNER: Player", self.manager.is_final(game))
-            
-            if actual_game % train_interval == 0:
-                self.anet.train_model(replay_buffer) # cannot train a lightmodel, so this must be the real model
 
+            if actual_game % train_interval == 0:
+                # cannot train a lightmodel, so this must be the real model
+                self.anet.train_model(replay_buffer)
+
+            if actual_game % save_interval == 0:
                 # TODO: Remember to put this back
                 self.anet.save_model(actual_game)
 
-    def add_to_rbuf(self, rbuf, state, dist):
-        # TODO: Debug this. Check that addition is great
-        key = tuple(state)
-        if rbuf and key in rbuf:
-            rbuf[key] += np.array(dist)
-        else:
-            rbuf[key] = np.array(dist)
-        return rbuf
+    def get_action_dist(self, visit_dist, action_counter):
+        # vurdere visit_dist**(1/T) og så normalisere og velge fra distribution
+        # kan decaye T etter feks 30 moves i et game
+        action_dist = visit_dist**(
+            1/(temperature if action_counter < decay_at_action else temperature**10))
+        action_dist = action_dist / sum(action_dist)
+        return action_dist

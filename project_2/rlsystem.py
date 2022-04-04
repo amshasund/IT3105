@@ -74,7 +74,8 @@ class RLSystem:
             if actual_game % train_interval == 0:
                 # cannot train a lightmodel, so this must be the real model
                 self.anet.train_model(replay_buffer)
-                replay_buffer = random.shuffle(replay_buffer)[0:5]
+                random.shuffle(replay_buffer)
+                replay_buffer = replay_buffer[0:5]
 
             if actual_game % save_interval == 0:
                 # TODO: Remember to put this back

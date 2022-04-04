@@ -54,17 +54,12 @@ class MonteCarloTree:
     def __init__(self, anet):
         self.root = None
         self.anet = anet
-        self.count = 1
 
     def init_tree(self, root):
         self.root = Node(root)
-        self.count = 1
     
     def get_root(self):
         return self.root
-    
-    def update_count(self):
-        self.count += 1
 
     def search_to_leaf(self):
         node = self.root
@@ -84,7 +79,7 @@ class MonteCarloTree:
                 for child in node.get_children():
                     # Check for maximize or minizime player
                     # Epsilon decay?
-                    score = child.get_value() + epsilon * np.sqrt(np.log(self.count)/child.get_count())
+                    score = child.get_value() + epsilon * np.sqrt(np.log(node.get_count())/child.get_count())
                     #print("count", child.get_count())
                     #print("score", score)
                     if score > best_score:
@@ -104,6 +99,7 @@ class MonteCarloTree:
             if legal_actions[i] == 1:
                 state, action = manager.try_action(search_game, i)
                 child = Node(state, action, parent)
+                # parent[i] = child
                 parent.add_children(child)
 
     def search(self, manager, model):
@@ -129,10 +125,22 @@ class MonteCarloTree:
             # Rollout from leaf with actor network policy
             start_state = manager.get_state(search_game)
 
+            if manager.is_final(search_game):
+                reward = manager.get_reward(start_state, start_state)
+                self.perform_backpropagation(leaf, reward)
+                return
+
+            first_action = action = random.choice(np.argwhere(manager.get_legal_actions(search_game) == 1).reshape(-1))
+            manager.do_action(search_game, first_action)
+
             # ROLLOUT START
             while not manager.is_final(search_game):
-                action = self.anet.choose_action(
-                    manager.get_state(search_game), model, manager.get_legal_actions(search_game))
+                # test if when rollout is random it beats total random
+
+                action = random.choice(np.argwhere(manager.get_legal_actions(search_game) == 1).reshape(-1))
+
+                #action = self.anet.choose_action(
+                    #manager.get_state(search_game), model, manager.get_legal_actions(search_game))
                 manager.do_action(search_game, action)
             final_state = manager.get_state(search_game)
             # ROLLOUT END
@@ -141,11 +149,14 @@ class MonteCarloTree:
             reward = manager.get_reward(start_state, final_state)
             
             # Perform Backpropagation
-            self.perform_backpropagation(leaf, reward)
+            # TODO: Is there an issue with using leaf here?
+            # Should use chosen child here
+            # TODO: Make children to dictionary to get child from action
+            child = next(child for child in leaf.get_children() if child.preceding_action == first_action)
+            self.perform_backpropagation(child, reward)
 
     def perform_backpropagation(self, final, reward):
-        # N(s)
-        self.update_count()
+        #print("node: ", final.get_preceding_action(), final.get_state())
         # N(s, a)
         final.update_count()
         # Q(s, a)
@@ -165,11 +176,11 @@ class MonteCarloTree:
 
     def retain_and_discard(self, succ_state):
         # retain subtree rooted at succ_state
-        new_root = self.get_node_from_state(succ_state, self.root)
-        self.root = new_root
+        #new_root = self.get_node_from_state(succ_state, self.root)
+        self.root = Node(succ_state)
 
         # discard everything else
-        self.root.set_parent(None)
+        #self.root.set_parent(None)
 
     def get_node_from_state(self, state, node):
         # return node that has state
@@ -178,6 +189,7 @@ class MonteCarloTree:
         # if not, search recursively among node's children
         elif node.get_children():
             for child in node.get_children():
+                # TODO: Bredde først!!
                 result = self.get_node_from_state(state, child)
                 if result:
                     return result

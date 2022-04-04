@@ -23,7 +23,7 @@ class Tournament:
         
         for i in range(0, number_actual_games+1, save_interval):
             #self.agents[i]= tf.keras.models.load_model("model34x4_{}.h5".format(i))
-            self.agents[i]= tf.keras.models.load_model("lite_model3x3_{}.h5".format(i))
+            self.agents[i]= tf.keras.models.load_model("models/cool_model3x3_{}.h5".format(i))
     
     def play_games(self):
         for serie in self.series:
@@ -43,7 +43,7 @@ class Tournament:
                     self.manager.do_action(game, best_action)
                 if self.manager.is_final(game) == 1:
                     p1_wins += 1
-                elif self.manager.is_final(game) == 2:
+                elif self.manager.is_final(game) == -1:
                     p2_wins += 1
             
             self.winners.append((p1_wins, p2_wins))
@@ -66,26 +66,12 @@ class Tournament:
         # Play
         self.play_games()
         #print("Series ", self.series[i], " Winners: ", self.winners[i])
-        '''
-        Series: [(0,1),(0,2),(1,0),(1,2),(2,0),(2,1)]
-        Winners: [(0,1),(0,2),(1,0),(1,2),(2,0),(2,1)]
-        Matrix
-                0           1           2       (home)
-         0      x        (22, 3)
 
-         1    (19,6)        x
-
-         2    (13,12)                         x  
-        '''
-        matrix = [[0 for i in range(len(self.agents))]
-                      for j in range(len(self.agents))]
         wins = dict()
         for i in range(len(self.series)):
             home = self.series[i][0]
             away = self.series[i][1]
             wins[home] = (0 if not home in wins.keys() else wins[home]) + self.winners[i][0]
             wins[away] = (0 if not away in wins.keys() else wins[away]) + self.winners[i][1]
-            #matrix[home][away] = self.winners[i]
         
         print(wins)
-        #print(matrix)

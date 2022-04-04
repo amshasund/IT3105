@@ -19,7 +19,7 @@ class ANet:
         # one extra input to know which player
         self.model = None
 
-    def build_model(self, loss=tf.keras.losses.binary_crossentropy):
+    def build_model(self, loss=tf.keras.losses.categorical_crossentropy):
         # Create Neural Net
         model = tf.keras.models.Sequential()
 
@@ -47,6 +47,19 @@ class ANet:
     def train_model(self, rbuf):
         # Input: dict{  key=tuple(player, board.flatten()), 
         #               value=board's visit distribution)}
+
+        # TODO: use minibatch from keras
+        # make array of states and targets
+        # shuffle
+
+        # rbuf = [(x1,y1),(x2,y2), ...]
+        # x_array = 
+        # y_array = 
+        # Train on one-hot of argmax of target
+        # [5, 3, 2]
+        # []**(1/T) -> T = 0.1 (T mot null, tilsvarer nesten one-hot)
+        # opphøy i 10 og normaliser på nytt 
+        # beware of integer overflow <- normaliser array før opphøying
         for key in rbuf:
             # Train on random batches of rbuf
             if np.random.choice([True, False], p=[0.5, 0.5]):
@@ -57,13 +70,21 @@ class ANet:
                 # Normalize replay buffer data
                 target = target / target.sum()
                 target = self.reshape_state(target)
+
+                # kan også flippe 180 grader for å trene meir
                 
-                self.model.fit(state, target, verbose=0)
+                self.model.fit(state, target, verbose=0) # default batchsize 32 elements, use shuffle
 
 
     def choose_action(self, state, model, legal_actions):
         # Make state ready for input to actor net model
         state_to_model = self.reshape_state(state)
+        # [1 0 0 0 0 0 0 0 0 0]
+        # [-1 0 1 0 0 0 0 0 0 0]
+        # [[010],[001],[100],[010]]
+        # hex triks: board.T*(-1)
+        # TODO: make utility function
+        # husk å flippe tilbake etter valg av action
 
         # Get preference distribution from actor net model
         distribution = np.array(model.predict(state_to_model)[0])
@@ -86,7 +107,7 @@ class ANet:
 
 
     def save_model(self, game_nr):
-        self.model.save("lite_model3x3_{nr}.h5".format(nr=game_nr))
+        self.model.save("models/cool_model3x3_{nr}.h5".format(nr=game_nr))
 
         '''
         # Calling `save('my_model')` creates a SavedModel folder `my_model`.

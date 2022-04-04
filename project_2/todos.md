@@ -1,8 +1,10 @@
 ## TODOs
-- [ ] argmax og argmin??? trene best and bad?
+- [ ] Should we try convolutional layers instead of Dense layers?
+- [ ] Online Tournament: Dere måp fikse: Handle get action(), last ned filer bare
+- [x] argmax og argmin??? trene best and bad?
 - [ ] debug visit = true/false in mcts - reset after each iteration?
 - [x] M = num_cashed instead of save_interval
-- [ ] Implement Tournament
+- [x] Implement Tournament
 - [ ] Debugging -> do we get improvement?
 - [ ] Train models
 - [ ] Tweak parameters (opt, act, hidden_layers)
@@ -17,7 +19,7 @@
 - [x] Add player and position as parameters to find_neighbours function
 
 ## Questions to studass
-- [ ] TIPS for: Learning rate, Nodes in hidden layers, Activation func, optimizer
+- [x] TIPS for: Learning rate, Nodes in hidden layers, Activation func, optimizer
 - [x] PLS HELP: model.fit does not work in train_model
 - [x] Set new root and discrad everything else? Mener de slett treet over og sett ny subtree som tree slik at new root har none parents?
 - [x] How to control explore and not?

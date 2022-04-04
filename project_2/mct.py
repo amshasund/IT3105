@@ -3,6 +3,7 @@ import random
 import numpy as np
 from parameters import (
     number_search_games,
+    epsilon
 )
 
 
@@ -12,7 +13,7 @@ class Node:
         self.preceding_action = action
         self.children = []
         self.state = state # [player, board.flatten]
-        self.count = 0
+        self.count = 1
         self.value = 0
 
     def get_state(self):
@@ -31,7 +32,6 @@ class Node:
         self.count += 1
     
     def update_value(self, value):
-        # TODO: Do maths here!!
         self.value += value
 
     def set_parent(self, parent):
@@ -54,25 +54,46 @@ class MonteCarloTree:
     def __init__(self, anet):
         self.root = None
         self.anet = anet
+        self.count = 1
 
     def init_tree(self, root):
         self.root = Node(root)
+        self.count = 1
     
     def get_root(self):
         return self.root
+    
+    def update_count(self):
+        self.count += 1
 
     def search_to_leaf(self):
         node = self.root
         leaf = False
+        
         while not leaf:
             # Node has no children -> node is leaf node
             if len(node.get_children()) == 0:
                 leaf = node
             # If node has children -> not a leaf node -> get node's children:
             else:
-                # TODO: use tree policy to choose child to look at
-                # now: choosing a random child
-                node = random.choice(node.get_children())
+                # Calculate tree policy score for all children on current node
+                best_child = None
+                best_score = -np.inf     #float('inf')
+                
+                
+                for child in node.get_children():
+                    # Check for maximize or minizime player
+                    # Epsilon decay?
+                    score = child.get_value() + epsilon * np.sqrt(np.log(self.count)/child.get_count())
+                    #print("count", child.get_count())
+                    #print("score", score)
+                    if score > best_score:
+                            best_child = child
+                            best_score = score
+                    
+                node = best_child
+                #print("node", node)
+                    
         return leaf
 
     def expand_leaf(self, parent, manager, search_game):
@@ -85,7 +106,7 @@ class MonteCarloTree:
                 child = Node(state, action, parent)
                 parent.add_children(child)
 
-    def search(self, manager):
+    def search(self, manager, model):
         # Search to a leaf and update hex_mc
         for _ in range(number_search_games):
             '''
@@ -110,8 +131,8 @@ class MonteCarloTree:
 
             # ROLLOUT START
             while not manager.is_final(search_game):
-                action = self.anet.rollout(
-                    manager.get_state(search_game), manager.get_legal_actions(search_game))
+                action = self.anet.choose_action(
+                    manager.get_state(search_game), model, manager.get_legal_actions(search_game))
                 manager.do_action(search_game, action)
             final_state = manager.get_state(search_game)
             # ROLLOUT END
@@ -123,10 +144,15 @@ class MonteCarloTree:
             self.perform_backpropagation(leaf, reward)
 
     def perform_backpropagation(self, final, reward):
+        # N(s)
+        self.update_count()
+        # N(s, a)
         final.update_count()
+        # Q(s, a)
         final.update_value(reward)
-        if final.get_parent():    
-            self.perform_backpropagation(final.get_parent(), reward)
+        if final.get_parent():
+            # Switch player in order to maximize action for every player   
+            self.perform_backpropagation(final.get_parent(), -reward)
         
     def get_distribution(self, legal_actions):
         dist = np.array(copy.deepcopy(legal_actions))

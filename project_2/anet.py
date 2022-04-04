@@ -1,6 +1,8 @@
 import numpy as np
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+import absl.logging
+absl.logging.set_verbosity(absl.logging.ERROR)
 import tensorflow as tf
 
 from parameters import (
@@ -40,7 +42,6 @@ class ANet:
         model.compile(optimizer=optimizer, loss=loss,
                       metrics=[
                           tf.keras.metrics.categorical_accuracy])
-
         self.model = model
 
     def train_model(self, rbuf):
@@ -60,12 +61,12 @@ class ANet:
                 self.model.fit(state, target, verbose=0)
 
 
-    def rollout(self, state, legal_actions):
+    def choose_action(self, state, model, legal_actions):
         # Make state ready for input to actor net model
         state_to_model = self.reshape_state(state)
 
         # Get preference distribution from actor net model
-        distribution = np.array(self.model(state_to_model)[0])
+        distribution = np.array(model.predict(state_to_model)[0])
 
         # Eliminate illegal moves
         distribution = distribution * legal_actions
@@ -79,12 +80,13 @@ class ANet:
             distribution = legal_actions / (np.sum(legal_actions))
         
         # When choosing move, use prob from anet to choose a move [0.4, 0.45, 0.1, 0.05]
+
         # Find 1d index of flattened distribution
         return np.random.choice(range(len(distribution)), p=distribution)
 
 
     def save_model(self, game_nr):
-        self.model.save("model34x4_{nr}.h5".format(nr=game_nr))
+        self.model.save("lite_model3x3_{nr}.h5".format(nr=game_nr))
 
         '''
         # Calling `save('my_model')` creates a SavedModel folder `my_model`.
@@ -97,3 +99,47 @@ class ANet:
     @staticmethod
     def reshape_state(state):
         return np.array(state).reshape([1, -1])
+
+
+class LiteModel:
+    """Source: https://micwurm.medium.com/using-tensorflow-lite-to-speed-up-predictions-a3954886eb98"""
+
+    @classmethod
+    def from_file(cls, model_path):
+        return LiteModel(tf.lite.Interpreter(model_path=model_path))
+    
+    @classmethod
+    def from_keras_model(cls, kmodel):
+        converter = tf.lite.TFLiteConverter.from_keras_model(kmodel)
+        tflite_model = converter.convert()
+        return LiteModel(tf.lite.Interpreter(model_content=tflite_model))
+    
+    def __init__(self, interpreter):
+        self.interpreter = interpreter
+        self.interpreter.allocate_tensors()
+        input_det = self.interpreter.get_input_details()[0]
+        output_det = self.interpreter.get_output_details()[0]
+        self.input_index = input_det["index"]
+        self.output_index = output_det["index"]
+        self.input_shape = input_det["shape"]
+        self.output_shape = output_det["shape"]
+        self.input_dtype = input_det["dtype"]
+        self.output_dtype = output_det["dtype"]
+        
+    def predict(self, inp):
+        inp = inp.astype(self.input_dtype)
+        count = inp.shape[0]
+        out = np.zeros((count, self.output_shape[1]), dtype=self.output_dtype)
+        for i in range(count):
+            self.interpreter.set_tensor(self.input_index, inp[i:i+1])
+            self.interpreter.invoke()
+            out[i] = self.interpreter.get_tensor(self.output_index)[0]
+        return out
+    
+    def predict_single(self, inp):
+        """ Like predict(), but only for a single record. The input data can be a Python list. """
+        inp = np.array([inp], dtype=self.input_dtype)
+        self.interpreter.set_tensor(self.input_index, inp)
+        self.interpreter.invoke()
+        out = self.interpreter.get_tensor(self.output_index)
+        return out[0]

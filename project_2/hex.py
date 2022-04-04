@@ -47,12 +47,12 @@ class Hex:
         self.board = [[0 for i in range(hex_board_size)]
                       for j in range(hex_board_size)]
         self.next_player = starting_player
-
+        #self.next_player = random.randint(1,2)
     
     def reset_game_board(self):
         self.board = None
-        #self.next_player = starting_player
-        self.next_player = random.randint(1,2)
+        self.next_player = starting_player
+        #self.next_player = random.randint(1,2)
 
     def get_hex_board(self):
         return self.board
@@ -82,6 +82,7 @@ class Hex:
                 self.board[row][col] = piece
     
     def get_reward(self, winner, player):
+        # TODO : FIX
         if winner:
             if winner == player:
                 return 1
@@ -263,6 +264,9 @@ class StateManager:
         player = game.get_next_player()
         state = np.insert(board, 0, player)
         return state
+    
+    def get_next_player(self, state):
+        return state[0]
     
     def do_action(self, game, action, print=False):
         action = np.unravel_index(action, np.array(game.get_hex_board()).shape)

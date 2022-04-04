@@ -1,5 +1,5 @@
 # From pseudocode
-from anet import ANet
+from anet import ANet, LiteModel
 from mct import MonteCarloTree
 from hex import StateManager
 import numpy as np
@@ -14,6 +14,7 @@ class RLSystem:
     def __init__(self):
         self.manager = StateManager()
         self.anet = ANet()
+        self.lite_model = LiteModel
         self.mct = MonteCarloTree(self.anet)
 
     def algorithm(self):
@@ -39,15 +40,18 @@ class RLSystem:
 
             # Set start state: [player, board.flatten()]
             state_init = self.manager.get_state(game)
-            self.mct.init_tree(state_init)
+            self.mct.init_tree(state_init) 
+            # TODO: send in litemodel of anet to use for rollout
+            # __call__ if we want model(state) and not model.predict(state)
             
             while not self.manager.is_final(game):
-                self.mct.search(self.manager)
+                # Using Lite ANet model
+                lite_model = self.lite_model.from_keras_model(self.anet.model)
+                self.mct.search(self.manager, lite_model)
                 visit_dist = self.mct.get_distribution(self.manager.get_legal_actions(game))
                 replay_buffer = self.add_to_rbuf(replay_buffer, self.manager.get_state(game), visit_dist)
 
                 # Choose actual move
-                # TODO: Send in reformatted board state
                 action = np.argmax(np.array(visit_dist))
 
                 # Perform move
@@ -58,7 +62,7 @@ class RLSystem:
             if print_game:
                 print("WINNER: Player", self.manager.is_final(game))
             
-            self.anet.train_model(replay_buffer)
+            self.anet.train_model(replay_buffer) # cannot train a lightmodel, so this must be the real model
             
             # Save parameters for tournament
             if actual_game % save_interval == 0:

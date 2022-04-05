@@ -25,10 +25,10 @@ temperature = 0.01
 decay_at_action = 1000 # TODO: Which value here??? Gave nan some places when very small 
 
 #actor net
-learning_rate = 0.005          # 0.1 is too large and 0.0001 might be too small
-hidden_layers = [10, 30, 50, 30, 10]  # 4 layers are a lot more complicated
+learning_rate = 0.008          # 0.1 is too large and 0.0001 might be too small
+hidden_layers = [10, 20, 20, 10]  # 4 layers are a lot more complicated
 #["linear", "sigmoid", "tanh", "ReLU"] DO NOT USE LINEAR!!!!
-activation_function = ["ReLU", "ReLU","ReLU", "ReLU", "ReLU"]
+activation_function = ["sigmoid", "sigmoid", "sigmoid", "sigmoid"]
 optimizer = "sgd"  # adagrad, stochastic gradient descent, rmsprop or adam
 num_cached = 6
 train_interval = 5 # TODO: samkjøre med save interval

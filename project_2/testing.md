@@ -30,3 +30,14 @@ train_interval = 5
 epochs = 2
 k = 256     
 batch_size = 256 
+
+## Britney 5x5
+learning_rate = 0.008       
+hidden_layers = [10, 20, 20, 10]  
+activation_function = ["sigmoid","sigmoid", "sigmoid", "sigmoid"]
+optimizer = "sgd"  
+num_cached = 6
+train_interval = 5 
+epochs = 2
+k = 256     
+batch_size = 256 

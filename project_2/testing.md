@@ -56,7 +56,7 @@ batch_size = 256
 ## Hermione 5x5 1500 games
 learning_rate = 0.001  
 hidden_layers = [25, 50, 50, 25]  
-activation_function = ["hard-sigmoid", "hard-sigmoid", "hard-sigmoid", "hard-sigmoid"]
+activation_function = ["hard_sigmoid", "hard_sigmoid", "hard_sigmoid", "hard_sigmoid"]
 optimizer = "adam"  
 num_cached = 6
 train_interval = 5 

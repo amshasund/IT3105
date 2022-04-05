@@ -20,8 +20,8 @@ def main():
     rl_system_test = RLSystem()
     rl_system_test.algorithm()
     
-    tournament = Tournament()
-    tournament.play_tournament()
+    #tournament = Tournament()
+    #tournament.play_tournament()
 
     # Test
     #anet = ANet()

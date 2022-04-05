@@ -12,7 +12,7 @@ play of the TOPP.
 """
 
 hex_board_size = 5    # 3 <= k <= 10
-number_actual_games = 5000
+number_actual_games = 1500
 print_games = [1, number_actual_games]  # games to be printed out while running
 number_search_games = 5000       # test 500
 starting_player = 1      # 1 or -1
@@ -25,11 +25,11 @@ temperature = 0.01
 decay_at_action = 1000 # TODO: Which value here??? Gave nan some places when very small 
 
 #actor net
-learning_rate = 0.008          # 0.1 is too large and 0.0001 might be too small
-hidden_layers = [10, 20, 20, 10]  # 4 layers are a lot more complicated
+learning_rate = 0.007          # 0.1 is too large and 0.0001 might be too small
+hidden_layers = [10, 40, 40, 10]  # 4 layers are a lot more complicated
 #["linear", "sigmoid", "tanh", "ReLU"] DO NOT USE LINEAR!!!!
-activation_function = ["sigmoid", "sigmoid", "sigmoid", "sigmoid"]
-optimizer = "sgd"  # adagrad, stochastic gradient descent, rmsprop or adam
+activation_function = ["hardswish", "hardswish", "hardswish," "hardswish"]
+optimizer = "adam"  # adagrad, stochastic gradient descent, rmsprop or adam
 num_cached = 6
 train_interval = 5 # TODO: samkjøre med save interval
 epochs = 2

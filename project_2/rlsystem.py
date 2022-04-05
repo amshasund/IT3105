@@ -59,7 +59,7 @@ class RLSystem:
                     (self.manager.get_state(game), visit_dist))
 
                 # Choose actual move
-                action_dist = self.get_action_dist(visit_dist, action_counter)
+                #action_dist = self.get_action_dist(visit_dist, action_counter)
                 visit_dist = visit_dist/sum(visit_dist)
                 action = np.random.choice(
                     range(len(visit_dist)), p=visit_dist)
@@ -80,7 +80,7 @@ class RLSystem:
                 self.anet.save_model(actual_game)
             
     def write_rbuf_to_file(self, rbuf):
-        output_file = open('britney.txt', 'w')
+        output_file = open('anna_delvi.txt', 'w')
 
         for element in rbuf:
             state = list(element[0])

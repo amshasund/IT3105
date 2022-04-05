@@ -1,4 +1,4 @@
-## Beyonce 4x4
+## Beyonce 4x4 5000 games
 learning_rate = 0.005          
 hidden_layers = [10, 30, 30, 10] 
 activation_function = ["ReLU", "ReLU","ReLU", "ReLU"]
@@ -9,7 +9,7 @@ epochs = 2
 k = 256   
 batch_size = 256 
 
-## Ada Lovelace 4x4
+## Ada Lovelace 4x4 5000 games
 learning_rate = 0.001          
 hidden_layers = [10, 30, 50, 30, 10] 
 activation_function = ["ReLU", "ReLU","ReLU", "ReLU", "ReLU"]
@@ -20,7 +20,7 @@ epochs = 2
 k = 256   
 batch_size = 256 
 
-## Iron Man 5x5
+## Iron Man 5x5 5000 games
 learning_rate = 0.005       
 hidden_layers = [10, 30, 50, 30, 10]  
 activation_function = ["ReLU", "ReLU","ReLU", "ReLU", "ReLU"]
@@ -31,7 +31,7 @@ epochs = 2
 k = 256     
 batch_size = 256 
 
-## Britney 5x5
+## Britney 5x5 5000 games
 learning_rate = 0.008       
 hidden_layers = [10, 20, 20, 10]  
 activation_function = ["sigmoid","sigmoid", "sigmoid", "sigmoid"]
@@ -41,3 +41,14 @@ train_interval = 5
 epochs = 2
 k = 256     
 batch_size = 256 
+
+## Anna Delvi 4x4 1500 games
+learning_rate = 0.007          
+hidden_layers = [10, 40, 40, 10] 
+activation_function = ["hardswish", "hardswish", "hardswish," "hardswish"]
+optimizer = "adam"  
+num_cached = 6
+train_interval = 5 
+epochs = 2
+k = 256     
+batch_size = 256  

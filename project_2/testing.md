@@ -45,7 +45,7 @@ batch_size = 256
 ## Anna Delvi 5x5 1500 games
 learning_rate = 0.007          
 hidden_layers = [10, 40, 40, 10] 
-activation_function = ["hard-swish", "hard-swish", "hard-swish," "hard-swish"]
+activation_function = ["swish", "swish", "swish," "swish"]
 optimizer = "adam"  
 num_cached = 6
 train_interval = 5 

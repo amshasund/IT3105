@@ -28,7 +28,7 @@ decay_at_action = 1000 # TODO: Which value here??? Gave nan some places when ver
 learning_rate = 0.007          # 0.1 is too large and 0.0001 might be too small
 hidden_layers = [10, 40, 40, 10]  # 4 layers are a lot more complicated
 #["linear", "sigmoid", "tanh", "ReLU"] DO NOT USE LINEAR!!!!
-activation_function = ["hard-swish", "hard-swish", "hard-swish," "hard-swish"]
+activation_function = ["swish", "swish", "swish," "swish"]
 optimizer = "adam"  # adagrad, stochastic gradient descent, rmsprop or adam
 num_cached = 6
 train_interval = 5 # TODO: samkjøre med save interval

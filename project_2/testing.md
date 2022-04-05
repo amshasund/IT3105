@@ -42,13 +42,15 @@ epochs = 2
 k = 256     
 batch_size = 256 
 
-## Anna Delvi 4x4 1500 games
+## Anna Delvi 5x5 1500 games
 learning_rate = 0.007          
 hidden_layers = [10, 40, 40, 10] 
-activation_function = ["hardswish", "hardswish", "hardswish," "hardswish"]
+activation_function = ["hard-swish", "hard-swish", "hard-swish," "hard-swish"]
 optimizer = "adam"  
 num_cached = 6
 train_interval = 5 
 epochs = 2
 k = 256     
 batch_size = 256  
+
+## Hermione 5x5 1500 games

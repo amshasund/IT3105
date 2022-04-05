@@ -17,19 +17,20 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
 
 def main():
-    # TESTS
-    #rl_system_test = RLSystem()
-    #rl_system_test.algorithm()
-    anet = ANet()
-    anet.build_model()
+    rl_system_test = RLSystem()
+    rl_system_test.algorithm()
+    
+    tournament = Tournament()
+    tournament.play_tournament()
 
-    anet.train_model("rbuf.txt", True)
-    anet.save_model(666)
+    # Test
+    #anet = ANet()
+    #anet.build_model()
 
-    #tournament = Tournament()
-    #tournament.play_tournament()
+    #anet.train_model("rbuf.txt", True)
+    #anet.save_model(666)
 
-    #""" 
+    """ 
     for _ in range(0, 10):
         manager = StateManager()
         #mct = MonteCarloTree(None)
@@ -54,7 +55,7 @@ def main():
         winner = manager.is_final(game)
         assert winner is not False
         print(winner)
-    #"""
+    """
 
 
 main()

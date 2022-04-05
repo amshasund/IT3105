@@ -16,8 +16,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
 
 
-
-
 class ANet:
     def __init__(self):
         self.num_input_nodes = hex_board_size**2
@@ -58,15 +56,9 @@ class ANet:
                     print(line)
                     replay.append(eval(line.strip("\n")))
 
-
-        # print("rbuf", rbuf)
-        # [(s,t), (s,t), (s,t), ...]
         else:
             replay = list(rbuf)
         
-        print("replay")
-        print(replay[0])
-        #print(replay)
         arrays = list(map(list, zip(*replay)))
         states = np.array(arrays[0])
         targets = np.array(arrays[1])
@@ -79,11 +71,6 @@ class ANet:
         # Normalize again
         targets = [distribution/sum(distribution) for distribution in targets]
 
-        # kan også flippe 180 grader for å trene meir
-        # default batchsize 32 elements, use shuffle
-
-        # print('states', states)
-        # print('targets', targets)
         X,Y = [],[]
         for i in range(len(states)):
             x,y = states[i], targets[i]
@@ -94,17 +81,10 @@ class ANet:
 
             X.append(x)
             Y.append(y)
-            # TODO: How many in a minibatch????
-            # Reshape states and targets to suit Tensors
-            #states[i] = self.reshape_state(states[i])
-            #targets[i] = self.reshape_state(targets[i])
-            # train states on targets
-            # states[i] = self.reshape_state(states[i])
-            # targets[i] = self.reshape_state(targets[i])
-            # states [[0 1 0], []]
-        #print("States shape: ", np.array(X).shape)
+            
         X = np.array(X)
         Y = np.array(Y)
+
         print("targets shape: ", np.array(Y).shape)
         history = self.model.fit(X, Y, shuffle=True, batch_size=batch_size, epochs=epochs, verbose=0)
         print(history.history['loss'])
@@ -137,7 +117,7 @@ class ANet:
         return np.random.choice(range(len(distribution)), p=distribution)
 
     def save_model(self, game_nr):
-        self.model.save("models/please_model_4x4_{nr}.h5".format(nr=game_nr))
+        self.model.save("models/beyonce_model_4x4_{nr}.h5".format(nr=game_nr))
 
         '''
         # Calling `save('my_model')` creates a SavedModel folder `my_model`.

@@ -59,7 +59,7 @@ class RLSystem:
                     (self.manager.get_state(game), visit_dist))
 
                 # Choose actual move
-                #action_dist = self.get_action_dist(visit_dist, action_counter)
+                action_dist = self.get_action_dist(visit_dist, action_counter)
                 visit_dist = visit_dist/sum(visit_dist)
                 action = np.random.choice(
                     range(len(visit_dist)), p=visit_dist)
@@ -75,17 +75,12 @@ class RLSystem:
 
             if actual_game % save_interval == 0:
                 self.anet.train_model(replay_buffer)
-
-                # TODO: save replay_buffer, train models offline
-                #np.savetxt('rbuf.csv', replay_buffer, delimiter=',')
                 self.write_rbuf_to_file(replay_buffer)
-
                 replay_buffer = replay_buffer[-k:]
-
-                #self.anet.save_model(actual_game)
+                self.anet.save_model(actual_game)
             
     def write_rbuf_to_file(self, rbuf):
-        output_file = open('rbuf.txt', 'w')
+        output_file = open('beoynce.txt', 'w')
 
         for element in rbuf:
             state = list(element[0])

@@ -11,7 +11,7 @@ untrained net prior to episode 1, at a fixed interval throughout the training ep
 play of the TOPP.
 """
 
-hex_board_size = 5    # 3 <= k <= 10
+hex_board_size = 4    # 3 <= k <= 10
 number_actual_games = 1500
 print_games = [1, number_actual_games]  # games to be printed out while running
 number_search_games = 5000       # test 500
@@ -25,8 +25,8 @@ temperature = 0.01
 decay_at_action = 1000 # TODO: Which value here??? Gave nan some places when very small 
 
 #actor net
-learning_rate = 0.001          # 0.1 is too large and 0.0001 might be too small
-hidden_layers = [25, 50, 50, 25]  # 4 layers are a lot more complicated
+learning_rate = 0.005          # 0.1 is too large and 0.0001 might be too small
+hidden_layers = [16, 32, 32, 16]  # 4 layers are a lot more complicated
 #["linear", "sigmoid", "tanh", "ReLU"] DO NOT USE LINEAR!!!!
 activation_function = ["hard_sigmoid", "hard_sigmoid", "hard_sigmoid", "hard_sigmoid"]
 optimizer = "adam"  # adagrad, stochastic gradient descent, rmsprop or adam

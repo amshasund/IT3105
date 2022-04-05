@@ -63,3 +63,14 @@ train_interval = 5
 epochs = 2
 k = 256     
 batch_size = 256 
+
+## Luna Lovegood 4x4 1500 games
+learning_rate = 0.005        
+hidden_layers = [16, 32, 32, 16] 
+activation_function = ["hard_sigmoid", "hard_sigmoid", "hard_sigmoid", "hard_sigmoid"]
+optimizer = "adam"  
+num_cached = 6
+train_interval = 5 
+epochs = 2
+k = 256     
+batch_size = 256 

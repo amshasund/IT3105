@@ -11,7 +11,8 @@ from parameters import (
     print_games,
     train_interval,
     temperature,
-    decay_at_action
+    decay_at_action,
+    k
 )
 
 
@@ -58,9 +59,10 @@ class RLSystem:
                     (self.manager.get_state(game), visit_dist))
 
                 # Choose actual move
-                action_dist = self.get_action_dist(visit_dist, action_counter)
+                #action_dist = self.get_action_dist(visit_dist, action_counter)
+                visit_dist = visit_dist/sum(visit_dist)
                 action = np.random.choice(
-                    range(len(action_dist)), p=action_dist)
+                    range(len(visit_dist)), p=visit_dist)
 
                 # Perform move
                 self.manager.do_action(game, action, print=print_game)
@@ -71,19 +73,31 @@ class RLSystem:
             if print_game:
                 print("WINNER: Player", self.manager.is_final(game))
 
-            if actual_game % train_interval == 0:
-                # cannot train a lightmodel, so this must be the real model
-                self.anet.train_model(replay_buffer)
-                random.shuffle(replay_buffer)
-                replay_buffer = replay_buffer[0:5]
-
             if actual_game % save_interval == 0:
-                # TODO: Remember to put this back
-                self.anet.save_model(actual_game)
+                self.anet.train_model(replay_buffer)
+
+                # TODO: save replay_buffer, train models offline
+                #np.savetxt('rbuf.csv', replay_buffer, delimiter=',')
+                self.write_rbuf_to_file(replay_buffer)
+
+                replay_buffer = replay_buffer[-k:]
+
+                #self.anet.save_model(actual_game)
+            
+    def write_rbuf_to_file(self, rbuf):
+        output_file = open('rbuf.txt', 'w')
+
+        for element in rbuf:
+            state = list(element[0])
+            target = list(element[1])
+            output_file.write(str((state, target)) + '\n')
+
+        output_file.close()
 
     def get_action_dist(self, visit_dist, action_counter):
         # vurdere visit_dist**(1/T) og så normalisere og velge fra distribution
         # kan decaye T etter feks 30 moves i et game
+        visit_dist = visit_dist / sum(visit_dist)
         action_dist = visit_dist**(
             1/(temperature if action_counter < decay_at_action else temperature**10))
         action_dist = action_dist / sum(action_dist)

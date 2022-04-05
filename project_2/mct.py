@@ -134,7 +134,7 @@ class MonteCarloTree:
             # ROLLOUT START
 
             # test if when rollout is random it beats total random
-            # first_action = action = random.choice(np.argwhere(manager.get_legal_actions(search_game) == 1).reshape(-1))
+            #first_action = action = random.choice(np.argwhere(manager.get_legal_actions(search_game) == 1).reshape(-1))
 
             # Get first action to know which child of leaf is chosen
             first_action = self.anet.choose_action(manager.get_state(
@@ -143,7 +143,7 @@ class MonteCarloTree:
             while not manager.is_final(search_game):
 
                 # test if when rollout is random it beats total random
-                # action = random.choice(np.argwhere(manager.get_legal_actions(search_game) == 1).reshape(-1))
+                #action = random.choice(np.argwhere(manager.get_legal_actions(search_game) == 1).reshape(-1))
 
                 action = self.anet.choose_action(manager.get_state(
                     search_game), model, manager.get_legal_actions(search_game))

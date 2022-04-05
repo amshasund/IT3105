@@ -21,17 +21,21 @@ class Tournament:
 
     def add_agents(self, create_agents=False):
         """Create agents with pretrained models and add to list"""
-
+        
+        #self.agents[0] = tf.keras.models.load_model("models/sverre_model3x3_0.h5")
+        #self.agents[1] = tf.keras.models.load_model("models/sverre_model3x3_500.h5")
+        
         for i in range(0, number_actual_games+1, save_interval):
             #self.agents[i]= tf.keras.models.load_model("model34x4_{}.h5".format(i))
             self.agents[i] = tf.keras.models.load_model(
-                "models/crazy_model3x3_{}.h5".format(i))
-
+                "models/please_model_4x4_{}.h5".format(i))
+        
+    
     def play_games(self):
         for serie in self.series:
             players = dict()
             players[1] = self.agents[serie[0]]
-            players[2] = self.agents[serie[1]]
+            players[-1] = self.agents[serie[1]]
             # Count winning statistics
             p1_wins = 0
             p2_wins = 0

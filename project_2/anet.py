@@ -7,7 +7,8 @@ from parameters import (
     activation_function,
     optimizer,
     temperature,
-    batch_size
+    batch_size,
+    epochs
 )
 import absl.logging
 absl.logging.set_verbosity(absl.logging.ERROR)
@@ -19,7 +20,7 @@ import tensorflow as tf
 
 class ANet:
     def __init__(self):
-        self.num_input_nodes = hex_board_size**2 + 1
+        self.num_input_nodes = hex_board_size**2
         # one extra input to know which player
         self.model = None
 
@@ -48,18 +49,32 @@ class ANet:
                           tf.keras.metrics.categorical_accuracy])
         self.model = model
 
-    def train_model(self, rbuf):
+    def train_model(self, rbuf, read_from_file=False):
+        if read_from_file:
+            with open(rbuf) as file_in:
+                replay = []
+                
+                for line in file_in:
+                    print(line)
+                    replay.append(eval(line.strip("\n")))
+
+
         # print("rbuf", rbuf)
         # [(s,t), (s,t), (s,t), ...]
-        random.shuffle(rbuf)
-        arrays = list(map(list, zip(*rbuf)))
-        states = arrays[0]
-        targets = arrays[1]
+        else:
+            replay = list(rbuf)
+        
+        print("replay")
+        print(replay[0])
+        #print(replay)
+        arrays = list(map(list, zip(*replay)))
+        states = np.array(arrays[0])
+        targets = np.array(arrays[1])
         
         # Normalize to avoid overflow
         targets = [distribution/sum(distribution) for distribution in targets]
         # []**(1/T) <- beware of integer overflow
-        targets = [np.array(distribution)**(1/temperature)
+        targets = [distribution**(1/temperature)
                    for distribution in targets]
         # Normalize again
         targets = [distribution/sum(distribution) for distribution in targets]
@@ -67,47 +82,62 @@ class ANet:
         # kan også flippe 180 grader for å trene meir
         # default batchsize 32 elements, use shuffle
 
-        # TODO: How many in a minibatch????
-        states = [self.reshape_state(s) for s in states]
-        targets = [self.reshape_state(t) for t in targets]
-
         # print('states', states)
         # print('targets', targets)
+        X,Y = [],[]
         for i in range(len(states)):
-            self.model.fit(states[i], targets[i],
-                       shuffle=True, verbose=0)
+            x,y = states[i], targets[i]
+            # Flip state and targets for vertical player
+            if states[i][0] == -1:
+                y = self.flip_distribution(y)
+            x = self.flip_state(x)
 
+            X.append(x)
+            Y.append(y)
+            # TODO: How many in a minibatch????
+            # Reshape states and targets to suit Tensors
+            #states[i] = self.reshape_state(states[i])
+            #targets[i] = self.reshape_state(targets[i])
+            # train states on targets
+            # states[i] = self.reshape_state(states[i])
+            # targets[i] = self.reshape_state(targets[i])
+            # states [[0 1 0], []]
+        #print("States shape: ", np.array(X).shape)
+        X = np.array(X)
+        Y = np.array(Y)
+        print("targets shape: ", np.array(Y).shape)
+        history = self.model.fit(X, Y, shuffle=True, batch_size=batch_size, epochs=epochs, verbose=0)
+        print(history.history['loss'])
+        
     def choose_action(self, state, model, legal_actions):
+        # Flip state
+        state = self.flip_state(state)
+
         # Make state ready for input to actor net model
         state_to_model = self.reshape_state(state)
-        # [1 0 0 0 0 0 0 0 0 0]
-        # [-1 0 1 0 0 0 0 0 0 0]
-        # [[010],[001],[100],[010]]
-        # hex triks: board.T*(-1)
-        # TODO: make utility function
-        # husk å flippe tilbake etter valg av action
 
         # Get preference distribution from actor net model
         distribution = np.array(model.predict(state_to_model)[0])
+
+        # Flip back
+        if state[0] == -1:
+            distribution = self.flip_distribution(distribution)
 
         # Eliminate illegal moves
         distribution = distribution * legal_actions
 
         # Normalize distribution to ensure no error from np.random.choice
-
         # For cases when distribution is all zeroes
         if (np.sum(distribution) != 0):
             distribution = distribution / (np.sum(distribution))
         else:
             distribution = legal_actions / (np.sum(legal_actions))
 
-        # When choosing move, use prob from anet to choose a move [0.4, 0.45, 0.1, 0.05]
-
         # Find 1d index of flattened distribution
         return np.random.choice(range(len(distribution)), p=distribution)
 
     def save_model(self, game_nr):
-        self.model.save("models/crazy_model3x3_{nr}.h5".format(nr=game_nr))
+        self.model.save("models/please_model_4x4_{nr}.h5".format(nr=game_nr))
 
         '''
         # Calling `save('my_model')` creates a SavedModel folder `my_model`.
@@ -116,6 +146,22 @@ class ANet:
         # It can be used to reconstruct the model identically.
         reconstructed_model = keras.models.load_model("my_model")
         '''
+    
+    def flip_state(self, state):
+        board =  np.array(state[1:])
+        board = board.reshape((hex_board_size, hex_board_size))
+        # Flip board for vertical player
+        if state[0] == -1:
+            board = board.T*(-1)   # *(-1) to flip player of pieces to train as player 1
+        return board.flatten()
+
+    def flip_distribution(self, dist):
+        dist = dist.reshape((hex_board_size, hex_board_size))
+        # Flip board for vertical player
+        dist = dist.T
+        return dist.flatten()
+
+    
 
     @staticmethod
     def reshape_state(state):

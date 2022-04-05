@@ -3,6 +3,7 @@ import numpy as np
 from random import seed
 from rlsystem import RLSystem
 from tournament import Tournament
+from anet import ANet
 from mct import MonteCarloTree
 from hex import StateManager
 import random
@@ -13,40 +14,47 @@ os.environ['CUDA_VISIBLE_DEVICES'] = ''
 absl.logging.set_verbosity(absl.logging.ERROR)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
+import tensorflow as tf
 
 def main():
     # TESTS
-    rl_system_test = RLSystem()
-    rl_system_test.algorithm()
+    #rl_system_test = RLSystem()
+    #rl_system_test.algorithm()
+    anet = ANet()
+    anet.build_model()
 
-    tournament = Tournament()
-    tournament.play_tournament()
+    anet.train_model("rbuf.txt", True)
+    anet.save_model(666)
 
-    """
+    #tournament = Tournament()
+    #tournament.play_tournament()
+
+    #""" 
     for _ in range(0, 10):
         manager = StateManager()
-        mct = MonteCarloTree(None)
-
+        #mct = MonteCarloTree(None)
+        #anet = ANet()
+        model = tf.keras.models.load_model("models/please_model_4x4_666.h5")
         game = manager.start_game()
 
         while not manager.is_final(game):
             state = manager.get_state(game)
-            if manager.get_next_player(state) == -1:
+            if manager.get_next_player(state) == 1:
+                # Network models
                 state_init = manager.get_state(game)
-                mct.init_tree(state_init)
-                mct.search(manager, None)
-                visit_dist = mct.get_distribution(
-                    manager.get_legal_actions(game))
-                action = np.argmax(np.array(visit_dist))
-                manager.do_action(game, action)
+                legal_actions = manager.get_legal_actions(game)
+                best_action = anet.choose_action(
+                    state_init, model, legal_actions)
+                manager.do_action(game, best_action)
             else:
+                # Random
                 action = random.choice(np.argwhere(
                     manager.get_legal_actions(game) == 1).reshape(-1))
                 manager.do_action(game, action)
         winner = manager.is_final(game)
         assert winner is not False
         print(winner)
-    """
+    #"""
 
 
 main()

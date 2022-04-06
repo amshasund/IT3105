@@ -151,3 +151,14 @@ train_interval = 5
 epochs = 10  
 k = 512     
 batch_size = 512  
+
+## Basic Bitch 3x3 4x4 5x5 : 300 games, 800 MCTS 
+learning_rate = 0.0001          
+hidden_layers = [256, 256]  
+activation_function = ["ReLU", "ReLU"]
+optimizer = "adam"  
+num_cached = 4
+train_interval = 5 
+epochs = 10  
+k = 256     
+batch_size = 256  

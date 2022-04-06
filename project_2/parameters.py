@@ -15,7 +15,7 @@ number_actual_games = 300
 print_games = [1, number_actual_games]  # games to be printed out while running
 
 # HEX
-hex_board_size = 5  
+hex_board_size = 3  
 starting_player = 1     # 1 or -1
 
 # MCTS
@@ -32,8 +32,8 @@ optimizer = "adam"
 num_cached = 4
 train_interval = 5 
 epochs = 10  
-k = 512     
-batch_size = 512      
+k = 256     
+batch_size = 256      
 
 # TOURNAMENT
 save_interval = number_actual_games // (num_cached-1)

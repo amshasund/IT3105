@@ -19,7 +19,7 @@ class Node:
     def get_state(self):
         return self.state
 
-    def get_preceding_action(self):  # get_move
+    def get_preceding_action(self):  
         return self.preceding_action
 
     def get_count(self):
@@ -66,40 +66,35 @@ class MonteCarloTree:
         leaf = False
 
         while not leaf:
-            # Node has no children -> node is leaf node
+            # Leaf: Node with no children 
             if len(node.get_children()) == 0:
                 leaf = node
-            # If node has children -> not a leaf node -> get node's children:
             else:
                 # Calculate tree policy score for all children on current node
                 best_child = None
-                best_score = -np.inf  # float('inf')
-
+                best_score = -np.inf 
+                
+                # Go through node's children
                 for child in node.get_children():
                     # Check for maximize or minizime player
-                    # Epsilon decay?
                     score = child.get_value() + epsilon * \
                         np.sqrt(np.log(node.get_count())/child.get_count())
-                    #print("count", child.get_count())
-                    #print("score", score)
+                    # Check if score is better than the best registrated
                     if score > best_score:
                         best_child = child
                         best_score = score
-
+                # Set a new node whoch is the best child from the old node
                 node = best_child
-                #print("node", node)
-
         return leaf
 
     def expand_leaf(self, parent, manager, search_game):
-        # get list of all legal actions from current state
+        # Get list of all legal actions from current state
         legal_actions = manager.get_legal_actions(search_game)
 
         for i in range(len(legal_actions)):
             if legal_actions[i] == 1:
                 state, action = manager.try_action(search_game, i)
                 child = Node(state, action, parent)
-                # parent[i] = child
                 parent.add_children(child)
 
     def search(self, manager, model):
@@ -112,7 +107,6 @@ class MonteCarloTree:
             2: use anet to choose rollout actions from L to a final state F - update game with each move
             3: perform mcts backpropagation from F to root
             '''
-
             # Find a leaf based on tree policy
             leaf = self.search_to_leaf()
 
@@ -132,21 +126,17 @@ class MonteCarloTree:
                 return
 
             # ROLLOUT START
-
-            # test if when rollout is random it beats total random
-            #first_action = action = random.choice(np.argwhere(manager.get_legal_actions(search_game) == 1).reshape(-1))
-
             # Get first action to know which child of leaf is chosen
             first_action = self.anet.choose_action(manager.get_state(
                 search_game), model, manager.get_legal_actions(search_game))
+            # Do first ation
             manager.do_action(search_game, first_action)
+            # Play until game over
             while not manager.is_final(search_game):
-
-                # test if when rollout is random it beats total random
-                #action = random.choice(np.argwhere(manager.get_legal_actions(search_game) == 1).reshape(-1))
-
+                # Get action
                 action = self.anet.choose_action(manager.get_state(
                     search_game), model, manager.get_legal_actions(search_game))
+                # Do action
                 manager.do_action(search_game, action)
             final_state = manager.get_state(search_game)
             # ROLLOUT END
@@ -160,7 +150,6 @@ class MonteCarloTree:
             self.perform_backpropagation(child, reward)
 
     def perform_backpropagation(self, final, reward):
-        #print("node: ", final.get_preceding_action(), final.get_state())
         # N(s, a)
         final.update_count()
         # Q(s, a)
@@ -171,7 +160,7 @@ class MonteCarloTree:
 
     def get_distribution(self, legal_actions):
         dist = np.array(copy.deepcopy(legal_actions))
-        # get visit count from all children and place in game
+        # Get visit count from all children and place in game
         for child in self.root.get_children():
             index = child.get_preceding_action()
             visit_count = child.get_count()
@@ -179,21 +168,16 @@ class MonteCarloTree:
         return dist
 
     def retain_and_discard(self, succ_state):
-        # retain subtree rooted at succ_state
-        #new_root = self.get_node_from_state(succ_state, self.root)
+        # Retain subtree rooted at succ_state and discard everything else
         self.root = Node(succ_state)
 
-        # discard everything else
-        # self.root.set_parent(None)
-
     def get_node_from_state(self, state, node):
-        # return node that has state
+        # Only return node that has a state
         if np.array_equal(node.get_state(), state):
             return node
-        # if not, search recursively among node's children
+        # Otherwise, search recursively among the node's children
         elif node.get_children():
             for child in node.get_children():
-                # TODO: Bredde først!!
                 result = self.get_node_from_state(state, child)
                 if result:
                     return result

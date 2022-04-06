@@ -12,10 +12,10 @@ class Piece:
 
     def add_neighbouring_friends(self, neighbours):
         if isinstance(neighbours, list):
-            # add neighbours to list of neighbours
+            # Add neighbours to list of neighbours
             self.neighbouring_friends = neighbours
             for neighbour in self.neighbouring_friends:
-                # add self to neighbours' list of neighbours
+                # Add self to neighbours' list of neighbours
                 neighbour.add_neighbouring_friends(self)
         else:
             if neighbours not in self.neighbouring_friends:
@@ -64,25 +64,29 @@ class Hex:
         """Creates a new board for simulation with pieces as a copy of the state
         given"""
         # state = [-1 0 0 0 1 -1 1 0 0 0]
-        # first num is player, rest is board
+        # first num is player, rest is flattened board
         self.next_player = state[0]
-        state = np.delete(state, 0)
+        # Remove player from state such that state is now only board
         # state = [0 0 0 1 -1 1 0 0 0]
+        state = np.delete(state, 0)
+        
+        # Set the game state
         for i in range(len(state)):
             if state[i] != 0:
                 pos = list(np.unravel_index(i, np.array(self.board).shape))
                 # pos = [x, y]
                 
+                # Create pieces
                 piece = Piece(pos, state[i])
                 friendly_neighbours = self.find_neighbours(pos, self.next_player)
                 piece.add_neighbouring_friends(friendly_neighbours)
-
+                
+                # Add piece to board
                 row = pos[0]
                 col = pos[1]
                 self.board[row][col] = piece
     
     def get_reward(self, winner, player):
-        # TODO : FIX
         if winner:
             if winner == player:
                 return 1
@@ -92,7 +96,6 @@ class Hex:
             return 0
 
     def reformat_state(self):
-        # TODO: Figure out how to do when using Piece objects
         """ Reformats the presentation of the board
         for the RL system """
         ref_board = self.get_non_object_board(self.board)
@@ -103,7 +106,6 @@ class Hex:
     def get_non_object_board(self):
         return [[piece.get_player() if isinstance(piece, Piece) else piece for piece in row] for row in self.board]
         
-
     def switch_player(self, prev_player):
         next_player_dict = {
             1:-1,
@@ -165,8 +167,10 @@ class Hex:
         # Add piece to board and list of pieces
         self.board[row][col] = piece
 
+        # Set next player
         self.next_player = self.switch_player(moving_player)
 
+        # Printing board after a move if wanted
         if print:
             self.print_game_board()
     
@@ -200,7 +204,6 @@ class Hex:
         return start, end
 
     def game_over(self):
-        # TODO: return False when less than hex_board_size*2-1 pieces on board
         next_player = self.get_next_player()
         potential_winner = self.switch_player(next_player)
         start_edge, end_edge = self.get_edges(potential_winner)
@@ -256,7 +259,6 @@ class StateManager:
         game = Hex()
         game.init_game_board()
         if specified_state is not False:
-            # TODO: Need to reformat this
             game.set_game_state(specified_state)
         return game
 
@@ -276,15 +278,14 @@ class StateManager:
     
     def try_action(self, game, action):
         # action is a number in flattened legal action list
-        # make a temporary copy of the game
+        # Make a temporary copy of the game
         temp_game = copy.deepcopy(game)
 
-        # simulate a legal move on the temp game
+        # Simulate a legal move on the temp game
         self.do_action(temp_game, action)
         
-        # get new temp game state
+        # Get new temp game state
         state = copy.deepcopy(self.get_state(temp_game))
-
         return state, action
     
     def get_legal_actions(self, game):

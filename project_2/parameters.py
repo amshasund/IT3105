@@ -10,38 +10,32 @@ untrained net prior to episode 1, at a fixed interval throughout the training ep
 • The number of games, G, to be played between any two ANET-based agents that meet during the round-robin
 play of the TOPP.
 """
-
-hex_board_size = 3   # 3 <= k <= 10
+# GENERAL PARAMETERS
 number_actual_games = 500
 print_games = [1, number_actual_games]  # games to be printed out while running
-number_search_games = 500       # test 500
-starting_player = 1      # 1 or -1
 
-#mcts parameters
-epsilon = 0.9  # eploration constant -> should be decayed? TEST SOMETHING HERE
-#episodes = 10
-#search_games_per_move = 3
-temperature = 0.01 # 
-decay_at_action = 1000 # TODO: Which value here??? Gave nan some places when very small 
+# HEX
+hex_board_size = 3   
+starting_player = 1     # 1 or -1
 
-#actor net
-learning_rate = 0.0001   #0.001 og 0.0001         # 0.1 is too large and 0.0001 might be too small
-hidden_layers = [256, 256]  # 4 layers are a lot more complicated
-#["linear", "sigmoid", "tanh", "ReLU"] DO NOT USE LINEAR!!!!
+# MCTS
+epsilon = 0.9  # eploration constant 
+number_search_games = 500  
+temperature = 0.01      # For "one-hot-encoding"
+decay_at_action = 1000  
+
+# ACTOR NEURAL NET
+learning_rate = 0.0001          
+hidden_layers = [256, 256]  
 activation_function = ["ReLU", "ReLU"]
-optimizer = "adam"  # adagrad, stochastic gradient descent, rmsprop or adam
+optimizer = "adam"  
 num_cached = 6
-train_interval = 5 # TODO: samkjøre med save interval
-epochs = 10  # Gå gjennom datasettet
-k = 256     # TODO:find better name
-batch_size = 256         # default: 32 (2^x)
+train_interval = 5 
+epochs = 10  
+k = 256     
+batch_size = 256      
 
-#tournament
+# TOURNAMENT
 save_interval = number_actual_games // (num_cached-1)
-num_agents = number_actual_games // save_interval      # M different agents
-games_pr_meet = 25  # G number of games between any two agents in a serie
-
-
-# OHT
-# 7x7 board
-# train beforehand
+num_agents = number_actual_games // save_interval     
+games_pr_meet = 25 

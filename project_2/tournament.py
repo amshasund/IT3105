@@ -24,7 +24,7 @@ class Tournament:
         """Create agents with pretrained models and add to list"""
         for i in range(0, number_actual_games+1, save_interval):
             self.agents[i] = tf.keras.models.load_model(
-                "best_models/crazy_model_3x3_{}.h5".format(i))
+                "best_models/little_possible_model_3x3_{}.h5".format(i))
         
     def play_games(self):
         for serie in self.series:
@@ -52,7 +52,6 @@ class Tournament:
             self.winners.append((p1_wins, p2_wins))
 
     def create_series(self):
-        # Get all combinations <- TODO: permutations, but not against itself
         self.series = list(permutations(self.agents.keys(), 2))
         
 

@@ -2,12 +2,12 @@
 - [ ] Should we try convolutional layers instead of Dense layers?
 - [ ] Online Tournament: Dere måp fikse: Handle get action(), last ned filer bare
 - [x] argmax og argmin??? trene best and bad?
-- [ ] debug visit = true/false in mcts - reset after each iteration?
+- [x] debug visit = true/false in mcts - reset after each iteration?
 - [x] M = num_cashed instead of save_interval
 - [x] Implement Tournament
-- [ ] Debugging -> do we get improvement?
-- [ ] Train models
-- [ ] Tweak parameters (opt, act, hidden_layers)
+- [x] Debugging -> do we get improvement?
+- [x] Train models
+- [x] Tweak parameters (opt, act, hidden_layers)
 - [x] Create a rollout func
 - [x] Get node from state to use for visit_dist (mct 160)
 - [x] Implement backprop

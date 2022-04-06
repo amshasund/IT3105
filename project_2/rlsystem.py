@@ -93,7 +93,7 @@ class RLSystem:
                 # Train the network model on content stored in the replay buffer
                 self.anet.train_model(replay_buffer)
                 # Save the replay buffer to a file go generate a dataset
-                self.write_rbuf_to_file(replay_buffer)
+                #self.write_rbuf_to_file(replay_buffer)
                 replay_buffer = replay_buffer[-k:]
                 # Save the actor net model
                 self.anet.save_model(actual_game)

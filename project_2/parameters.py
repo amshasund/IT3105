@@ -11,7 +11,7 @@ untrained net prior to episode 1, at a fixed interval throughout the training ep
 play of the TOPP.
 """
 
-hex_board_size = 4   # 3 <= k <= 10
+hex_board_size = 3   # 3 <= k <= 10
 number_actual_games = 500
 print_games = [1, number_actual_games]  # games to be printed out while running
 number_search_games = 500       # test 500
@@ -32,7 +32,7 @@ activation_function = ["ReLU", "ReLU"]
 optimizer = "adam"  # adagrad, stochastic gradient descent, rmsprop or adam
 num_cached = 6
 train_interval = 5 # TODO: samkjøre med save interval
-epochs = 5  # Gå gjennom datasettet
+epochs = 10  # Gå gjennom datasettet
 k = 256     # TODO:find better name
 batch_size = 256         # default: 32 (2^x)
 

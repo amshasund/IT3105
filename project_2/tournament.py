@@ -6,6 +6,7 @@ import numpy as np
 import tensorflow as tf
 import absl.logging
 from numpy import argmax
+import random
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 absl.logging.set_verbosity(absl.logging.ERROR)
@@ -28,9 +29,8 @@ class Tournament:
         for i in range(0, number_actual_games+1, save_interval):
             #self.agents[i]= tf.keras.models.load_model("model34x4_{}.h5".format(i))
             self.agents[i] = tf.keras.models.load_model(
-                "best_models/kim_possible_model_5x5_{}.h5".format(i))
+                "best_models/kim_possible_model_3x3_{}.h5".format(i))
         
-    
     def play_games(self):
         for serie in self.series:
             players = dict()
@@ -82,5 +82,38 @@ class Tournament:
                           else wins[home]) + self.winners[i][0]
             wins[away] = (0 if not away in wins.keys()
                           else wins[away]) + self.winners[i][1]
-
+        print("---- TOURNAMENT ----")
         print(wins)
+
+
+def play_model_against_random(model):
+    anet = ANet()
+    anet.build_model()
+
+    for _ in range(0, 10):
+        manager = StateManager()
+        winners = []
+        
+        # Play games
+        for i in range(100):
+            game = manager.start_game()
+            
+            while not manager.is_final(game):
+                state = manager.get_state(game)
+                if manager.get_next_player(state) == 1:
+                    # Network model
+                    state_init = manager.get_state(game)
+                    legal_actions = manager.get_legal_actions(game)
+                    best_action = anet.choose_action(
+                        state_init, model, legal_actions)
+                    manager.do_action(game, best_action)
+                else:
+                    # Random
+                    action = random.choice(np.argwhere(
+                        manager.get_legal_actions(game) == 1).reshape(-1))
+                    manager.do_action(game, action)
+                    
+            winner = manager.is_final(game)
+            assert winner is not False
+            winners.append(winner)
+        print(sum(v==1 for v in winners))

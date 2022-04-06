@@ -75,7 +75,7 @@ epochs = 2
 k = 256     
 batch_size = 256 
 
-## Wonder Woman 3x3 500 games, 500
+## Wonder Woman 3x3 500 games, 500 MCTS
 learning_rate = 0.01         
 hidden_layers = [256, 256]  
 activation_function = ["ReLU", "ReLU"]
@@ -85,3 +85,14 @@ train_interval = 5
 epochs = 2  
 k = 256    
 batch_size = 256      
+
+## Captain Marvel 4x4 500 games, 500 MCTS
+learning_rate = 0.005         
+hidden_layers = [256, 256, 128]  
+activation_function = ["ReLU", "ReLU", "ReLU]
+optimizer = "adam"  
+num_cached = 6
+train_interval = 5 
+epochs = 2  
+k = 256    
+batch_size = 256

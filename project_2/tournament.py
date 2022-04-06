@@ -22,14 +22,9 @@ class Tournament:
 
     def add_agents(self, create_agents=False):
         """Create agents with pretrained models and add to list"""
-        
-        #self.agents[0] = tf.keras.models.load_model("models/sverre_model3x3_0.h5")
-        #self.agents[1] = tf.keras.models.load_model("models/sverre_model3x3_500.h5")
-        
         for i in range(0, number_actual_games+1, save_interval):
-            #self.agents[i]= tf.keras.models.load_model("model34x4_{}.h5".format(i))
             self.agents[i] = tf.keras.models.load_model(
-                "best_models/kim_possible_model_3x3_{}.h5".format(i))
+                "best_models/little_possible_model_3x3_{}.h5".format(i))
         
     def play_games(self):
         for serie in self.series:
@@ -39,6 +34,7 @@ class Tournament:
             # Count winning statistics
             p1_wins = 0
             p2_wins = 0
+            print("Playing ", games_pr_meet, "games between model: ", serie[0], " and ", serie[1])
             for i in range(games_pr_meet):
                 game = self.manager.start_game()
                 while not self.manager.is_final(game):
@@ -58,6 +54,7 @@ class Tournament:
     def create_series(self):
         # Get all combinations <- TODO: permutations, but not against itself
         self.series = list(permutations(self.agents.keys(), 2))
+        
 
     def set_up_tournament(self):
         # Get competing agents
@@ -69,11 +66,10 @@ class Tournament:
     def play_tournament(self):
         # Set up tournament
         self.set_up_tournament()
-
+        print("----------------- TOURNAMENT -----------------")
+        
         # Play
         self.play_games()
-        #print("Series ", self.series[i], " Winners: ", self.winners[i])
-
         wins = dict()
         for i in range(len(self.series)):
             home = self.series[i][0]
@@ -82,11 +78,11 @@ class Tournament:
                           else wins[home]) + self.winners[i][0]
             wins[away] = (0 if not away in wins.keys()
                           else wins[away]) + self.winners[i][1]
-        print("---- TOURNAMENT ----")
         print(wins)
 
 
 def play_model_against_random(model):
+    print("-----------------Play model agains random -----------------")
     anet = ANet()
     anet.build_model()
 
@@ -116,4 +112,4 @@ def play_model_against_random(model):
             winner = manager.is_final(game)
             assert winner is not False
             winners.append(winner)
-        print(sum(v==1 for v in winners))
+        print("wins: ", sum(v==1 for v in winners), " of 100 games")

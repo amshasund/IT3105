@@ -141,8 +141,6 @@ class ANet:
         dist = dist.T
         return dist.flatten()
 
-    
-
     @staticmethod
     def reshape_state(state):
         return np.array(state).reshape([1, -1])

@@ -18,15 +18,15 @@ import tensorflow as tf
 
 def main():
     # Train
-    #rl_system_test = RLSystem()
-    #rl_system_test.algorithm()
+    rl_system_test = RLSystem()
+    rl_system_test.algorithm()
     
     # Tournament
     tournament = Tournament()
     tournament.play_tournament()
     
     # Random
-    model = tf.keras.models.load_model("best_models/kim_possible_model_3x3_500.h5")
+    model = tf.keras.models.load_model("best_models/little_possible_model_3x3_500.h5")
     play_model_against_random(model)
 
 

@@ -107,3 +107,4 @@ train_interval = 5
 epochs = 5  
 k = 256    
 batch_size = 256  
+

@@ -23,8 +23,9 @@ class Tournament:
     def add_agents(self, create_agents=False):
         """Create agents with pretrained models and add to list"""
         for i in range(0, number_actual_games+1, save_interval):
+            
             self.agents[i] = tf.keras.models.load_model(
-                "best_models/little_possible_model_3x3_{}.h5".format(i))
+                "best_models/crazy_model_3x3_{}.h5".format(i))
         
     def play_games(self):
         for serie in self.series:
@@ -34,7 +35,7 @@ class Tournament:
             # Count winning statistics
             p1_wins = 0
             p2_wins = 0
-            print("Playing ", games_pr_meet, "games between model: ", serie[0], " and ", serie[1])
+            print("Playing", games_pr_meet, "games between model:", serie[0], "and", serie[1])
             for i in range(games_pr_meet):
                 game = self.manager.start_game()
                 while not self.manager.is_final(game):
@@ -50,10 +51,10 @@ class Tournament:
                     p2_wins += 1
 
             self.winners.append((p1_wins, p2_wins))
+            print("Result -> ", serie[0],":", p1_wins, "wins", serie[1],":", p2_wins, "wins")
 
     def create_series(self):
-        self.series = list(permutations(self.agents.keys(), 2))
-        
+        self.series = list(permutations(self.agents.keys(), 2))  
 
     def set_up_tournament(self):
         # Get competing agents
@@ -77,6 +78,7 @@ class Tournament:
                           else wins[home]) + self.winners[i][0]
             wins[away] = (0 if not away in wins.keys()
                           else wins[away]) + self.winners[i][1]
+        print("--------- TOTAL TOURNAMENT  RESULT ---------")
         print(wins)
 
 
@@ -96,14 +98,14 @@ def play_model_against_random(model):
             while not manager.is_final(game):
                 state = manager.get_state(game)
                 if manager.get_next_player(state) == 1:
-                    # Network model
+                    # Player 1: Network model 
                     state_init = manager.get_state(game)
                     legal_actions = manager.get_legal_actions(game)
                     best_action = anet.choose_action(
                         state_init, model, legal_actions)
                     manager.do_action(game, best_action)
                 else:
-                    # Random
+                    # Player 2: Random
                     action = random.choice(np.argwhere(
                         manager.get_legal_actions(game) == 1).reshape(-1))
                     manager.do_action(game, action)

@@ -11,16 +11,16 @@ untrained net prior to episode 1, at a fixed interval throughout the training ep
 play of the TOPP.
 """
 # GENERAL PARAMETERS
-number_actual_games = 500
+number_actual_games = 300
 print_games = [1, number_actual_games]  # games to be printed out while running
 
 # HEX
-hex_board_size = 5  
+hex_board_size = 3  
 starting_player = 1     # 1 or -1
 
 # MCTS
 epsilon = 0.9  # eploration constant 
-number_search_games = 700  
+number_search_games = 800  
 temperature = 0.01      # For "one-hot-encoding"
 decay_at_action = 1000  
 
@@ -29,7 +29,7 @@ learning_rate = 0.0001
 hidden_layers = [256, 256]  
 activation_function = ["ReLU", "ReLU"]
 optimizer = "adam"  
-num_cached = 6
+num_cached = 4
 train_interval = 5 
 epochs = 10  
 k = 512     

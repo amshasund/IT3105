@@ -97,7 +97,7 @@ epochs = 2
 k = 256    
 batch_size = 256
 
-## Kim Possible 3x3 and 4x4 500 games, 500 MCTS
+## Kim Possible 3x3, 4x4 & 5x5 : 500 games, 500 MCTS
 learning_rate = 0.01         
 hidden_layers = [256, 256]  
 activation_function = ["ReLU", "ReLU"]

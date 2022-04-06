@@ -28,7 +28,7 @@ class Tournament:
         for i in range(0, number_actual_games+1, save_interval):
             #self.agents[i]= tf.keras.models.load_model("model34x4_{}.h5".format(i))
             self.agents[i] = tf.keras.models.load_model(
-                "best_models/kim_possible_model_4x4_{}.h5".format(i))
+                "best_models/kim_possible_model_5x5_{}.h5".format(i))
         
     
     def play_games(self):

@@ -11,7 +11,7 @@ untrained net prior to episode 1, at a fixed interval throughout the training ep
 play of the TOPP.
 """
 
-hex_board_size = 4    # 3 <= k <= 10
+hex_board_size = 5    # 3 <= k <= 10
 number_actual_games = 500
 print_games = [1, number_actual_games]  # games to be printed out while running
 number_search_games = 500       # test 500

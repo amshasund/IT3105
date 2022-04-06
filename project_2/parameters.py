@@ -15,7 +15,7 @@ number_actual_games = 300
 print_games = [1, number_actual_games]  # games to be printed out while running
 
 # HEX
-hex_board_size = 3  
+hex_board_size = 4  
 starting_player = 1     # 1 or -1
 
 # MCTS

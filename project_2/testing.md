@@ -74,3 +74,14 @@ train_interval = 5
 epochs = 2
 k = 256     
 batch_size = 256 
+
+## Wonder Woman 3x3 500 games, 500
+learning_rate = 0.01         
+hidden_layers = [256, 256]  
+activation_function = ["ReLU", "ReLU"]
+optimizer = "adam"  
+num_cached = 6
+train_interval = 5 
+epochs = 2  
+k = 256    
+batch_size = 256      

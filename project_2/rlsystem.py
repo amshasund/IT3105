@@ -80,7 +80,7 @@ class RLSystem:
                 self.anet.save_model(actual_game)
             
     def write_rbuf_to_file(self, rbuf):
-        output_file = open('little_possible_3x3.txt', 'w')
+        output_file = open('little_possible_4x4.txt', 'w')
 
         for element in rbuf:
             state = list(element[0])

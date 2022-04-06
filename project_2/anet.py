@@ -116,7 +116,7 @@ class ANet:
         ''' Calling `save('my_model')` creates a SavedModel folder `my_model`.
         model.save("my_model")  It can be used to reconstruct the model identically.
         reconstructed_model = keras.models.load_model("my_model")'''
-        self.model.save("best_models/britney_bitch_model_4x4_{nr}.h5".format(nr=game_nr))
+        self.model.save("best_models/britney_bitch_model_5x5_{nr}.h5".format(nr=game_nr))
         
     def flip_state(self, state):
         board =  np.array(state[1:])

@@ -26,7 +26,7 @@ def main():
     tournament.play_tournament()
     
     # Random
-    model = tf.keras.models.load_model("best_models/super_model_4x4_600.h5")
+    model = tf.keras.models.load_model("best_models/super_model_5x5_600.h5")
     play_model_against_random(model)
 
 

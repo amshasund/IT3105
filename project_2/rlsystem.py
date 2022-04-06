@@ -80,7 +80,7 @@ class RLSystem:
                 self.anet.save_model(actual_game)
             
     def write_rbuf_to_file(self, rbuf):
-        output_file = open('luna_lovegood.txt', 'w')
+        output_file = open('captain_marvel.txt', 'w')
 
         for element in rbuf:
             state = list(element[0])

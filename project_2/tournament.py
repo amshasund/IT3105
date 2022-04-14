@@ -1,6 +1,6 @@
 from anet import ANet
 from hex import StateManager
-from parameters import games_pr_meet, number_actual_games, save_interval
+from parameters import games_pr_meet, number_actual_games, save_interval, model_name
 from itertools import permutations
 import numpy as np
 import tensorflow as tf
@@ -23,10 +23,8 @@ class Tournament:
     def add_agents(self, create_agents=False):
         """Create agents with pretrained models and add to list"""
         for i in range(0, number_actual_games+1, save_interval):
-            
-            self.agents[i] = tf.keras.models.load_model(
-                "best_models/basic_bitch_model_5x5_{}.h5".format(i))
-        
+            self.agents[i] = tf.keras.models.load_model(model_name.format(i))
+
     def play_games(self):
         for serie in self.series:
             players = dict()
@@ -35,7 +33,8 @@ class Tournament:
             # Count winning statistics
             p1_wins = 0
             p2_wins = 0
-            print("Playing", games_pr_meet, "games between model:", serie[0], "and", serie[1])
+            print("Playing", games_pr_meet, "games between model:",
+                  serie[0], "and", serie[1])
             for i in range(games_pr_meet):
                 game = self.manager.start_game()
                 while not self.manager.is_final(game):
@@ -51,10 +50,11 @@ class Tournament:
                     p2_wins += 1
 
             self.winners.append((p1_wins, p2_wins))
-            print("Result -> ", serie[0],":", p1_wins, "wins", serie[1],":", p2_wins, "wins")
+            print("Result -> ", serie[0], ":", p1_wins,
+                  "wins", serie[1], ":", p2_wins, "wins")
 
     def create_series(self):
-        self.series = list(permutations(self.agents.keys(), 2))  
+        self.series = list(permutations(self.agents.keys(), 2))
 
     def set_up_tournament(self):
         # Get competing agents
@@ -67,7 +67,7 @@ class Tournament:
         # Set up tournament
         self.set_up_tournament()
         print("----------------- TOURNAMENT -----------------")
-        
+
         # Play
         self.play_games()
         wins = dict()
@@ -90,15 +90,15 @@ def play_model_against_random(model):
     for _ in range(0, 10):
         manager = StateManager()
         winners = []
-        
+
         # Play games
         for i in range(100):
             game = manager.start_game()
-            
+
             while not manager.is_final(game):
                 state = manager.get_state(game)
                 if manager.get_next_player(state) == 1:
-                    # Player 1: Network model 
+                    # Player 1: Network model
                     state_init = manager.get_state(game)
                     legal_actions = manager.get_legal_actions(game)
                     best_action = anet.choose_action(
@@ -109,8 +109,8 @@ def play_model_against_random(model):
                     action = random.choice(np.argwhere(
                         manager.get_legal_actions(game) == 1).reshape(-1))
                     manager.do_action(game, action)
-                    
+
             winner = manager.is_final(game)
             assert winner is not False
             winners.append(winner)
-        print("wins: ", sum(v==1 for v in winners), " of 100 games")
+        print("wins: ", sum(v == 1 for v in winners), " of 100 games")

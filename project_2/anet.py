@@ -1,3 +1,4 @@
+import tensorflow as tf
 import os
 import numpy as np
 from parameters import (
@@ -7,12 +8,12 @@ from parameters import (
     optimizer,
     temperature,
     batch_size,
-    epochs
+    epochs,
+    model_name
 )
 import absl.logging
 absl.logging.set_verbosity(absl.logging.ERROR)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-import tensorflow as tf
 
 
 class ANet:
@@ -52,13 +53,13 @@ class ANet:
                     replay.append(eval(line.strip("\n")))
         else:
             replay = list(rbuf)
-        
-        # Reformat data and split into states to train on 
+
+        # Reformat data and split into states to train on
         # with previus states as targets
         arrays = list(map(list, zip(*replay)))
         states = np.array(arrays[0])
         targets = np.array(arrays[1])
-        
+
         # Normalize targets to avoid overflow
         targets = [distribution/sum(distribution) for distribution in targets]
         # "One-hot encode" targets with a temperature
@@ -67,9 +68,9 @@ class ANet:
         # Normalize targets again
         targets = [distribution/sum(distribution) for distribution in targets]
 
-        X,Y = [],[]
+        X, Y = [], []
         for i in range(len(states)):
-            x,y = states[i], targets[i]
+            x, y = states[i], targets[i]
             # Flip state and targets for vertical player
             if states[i][0] == -1:
                 y = self.flip_distribution(y)
@@ -77,14 +78,15 @@ class ANet:
 
             X.append(x)
             Y.append(y)
-        
+
         X = np.array(X)
         Y = np.array(Y)
 
         # Train model and print the cross entropy loss
-        history = self.model.fit(X, Y, shuffle=True, batch_size=batch_size, epochs=epochs, verbose=0)
+        history = self.model.fit(
+            X, Y, shuffle=True, batch_size=batch_size, epochs=epochs, verbose=0)
         print(history.history['loss'])
-        
+
     def choose_action(self, state, model, legal_actions):
         # Flip state
         state = self.flip_state(state)
@@ -116,14 +118,15 @@ class ANet:
         ''' Calling `save('my_model')` creates a SavedModel folder `my_model`.
         model.save("my_model")  It can be used to reconstruct the model identically.
         reconstructed_model = keras.models.load_model("my_model")'''
-        self.model.save("best_models/basic_bitch_model_5x5_{nr}.h5".format(nr=game_nr))
-        
+        self.model.save(model_name.format(game_nr))
+
     def flip_state(self, state):
-        board =  np.array(state[1:])
+        board = np.array(state[1:])
         board = board.reshape((hex_board_size, hex_board_size))
         # Flip board for vertical player
         if state[0] == -1:
-            board = board.T*(-1)   # *(-1) to flip player of pieces to train as player 1
+            # *(-1) to flip player of pieces to train as player 1
+            board = board.T*(-1)
         return board.flatten()
 
     def flip_distribution(self, dist):
@@ -138,6 +141,8 @@ class ANet:
         return np.array(state).reshape([1, -1])
 
 # To make MCTS run faster
+
+
 class LiteModel:
     """Source: https://micwurm.medium.com/using-tensorflow-lite-to-speed-up-predictions-a3954886eb98"""
 

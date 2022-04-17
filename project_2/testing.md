@@ -1,3 +1,20 @@
+### OHT 
+
+## Long Friday 7x7 : 300 games, 800 MCTS
+learning_rate = 0.01
+hidden_layers = [128, 128]
+activation_function = ["ReLU", "ReLU"]
+optimizer = "adam"
+num_cached = 3
+train_interval = 13
+epochs = 10
+k = 256
+batch_size = 256
+
+
+
+### DEMO
+
 ## Beyonce 4x4 5000 games
 learning_rate = 0.005          
 hidden_layers = [10, 30, 30, 10] 
@@ -162,3 +179,4 @@ train_interval = 5
 epochs = 10  
 k = 256     
 batch_size = 256  
+

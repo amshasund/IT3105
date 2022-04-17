@@ -25,7 +25,7 @@ class RLSystem:
 
     def algorithm(self):
         # Intialize replay buffer
-        replay_buffer = [] 
+        replay_buffer = []
 
         # Create neural net
         self.anet.build_model()
@@ -36,7 +36,7 @@ class RLSystem:
         # Play games
         for actual_game in range(1, number_actual_games+1):
             print("Running game: ", actual_game)
-            
+
             # Initialize actual game board
             game = self.manager.start_game()
 
@@ -45,8 +45,8 @@ class RLSystem:
             if print_game:
                 print("START GAME \n")
                 self.manager.print_state(game)
-            
-            # Get start state and initialize a Monte Carlo tree 
+
+            # Get start state and initialize a Monte Carlo tree
             # with the state as the root
             state_init = self.manager.get_state(game)
             self.mct.init_tree(state_init)
@@ -57,10 +57,10 @@ class RLSystem:
                 # Transform the network model to a lite model
                 # for faster running
                 lite_model = self.lite_model.from_keras_model(self.anet.model)
-                
-                # Perform Monte Carlo Tree Search 
+
+                # Perform Monte Carlo Tree Search
                 self.mct.search(self.manager, lite_model)
-                
+
                 # Get distribution of visit counts in Monte Carlo Tree
                 visit_dist = self.mct.get_distribution(
                     self.manager.get_legal_actions(game))
@@ -71,7 +71,7 @@ class RLSystem:
 
                 # Normalize visit distribution
                 visit_dist = visit_dist/sum(visit_dist)
-                
+
                 # Choose actual move from normalized visit distribution
                 action = np.random.choice(
                     range(len(visit_dist)), p=visit_dist)
@@ -79,25 +79,26 @@ class RLSystem:
                 # Perform move on the game board
                 self.manager.do_action(game, action, print=print_game)
                 action_counter += 1
-                
+
                 # Save the produced successor state
                 successor_state = self.manager.get_state(game)
                 self.mct.retain_and_discard(successor_state)
-            
+
             # Print the final game
             if print_game:
                 print("WINNER: Player", self.manager.is_final(game))
 
             # Train and save
-            if actual_game % save_interval == 0:
+            if actual_game % train_interval == 0:
                 # Train the network model on content stored in the replay buffer
                 self.anet.train_model(replay_buffer)
                 # Save the replay buffer to a file go generate a dataset
-                #self.write_rbuf_to_file(replay_buffer)
+                # self.write_rbuf_to_file(replay_buffer)
                 replay_buffer = replay_buffer[-k:]
+            if actual_game % save_interval == 0:
                 # Save the actor net model
                 self.anet.save_model(actual_game)
-            
+
     def write_rbuf_to_file(self, rbuf):
         output_file = open('crazy_3x3.txt', 'w')
 

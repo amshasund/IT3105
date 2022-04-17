@@ -15,22 +15,22 @@ number_actual_games = 300
 print_games = [1, number_actual_games]  # games to be printed out while running
 
 # HEX
-hex_board_size = 5
+hex_board_size = 7
 starting_player = 1     # 1 or -1
 
 # MCTS
-epsilon = 0.9  # eploration constant
+epsilon = 0.9  # exploration constant
 number_search_games = 800
 temperature = 0.01      # For "one-hot-encoding"
 decay_at_action = 1000
 
 # ACTOR NEURAL NET
-learning_rate = 0.0001
-hidden_layers = [256, 256]
+learning_rate = 0.01
+hidden_layers = [128, 128]
 activation_function = ["ReLU", "ReLU"]
 optimizer = "adam"
-num_cached = 4
-train_interval = 5
+num_cached = 3
+train_interval = 13
 epochs = 10
 k = 256
 batch_size = 256
@@ -40,4 +40,4 @@ save_interval = number_actual_games // (num_cached-1)
 num_agents = number_actual_games // save_interval
 games_pr_meet = 25
 
-model_name = "oht_models/first_7x7_{}.h5"
+model_name = "oht_models/long_friday_7x7_{}.h5"

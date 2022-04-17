@@ -1,5 +1,9 @@
-import tensorflow as tf
 import os
+import absl.logging
+absl.logging.set_verbosity(absl.logging.ERROR)
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
+import tensorflow as tf
 import numpy as np
 from random import seed
 from parameters import model_name
@@ -9,12 +13,10 @@ from anet import ANet
 from mct import MonteCarloTree
 from hex import StateManager
 import random
-import absl.logging
 
 # Does not init GPU's
 os.environ['CUDA_VISIBLE_DEVICES'] = ''
-absl.logging.set_verbosity(absl.logging.ERROR)
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 
 
 def main():

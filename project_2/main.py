@@ -1,22 +1,17 @@
 import os
+
 import absl.logging
+
 absl.logging.set_verbosity(absl.logging.ERROR)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import tensorflow as tf
-import numpy as np
-from random import seed
 from parameters import model_name
 from rlsystem import RLSystem
 from tournament import Tournament, play_model_against_random
-from anet import ANet
-from mct import MonteCarloTree
-from hex import StateManager
-import random
 
 # Does not init GPU's
 os.environ['CUDA_VISIBLE_DEVICES'] = ''
-
 
 
 def main():

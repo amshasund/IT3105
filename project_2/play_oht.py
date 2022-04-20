@@ -6,7 +6,7 @@ import numpy as np
 class MyHexActor:
     def __init__(self):
         self.anet = ANet()
-        self.agent = tf.keras.models.load_model("oht_models/bulbasaur_7x7_200.h5")
+        self.agent = tf.keras.models.load_model("oht_models/britney_bitch_7x7_200.h5")
 
     def get_action(self, state):
         # state = [
@@ -49,7 +49,7 @@ class MyClient(ActorClient):
 # Initialize and run your overridden client when the script is executed
 if __name__ == '__main__':
     client = MyClient()
-    client.run(mode='league')
+    client.run()
 
     # DEBUGGING
     # state = [1, 0, 2, 1, 0, 0, 0, 1, 2, 0]

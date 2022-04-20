@@ -25,14 +25,14 @@ temperature = 0.01  # For "one-hot-encoding"
 decay_at_action = 1000
 
 # ACTOR NEURAL NET
-learning_rate = 0.001
-hidden_layers = [128, 256, 128]
-activation_function = ["ReLU", "ReLU", "ReLU"]
-optimizer = "adam"
-num_cached = 4
-train_interval = 5
-epochs = 20
-k = 512
+learning_rate = 0.0001          
+hidden_layers = [256, 256]  
+activation_function = ["ReLU", "ReLU"]
+optimizer = "adam"  
+num_cached = 4 
+train_interval = 5 
+epochs = 10  
+k = 512     
 batch_size = 512
 
 # TOURNAMENT
@@ -40,4 +40,4 @@ save_interval = number_actual_games // (num_cached - 1)
 num_agents = number_actual_games // save_interval
 games_pr_meet = 25
 
-model_name = "oht_models/bulbasaur_7x7_{}.h5"
+model_name = "oht_models/crazy_bitch_7x7_{}.h5"

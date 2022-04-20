@@ -49,7 +49,7 @@ class MyClient(ActorClient):
 # Initialize and run your overridden client when the script is executed
 if __name__ == '__main__':
     client = MyClient()
-    client.run()
+    client.run(mode='league')
 
     # DEBUGGING
     # state = [1, 0, 2, 1, 0, 0, 0, 1, 2, 0]

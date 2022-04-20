@@ -26,7 +26,7 @@ decay_at_action = 1000
 
 # ACTOR NEURAL NET
 learning_rate = 0.0001          
-hidden_layers = [256, 256]  
+hidden_layers = [128, 128]  
 activation_function = ["ReLU", "ReLU"]
 optimizer = "adam"  
 num_cached = 4 
@@ -40,4 +40,4 @@ save_interval = number_actual_games // (num_cached - 1)
 num_agents = number_actual_games // save_interval
 games_pr_meet = 25
 
-model_name = "oht_models/crazy_bitch_7x7_{}.h5"
+model_name = "oht_models/terrible_tuesday_7x7_{}.h5"

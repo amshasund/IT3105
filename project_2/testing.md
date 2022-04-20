@@ -1,4 +1,15 @@
 ### OHT
+## Crazy bitch 7x7: 300 games, 800 MCTS [Switched player]
+
+learning_rate = 0.0001          
+hidden_layers = [256, 256]  
+activation_function = ["ReLU", "ReLU"]
+optimizer = "adam"  
+num_cached = 4 
+train_interval = 5 
+epochs = 10  
+k = 512     
+batch_size = 512
 
 ## Charmander 7x7 : 300 games, 800 MCTS
 
@@ -12,7 +23,8 @@ epochs = 10
 k = 256
 batch_size = 256
 
-## Bulbasaur 7x7 : 300 games, 800 MCTS
+
+## Bulbasaur 7x7 : 300 games, 800 MCTS 
 
 learning_rate = 0.001 
 hidden_layers = [128, 256, 128]

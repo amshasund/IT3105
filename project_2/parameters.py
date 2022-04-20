@@ -40,4 +40,4 @@ save_interval = number_actual_games // (num_cached - 1)
 num_agents = number_actual_games // save_interval
 games_pr_meet = 25
 
-model_name = "oht_models/crazy_bitch_7x7_{}.h5"
+model_name = "oht_models/mad_bitch_7x7_{}.h5"

@@ -20,7 +20,7 @@ starting_player = 1  # 1 or -1
 
 # MCTS
 epsilon = 0.9  # exploration constant
-number_search_games = 800
+number_search_games = 400
 temperature = 0.01  # For "one-hot-encoding"
 decay_at_action = 1000
 
@@ -40,4 +40,4 @@ save_interval = number_actual_games // (num_cached - 1)
 num_agents = number_actual_games // save_interval
 games_pr_meet = 25
 
-model_name = "oht_models/terrible_tuesday_7x7_{}.h5"
+model_name = "oht_models/waisted_wednesday_7x7_{}.h5"

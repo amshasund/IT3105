@@ -12,7 +12,7 @@ class Acrobat:
     max_vel = 5 # FIXME: Need to change this
     max_force = 1
     goal_height = 1 # FIXME: Need to change this
-    num_actions = 3
+    num_actions = 3 # -1, 0, 1
     
     def __init__(self, num_bins=7): 
         # [x_1, y_1, x_2, y_2, x_tip, y_tip]

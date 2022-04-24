@@ -34,9 +34,6 @@ class Agent:
                 
                 # Select action and check if it is valid in current state of environment
                 action = self.actor.get_action(discrete_state)
-                while not self.environment.is_action_valid(action):
-                    self.actor.table[discrete_state, action] = -np.inf
-                    action = self.actor.get_action(discrete_state)
                 
                 # Step with action
                 next_state, next_discrete_state, reward, is_state_final = self.environment.step(action, step, run)
@@ -77,21 +74,21 @@ class Agent:
         state = self.environment.reset()
         action = np.argmax(self.actor.table[state])
         fig, axs = self.environment.create_figure()
-        i=0
         self.environment.render(fig, axs)
-
+        
         display.display(plt.gcf())
         time.sleep(sleep)
         display.clear_output(wait=True)
-
+        
         for step in range(length):
             action = np.argmax(self.actor.table[state])
 
             _, state, r, is_state_final = self.environment.step(action, step, 1)
+
             self.environment.render(fig, axs)
             display.display(plt.gcf())
             time.sleep(sleep)
             display.clear_output(wait=True)
-            i+=1
+
             if is_state_final:
                 break

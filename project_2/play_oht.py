@@ -6,7 +6,7 @@ import numpy as np
 class MyHexActor:
     def __init__(self):
         self.anet = ANet()
-        self.agent = tf.keras.models.load_model("oht_models/crazy_bitch_7x7_100.h5")
+        self.agent = tf.keras.models.load_model("oht_models/crazy_bitch_7x7_200.h5")
 
     def get_action(self, state):
         # state = [

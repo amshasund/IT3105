@@ -39,10 +39,9 @@ class nn_Critic(nn.Module):
     
 class Critic:
     
-    def __init__(self, num_inputs, layers=[15, 20, 30, 5, 1], learning_rate=0.001, discount_factor=0.95):
+    def __init__(self, num_inputs, layers=[1], learning_rate=0.001, discount_factor=0.95):
         self.learning_rate = learning_rate
         self.discount_factor = discount_factor
-        self.nn_critic = True
         
         self.modul = to_cuda(nn_Critic(num_inputs, layers))
         self.optimizer = torch.optim.SGD(self.modul.parameters(), lr=learning_rate)
@@ -54,7 +53,7 @@ class Critic:
         pass
         
         
-    def compute_delta(self, reward, state, new_state, verbal=False):
+    def compute_delta(self, reward, state, new_state):
         reward = torch.tensor(reward, dtype=torch.float32)
         state = torch.tensor(state, dtype=torch.float32)
         new_state = torch.tensor(new_state, dtype=torch.float32)
@@ -71,10 +70,6 @@ class Critic:
 
         loss_critic.backward()
         self.optimizer.step()
-        
-        
-        if verbal:
-            print(f'next_val: {next_val:1.4f} target: {target:1.4f} output: {output:1.4f} Loss: {loss_critic.item():1.4f}')
         
         delta = target-output
         return delta.item(), loss_critic.item()

@@ -9,25 +9,26 @@ class Acrobat:
     length_cm = 0.5
     gravity = 9.8
     timestep = 0.05
-    max_vel = 5 # FIXME: Need to change this
+    max_vel_1 = 5 #4*np.pi
+    max_vel_2 = 5 #9*np.pi
     max_force = 1
     goal_height = 1 # FIXME: Need to change this
     num_actions = 3 # -1, 0, 1
     
-    def __init__(self, num_bins=7): 
+    def __init__(self, num_bins=6): 
         # [x_1, y_1, x_2, y_2, x_tip, y_tip]
         self.positions = [0, 0, 0, -1, 0, -2]
         # [Angle 1, Angle 2, Angle 1 velocity, Angle 2 velocity]
         self.continuous_state = None
         self.state_bins = [
             # Angle 1
-            np.linspace(-np.pi, np.pi, num_bins + 1)[1:-1],
+            np.linspace(-np.pi/1.5, np.pi/1.5, num_bins + 1)[1:-1],
             # Angle 2
             np.linspace(-np.pi, np.pi, num_bins + 1)[1:-1],
             # Angle 1 velocity
-            np.linspace(-self.max_vel, self.max_vel, num_bins + 1)[1:-1],
+            np.linspace(-self.max_vel_1, self.max_vel_1, num_bins + 1)[1:-1],
             # Angle 2 velocity
-            np.linspace(-self.max_vel, self.max_vel, num_bins + 1)[1:-1]
+            np.linspace(-self.max_vel_2, self.max_vel_2, num_bins + 1)[1:-1]
             ]
         self.num_bins = max(len(b) for b in self.state_bins) + 1
         self.num_states = self.num_bins**len(self.state_bins)
@@ -71,16 +72,16 @@ class Acrobat:
         x_1, y_1, x_2, y_2, x_tip, y_tip = self.positions
 
         # Equations
-        phi_2 = self.mass * self.length_cm * np.cos(theta_1 + theta_2 - np.pi/2)
+        phi_2 = self.mass * self.length_cm * self.gravity * np.cos(theta_1 + theta_2 - np.pi/2)
         phi_1 = - self.mass * self.length * self.length_cm * theta_2_dot**2 * np.sin(theta_2) - 2 * (
                 self.mass * self.length * self.length_cm * theta_2_dot * theta_1_dot * np.sin(theta_2)) + (
                 self.mass * self.length_cm + self.mass * self.length) * self.gravity * np.cos(theta_1 - np.pi/2) + (
                 phi_2) 
-        delta_2 = self.mass * (self.length_cm** + self.length * self.length_cm * np.cos(theta_2)) + 1
+        delta_2 = self.mass * (self.length_cm**2 + self.length * self.length_cm * np.cos(theta_2)) + 1
         delta_1 = self.mass * self.length_cm**2 + self.mass * (
-                  self.length**1 + self.length_cm**2 + 2 * self.length * self.length_cm * np.cos(theta_2)) + 2
+                  self.length**2 + self.length_cm**2 + 2 * self.length * self.length_cm * np.cos(theta_2)) + 2
         theta_2_ddot = (self.mass * self.length_cm**2 + 1 - delta_2**2/delta_1)**(-1) * (
-                        force + delta_2/delta_1 * phi_1 - self.mass * self.length * self.length_cm * theta_1_dot**2 * np.sin(theta_2) - phi_2)
+                        force + (delta_2/delta_1) * phi_1 - self.mass * self.length * self.length_cm * theta_1_dot**2 * np.sin(theta_2) - phi_2)
         theta_1_ddot = - (delta_2*theta_2_ddot + phi_1)/(delta_1)
         
         # Calculate the new state
@@ -101,35 +102,33 @@ class Acrobat:
         self.positions = [x_1, y_1, x_2, y_2, x_tip, y_tip]
         self.continuous_state = (theta_1, theta_2, theta_1_dot, theta_2_dot)
         
-        # TODO: Check if bottom point is above line
+        # Check if bottom point is above line
         done = True if y_tip > self.goal_height else False
         
-        # TODO: Create reward scheme
+        # Create reward scheme
         if done:
             reward = 10
         else:
-            reward = -0.1
+            reward = -1
         
         return self.get_state(), self.get_discrete_state(), reward, done
     
     
-    def create_figure(self):
-        fig, ax = plt.subplots(1, figsize=(16, 8))
-        return fig, ax
-    
-    
-    def render(self, fig, ax):
+    def render(self, fig, ax, action):
         x_1, y_1, x_2, y_2, x_tip, y_tip = self.positions
         ax.clear()
-        ax.set_xlim([0, 10])
-        ax.set_ylim([-5, 1])
+        ax.set_xlim([0, 6])
+        ax.set_ylim([-4, 2])
 
         ax.axhline(0)
+        ax.axhline(1, ls='--')
         
-        ax.plot([x_1+5, x_2+5], [y_1, y_2]) # Anchor to first joint
+        ax.axvline(1) if action == 0 else ax.axvline(5)
+        
+        ax.plot([x_1+3, x_2+3], [y_1, y_2]) # Anchor to first joint
 
-        ax.plot([x_2+5, x_tip+5], [y_2, y_tip]) # First joint to second joint line
+        ax.plot([x_2+3, x_tip+3], [y_2, y_tip]) # First joint to second joint line
         
-        ax.plot(x_1+5, y_1, marker="o", markersize=10, markeredgecolor="red", markerfacecolor="blue")
-        ax.plot(x_2+5, y_2, marker="o", markersize=10, markeredgecolor="red", markerfacecolor="blue")
-        ax.plot(x_tip+5, y_tip, marker="o", markersize=10, markeredgecolor="red", markerfacecolor="blue")
+        ax.plot(x_1+3, y_1, marker="o", markersize=10, markeredgecolor="red", markerfacecolor="blue")
+        ax.plot(x_2+3, y_2, marker="o", markersize=10, markeredgecolor="red", markerfacecolor="blue")
+        ax.plot(x_tip+3, y_tip, marker="o", markersize=10, markeredgecolor="red", markerfacecolor="blue")

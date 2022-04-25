@@ -113,6 +113,46 @@ class Acrobat:
         
         return self.get_state(), self.get_discrete_state(), reward, done
     
+    def get_tiling_state(self):
+        state = self.continuous_state
+        # Angle 1 and Angle 1 Velocity
+        #state1 = (state[0], state[2])
+        # Angle 2 and Angle 2 Velocity
+        #state2 = (state[1], state[3])
+        
+        # Angle 1 and Angle 1 Velocity
+        plt.scatter(state[0], state[2])
+        # Angle 2 and Angle 2 Velocity
+        plt.scatter(state[1], state[3])
+        
+        # Creating basis for a grid
+        x = [-np.pi/1.5, 0, np.pi/1.5]
+        y = [-np.pi*5, 0, np.pi*5]
+    
+        # Create filter grids for tiling
+        # Offsets
+        grids = [(0,0), (0.5, 2), (-0.5, -2)]
+
+        colors = ['r', 'b', 'g', 'y']
+        for g in range(len(grids)):
+            x0 = [x[0] + grids[g][0], x[2] + grids[g][0]]
+            x1 = [x[0] + grids[g][0], x[0] + grids[g][0]]
+            x2 = [x[1] + grids[g][0], x[1] + grids[g][0]]
+            x3 = [x[2] + grids[g][0], x[2] + grids[g][0]]
+
+            y0 = [y[0] + grids[g][1], y[2] + grids[g][1]]
+            y1 = [y[0] + grids[g][1], y[0] + grids[g][1]]
+            y2 = [y[1] + grids[g][1], y[1] + grids[g][1]]
+            y3 = [y[2] + grids[g][1], y[2] + grids[g][1]]
+
+            plt.plot(x0, y1, color=colors[g])
+            plt.plot(x0, y2, color=colors[g])
+            plt.plot(x0, y3, color=colors[g])
+            plt.plot(x1, y0, color=colors[g])
+            plt.plot(x2, y0, color=colors[g])
+            plt.plot(x3, y0, color=colors[g])
+            
+        plt.show()
     
     def render(self, fig, ax, action):
         x_1, y_1, x_2, y_2, x_tip, y_tip = self.positions

@@ -1,56 +1,30 @@
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import numpy as np
 
 
 
-def to_cuda(elements):
-    if not torch.cuda.is_available():
-        return elements
-    if isinstance(elements, tuple) or isinstance(elements, list):
-        return [x.cuda() for x in elements]
-    return elements.cuda()
-
-
-
-class nn_Critic(nn.Module):
-
-    def __init__(self, num_inputs, layers):
-        super(nn_Critic, self).__init__()
-        self.fc_layers = nn.ModuleList()
-        self.num_layers = len(layers)
+class Modul(torch.nn.Module):
+    def __init__(self, num_inputs):
+        super().__init__()
         
-        self.fc_layers.append(nn.Linear(num_inputs, layers[0]))
+        self.net = torch.nn.Sequential(
+            torch.nn.Linear(num_inputs, 1)
+        )
         
-        for i in range(self.num_layers-1):
-            self.fc_layers.append(nn.Linear(layers[i], layers[i+1]))
 
+    def forward(self, x):
+        return self.net(x)
 
-    def forward(self, state):
-        m = nn.ReLU()
-        for i in range(self.num_layers-1):
-            out = self.fc_layers[i](state)
-            state = m(out)
-        output = self.fc_layers[-1](state)
-        return output
-    
     
     
 class Critic:
     
-    def __init__(self, num_inputs, layers=[1], learning_rate=0.001, discount_factor=0.95):
-        self.learning_rate = learning_rate
-        self.discount_factor = discount_factor
+    def __init__(self, num_inputs):
+        self.discount_factor = 0.99
         
-        self.modul = to_cuda(nn_Critic(num_inputs, layers))
-        self.optimizer = torch.optim.SGD(self.modul.parameters(), lr=learning_rate)
-        #self.optimizer = torch.optim.Adam(self.modul.parameters(), lr=learning_rate)
+        self.modul = Modul(num_inputs)
+        self.optimizer = torch.optim.SGD(self.modul.parameters(), lr=0.001)
         print(f'{self.modul}\n')
-        
-        
-    def prepare_for_epoch(self):
-        pass
         
         
     def compute_delta(self, reward, state, new_state):
@@ -58,7 +32,7 @@ class Critic:
         state = torch.tensor(state, dtype=torch.float32)
         new_state = torch.tensor(new_state, dtype=torch.float32)
         
-        loss = nn.MSELoss()
+        loss = torch.nn.MSELoss()
         
         next_val = torch.squeeze(self.modul.forward(new_state).detach())
         target = reward + self.discount_factor*next_val

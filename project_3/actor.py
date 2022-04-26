@@ -1,17 +1,16 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 class Actor:
     
-    def __init__(self, num_actions, num_states, learning_rate=0.05, discount_factor=0.95, expl_rate=0.5, expl_decay=0.99, trace_decay=0.95):
+    def __init__(self, num_actions, num_states):
         self.num_actions = num_actions
         self.num_states = num_states
-        self.learning_rate = learning_rate
-        self.expl_rate = expl_rate
-        self.expl_decay = expl_decay
-        self.discount_factor = discount_factor
-        self.trace_decay = trace_decay
+        self.learning_rate = 0.01
+        self.expl_rate = 0.6
+        self.expl_decay = self.expl_rate/800
+        self.discount_factor = 0.96
+        self.trace_decay = 0.96
         
         self.table = np.zeros(shape=(num_states, num_actions))
 
@@ -20,7 +19,7 @@ class Actor:
         
         
     def prepare_for_epoch(self):
-        self.expl_rate = (self.expl_rate-0.005)*self.expl_decay + 0.005
+        self.expl_rate -= self.expl_decay
         self.eligibilities = np.zeros(shape=(self.num_states, self.num_actions))
         
         
